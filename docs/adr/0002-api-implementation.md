@@ -2,11 +2,7 @@
 
 ## ステータス
 
-承認済み - 2025-01-05
-
-## MCP ツール
-
-この ADR ではツールを定義しません。
+破棄 - 2025-01-05
 
 ## コンテキスト
 
@@ -25,64 +21,67 @@ MCP サーバーへの Redmine API の実装方針を決定する必要があり
 
 ### 1. コードの構成とアプローチ
 
-単一ファイルで実装し、シンプルで直接的なアプローチを取ります：
+モジュールを分割し、責務を明確に分けて実装します：
 
-```typescript
-const REDMINE_API_KEY = process.env.REDMINE_API_KEY!;
-const REDMINE_HOST = process.env.REDMINE_HOST!;
-
-if (!REDMINE_API_KEY || !REDMINE_HOST) {
-  console.error(
-    "Error: REDMINE_API_KEY and REDMINE_HOST environment variables are required"
-  );
-  process.exit(1);
-}
-
-const server = new Server(
-  {
-    name: "@yonaka15/mcp-server-redmine",
-    version: "0.1.0",
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  }
-);
-
-async function performRedmineRequest(path: string, options?: RequestInit) {
-  const url = new URL(path, REDMINE_HOST);
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "X-Redmine-API-Key": REDMINE_API_KEY,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...options?.headers,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Redmine API error: ${response.status} ${
-        response.statusText
-      }\\n${await response.text()}`
-    );
-  }
-
-  return response.json();
-}
+```
+src/
+  ├── config.ts    - 設定管理
+  ├── types.ts     - 型定義とスキーマ
+  ├── client.ts    - Redmine APIクライアント
+  ├── handlers.ts  - MCPリクエストハンドラ
+  └── index.ts     - エントリーポイント
 ```
 
-index.ts での実装順序：
+各モジュールの役割：
 
-1. 型定義
-2. 環境変数チェック
-3. ユーティリティ関数
-4. API リクエスト関数
-5. MCP ツールの定義
-6. リクエストハンドラーの設定
-7. サーバー起動処理
+#### config.ts - 環境変数と設定の管理
+```typescript
+const ConfigSchema = z.object({
+  redmine: z.object({
+    apiKey: z.string({
+      required_error: "REDMINE_API_KEY environment variable is required",
+    }),
+    host: z
+      .string({
+        required_error: "REDMINE_HOST environment variable is required",
+      })
+      .url("REDMINE_HOST must be a valid URL"),
+  }),
+  server: z.object({
+    name: z.string().default("@yonaka15/mcp-server-redmine"),
+    version: z.string().default("0.1.0"),
+  }),
+});
+```
+
+#### client.ts - API通信の実装
+```typescript
+export class RedmineClient {
+  private async performRequest<T>(path: string, options?: RequestInit): Promise<T> {
+    const url = new URL(path, config.redmine.host);
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "X-Redmine-API-Key": config.redmine.apiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...options?.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json() as RedmineErrorResponse;
+      throw new RedmineApiError(
+        response.status,
+        response.statusText,
+        error.errors
+      );
+    }
+
+    return response.json();
+  }
+}
+```
 
 ### 2. 対象 API の範囲
 
@@ -91,7 +90,7 @@ Stable ステータスのリソースのみを対象とします：
 1. Issues (1.0~)
    - チケットの作成、取得、更新、削除
 2. Projects (1.0~)
-   - プロジェクトの取得、更新
+   - プロジェクトの取得、更新、アーカイブ
 3. Users (1.1~)
    - ユーザー情報の取得
 4. Time Entries (1.1~)
@@ -99,265 +98,67 @@ Stable ステータスのリソースのみを対象とします：
 
 ### 3. データ形式
 
-JSON 形式を採用し、以下のような型定義とバリデーションを実装します：
+JSON 形式を採用し、zodによる型定義とバリデーションを実装します：
 
 ```typescript
-// 共通の型定義
-interface PaginatedResponse<T> {
-  total_count: number;
-  offset: number;
-  limit: number;
-  [key: string]: T[] | number; // issues, projects などの配列
-}
+// クエリパラメータのスキーマ
+export const IssueQuerySchema = z.object({
+  offset: z.number().int().min(0).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  sort: z.string().optional(),
+  include: z.string().transform(str => str.split(",").filter(Boolean)).optional(),
+  // ...その他のパラメータ
+});
 
-// Issues
-interface RedmineIssue {
-  id: number;
-  project: {
-    id: number;
-    name: string;
-  };
-  tracker: {
-    id: number;
-    name: string;
-  };
-  status: {
-    id: number;
-    name: string;
-  };
-  priority: {
-    id: number;
-    name: string;
-  };
-  author: {
-    id: number;
-    name: string;
-  };
-  subject: string;
-  description?: string;
-  start_date?: string;
-  done_ratio: number;
-  custom_fields?: {
-    id: number;
-    name: string;
-    value: string | string[];
-  }[];
-  created_on: string;
-  updated_on: string;
-}
-
-// Projects
-interface RedmineProject {
-  id: number;
-  name: string;
-  identifier: string;
-  description?: string;
-  created_on: string;
-  updated_on: string;
-  is_public: boolean;
-}
-
-// Time Entries
-interface RedmineTimeEntry {
-  id: number;
-  project: {
-    id: number;
-    name: string;
-  };
-  issue?: {
-    id: number;
-  };
-  user: {
-    id: number;
-    name: string;
-  };
-  activity: {
-    id: number;
-    name: string;
-  };
-  hours: number;
-  comments?: string;
-  spent_on: string;
-  created_on: string;
-  updated_on: string;
-}
-
-// Users
-interface RedmineUser {
-  id: number;
-  login: string;
-  firstname: string;
-  lastname: string;
-  mail: string;
-  created_on: string;
-  updated_on: string;
-  last_login_on?: string;
-  passwd_changed_on?: string;
-  status: number; // 1: active, 2: registered, 3: locked
-  api_key?: string; // Only visible for admins and self
-  custom_fields?: {
-    id: number;
-    name: string;
-    value: string | string[];
-  }[];
-  memberships?: {
-    project: {
-      id: number;
-      name: string;
-    };
-    roles: {
-      id: number;
-      name: string;
-    }[];
-  }[];
-  groups?: {
-    id: number;
-    name: string;
-  }[];
-}
-
-// zodによるバリデーションスキーマ
-const RedmineIssueSchema = z.object({
+// リソースのスキーマ
+export const RedmineIssueSchema = z.object({
   id: z.number(),
   project: z.object({
     id: z.number(),
     name: z.string(),
   }),
-  tracker: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  status: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  priority: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  author: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  subject: z.string(),
-  description: z.string().optional(),
-  start_date: z.string().optional(),
-  done_ratio: z.number(),
-  custom_fields: z
-    .array(
-      z.object({
-        id: z.number(),
-        name: z.string(),
-        value: z.union([z.string(), z.array(z.string())]),
-      })
-    )
-    .optional(),
-  created_on: z.string(),
-  updated_on: z.string(),
+  // ...その他のフィールド
 });
 
-const RedmineProjectSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  identifier: z.string(),
-  description: z.string().optional(),
-  created_on: z.string(),
-  updated_on: z.string(),
-  is_public: z.boolean(),
-});
-
-const RedmineTimeEntrySchema = z.object({
-  id: z.number(),
-  project: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  issue: z
-    .object({
-      id: z.number(),
-    })
-    .optional(),
-  user: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  activity: z.object({
-    id: z.number(),
-    name: z.string(),
-  }),
-  hours: z.number(),
-  comments: z.string().optional(),
-  spent_on: z.string(),
-  created_on: z.string(),
-  updated_on: z.string(),
-});
-
-const RedmineUserSchema = z.object({
-  id: z.number(),
-  login: z.string(),
-  firstname: z.string(),
-  lastname: z.string(),
-  mail: z.string(),
-  created_on: z.string(),
-  updated_on: z.string(),
-  last_login_on: z.string().optional(),
-  passwd_changed_on: z.string().optional(),
-  status: z.number(),
-  api_key: z.string().optional(),
-  custom_fields: z
-    .array(
-      z.object({
-        id: z.number(),
-        name: z.string(),
-        value: z.union([z.string(), z.array(z.string())]),
-      })
-    )
-    .optional(),
-  memberships: z
-    .array(
-      z.object({
-        project: z.object({
-          id: z.number(),
-          name: z.string(),
-        }),
-        roles: z.array(
-          z.object({
-            id: z.number(),
-            name: z.string(),
-          })
-        ),
-      })
-    )
-    .optional(),
-  groups: z
-    .array(
-      z.object({
-        id: z.number(),
-        name: z.string(),
-      })
-    )
-    .optional(),
-});
+// エラーの型定義
+export class RedmineApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly statusText: string,
+    public readonly errors: string[]
+  ) {
+    super(`Redmine API error: ${status} ${statusText}\n${errors.join(", ")}`);
+    this.name = "RedmineApiError";
+  }
+}
 ```
+
+### 4. エラーハンドリング
+
+- カスタムエラークラスによる詳細なエラー情報の提供
+- APIレスポンスコードに応じた適切な処理
+- バリデーションエラーの明確な通知
 
 ## 結果
 
-### 肯定的な結果
+この決定は実装を進める中で、以下の理由により破棄されました：
 
-- シンプルで理解しやすい実装
-- 単一ファイルでの完結した実装
-- 信頼性の高い API のみを使用
-- JSON による扱いやすいデータ形式
-- TypeScript/zod による型安全性
-- Redmine の API 仕様に忠実な型定義
-- すべての Stable リソースに対する型定義の提供
+1. ファイル構成が不十分
+   - ツール定義とフォーマット処理が混在
+   - コードの肥大化が予想される
 
-### 否定的な結果
+2. 責務の分離が不十分
+   - ハンドラーに多くの責務が集中
+   - テストが困難な構造
 
-- コードの再利用性が限定的
-- テストの分離が難しい
-- 一部の有用な機能が利用できない
-- 将来的な機能追加時の複雑化
+これらの課題を解決するため、[ADR 0003: モジュールの分割とディレクトリ構造の整理](./0003-separate-modules.md)で、より詳細な実装方針が定められました。
+
+ただし、本ADRで定義された以下の要素は、新しい実装でも継承されています：
+- 設定管理の方針
+- APIクライアントの基本構造
+- 対象APIの範囲
+- データ形式とバリデーション方針
+- エラーハンドリングの方針
 
 ## 参考資料
 
@@ -367,3 +168,4 @@ const RedmineUserSchema = z.object({
 - [Redmine REST Time Entries API](https://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries)
 - [Redmine REST Users API](https://www.redmine.org/projects/redmine/wiki/Rest_Users)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+- [ADR 0003: モジュールの分割とディレクトリ構造の整理](./0003-separate-modules.md)
