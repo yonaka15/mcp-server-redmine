@@ -1,41 +1,41 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 /**
- * 作業時間検索ツール
+ * Time entry search tool
  */
 export const TIME_ENTRY_SEARCH_TOOL: Tool = {
   name: "search_time_entries",
   description:
-    "作業時間の記録を検索します。\n" +
-    "- ユーザーID、プロジェクトID、日付での絞り込み\n" +
-    "- 期間指定での検索も可能\n" +
-    "- 最大100件まで取得可能",
+    "Search for time entries.\n" +
+    "- Filter by user ID, project ID, and date\n" +
+    "- Search within a date range\n" +
+    "- Retrieve up to 100 entries",
   inputSchema: {
     type: "object",
     properties: {
       user_id: {
         type: "number",
-        description: "ユーザーID (me: 自分の記録)"
+        description: "User ID (me: your own entries)"
       },
       project_id: {
         type: "string",
-        description: "プロジェクトID（数値）または識別子（文字列）"
+        description: "Project ID (numeric) or identifier (string)"
       },
       spent_on: {
         type: "string",
-        description: "特定の日付 (YYYY-MM-DD形式)"
+        description: "Specific date (YYYY-MM-DD format)"
       },
       from: {
         type: "string",
-        description: "開始日 (YYYY-MM-DD形式)"
+        description: "Start date (YYYY-MM-DD format)"
       },
       to: {
         type: "string",
-        description: "終了日 (YYYY-MM-DD形式)"
+        description: "End date (YYYY-MM-DD format)"
       },
       limit: {
         type: "number",
-        description: "取得件数 (1-100)",
+        description: "Number of results (1-100)",
         default: 10
       }
     }
@@ -43,19 +43,19 @@ export const TIME_ENTRY_SEARCH_TOOL: Tool = {
 };
 
 /**
- * 作業時間詳細取得ツール
+ * Time entry details tool
  */
 export const TIME_ENTRY_GET_TOOL: Tool = {
   name: "get_time_entry",
   description:
-    "作業時間の記録の詳細を取得します。\n" +
-    "- IDを指定して1件の作業時間記録を取得",
+    "Get detailed time entry information.\n" +
+    "- Retrieve a single time entry by ID",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "作業時間記録のID"
+        description: "Time entry ID"
       }
     },
     required: ["id"]
@@ -63,49 +63,49 @@ export const TIME_ENTRY_GET_TOOL: Tool = {
 };
 
 /**
- * 作業時間記録作成ツール
+ * Time entry creation tool
  */
 export const TIME_ENTRY_CREATE_TOOL: Tool = {
   name: "create_time_entry",
   description:
-    "新しい作業時間を記録します。\n" +
-    "- プロジェクトIDまたはチケットIDのいずれかが必須\n" +
-    "- 作業時間（hours）と作業分類（activity_id）は必須\n" +
-    "- カスタムフィールドの指定も可能",
+    "Create a new time entry.\n" +
+    "- Either project ID or issue ID is required\n" +
+    "- Hours and activity ID are required\n" +
+    "- Supports custom field values",
   inputSchema: {
     type: "object",
     properties: {
       project_id: {
         type: "number",
-        description: "プロジェクトID"
+        description: "Project ID"
       },
       issue_id: {
         type: "number",
-        description: "チケットID"
+        description: "Issue ID"
       },
       spent_on: {
         type: "string",
-        description: "作業日 (YYYY-MM-DD形式)"
+        description: "Date (YYYY-MM-DD format)"
       },
       hours: {
         type: "number",
-        description: "作業時間（時間単位）"
+        description: "Hours spent"
       },
       activity_id: {
         type: "number",
-        description: "作業分類ID"
+        description: "Activity ID"
       },
       comments: {
         type: "string",
-        description: "コメント"
+        description: "Comments"
       },
       user_id: {
         type: "number",
-        description: "ユーザーID（管理者のみ指定可能）"
+        description: "User ID (admin only)"
       },
       custom_field_values: {
         type: "object",
-        description: "カスタムフィールドの値（キー：カスタムフィールドID）"
+        description: "Custom field values (key: custom field ID)"
       }
     },
     required: ["hours", "activity_id"]
@@ -113,45 +113,45 @@ export const TIME_ENTRY_CREATE_TOOL: Tool = {
 };
 
 /**
- * 作業時間記録更新ツール
+ * Time entry update tool
  */
 export const TIME_ENTRY_UPDATE_TOOL: Tool = {
   name: "update_time_entry",
   description:
-    "既存の作業時間記録を更新します。\n" +
-    "- IDを指定して1件の作業時間記録を更新\n" +
-    "- 更新したい項目のみを指定可能\n" +
-    "- プロジェクトの変更は不可",
+    "Update an existing time entry.\n" +
+    "- Update a single time entry by ID\n" +
+    "- Only specify fields to be updated\n" +
+    "- Cannot change project",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "作業時間記録のID"
+        description: "Time entry ID"
       },
       issue_id: {
         type: "number",
-        description: "チケットID"
+        description: "Issue ID"
       },
       spent_on: {
         type: "string",
-        description: "作業日 (YYYY-MM-DD形式)"
+        description: "Date (YYYY-MM-DD format)"
       },
       hours: {
         type: "number",
-        description: "作業時間（時間単位）"
+        description: "Hours spent"
       },
       activity_id: {
         type: "number",
-        description: "作業分類ID"
+        description: "Activity ID"
       },
       comments: {
         type: "string",
-        description: "コメント"
+        description: "Comments"
       },
       custom_field_values: {
         type: "object",
-        description: "カスタムフィールドの値（キー：カスタムフィールドID）"
+        description: "Custom field values (key: custom field ID)"
       }
     },
     required: ["id"]
@@ -159,20 +159,20 @@ export const TIME_ENTRY_UPDATE_TOOL: Tool = {
 };
 
 /**
- * 作業時間記録削除ツール
+ * Time entry deletion tool
  */
 export const TIME_ENTRY_DELETE_TOOL: Tool = {
   name: "delete_time_entry",
   description:
-    "作業時間の記録を削除します。\n" +
-    "- IDを指定して1件の作業時間記録を削除\n" +
-    "- この操作は取り消せません",
+    "Delete a time entry.\n" +
+    "- Delete a single time entry by ID\n" +
+    "- This action cannot be undone",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "作業時間記録のID"
+        description: "Time entry ID"
       }
     },
     required: ["id"]

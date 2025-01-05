@@ -1,35 +1,35 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 /**
- * プロジェクト検索ツール
+ * Project search tool
  */
 export const PROJECT_SEARCH_TOOL: Tool = {
   name: "search_projects",
   description:
-    "Redmineのプロジェクトを検索します。\n" +
-    "- 名前やIDでの検索\n" +
-    "- ステータスでの絞り込み\n" +
-    "- 最大100件まで取得可能",
+    "Search for Redmine projects.\n" +
+    "- Search by name or ID\n" +
+    "- Filter by status\n" +
+    "- Retrieve up to 100 projects",
   inputSchema: {
     type: "object",
     properties: {
       query: {
         type: "string",
-        description: "検索キーワード"
+        description: "Search keywords"
       },
       status: {
         type: "number",
-        description: "ステータス (1: active, 5: archived, 9: closed)",
+        description: "Status (1: active, 5: archived, 9: closed)",
         enum: [1, 5, 9]
       },
       include: {
         type: "string",
-        description: "含める情報 (trackers,issue_categories,enabled_modules,time_entry_activities)",
+        description: "Include additional info (trackers,issue_categories,enabled_modules,time_entry_activities)",
         default: ""
       },
       limit: {
         type: "number",
-        description: "取得件数 (1-100)",
+        description: "Number of results (1-100)",
         default: 10
       }
     },
@@ -38,24 +38,24 @@ export const PROJECT_SEARCH_TOOL: Tool = {
 };
 
 /**
- * プロジェクト詳細取得ツール
+ * Project details tool
  */
 export const PROJECT_GET_TOOL: Tool = {
   name: "get_project",
   description:
-    "プロジェクトの詳細情報を取得します。\n" +
-    "- プロジェクトID（数値）または識別子（文字列）で指定\n" +
-    "- トラッカー、カテゴリなどの関連情報も取得可能",
+    "Get detailed project information.\n" +
+    "- Specify project ID (numeric) or identifier (string)\n" +
+    "- Can include related information like trackers and categories",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "string",
-        description: "プロジェクトID（数値）または識別子（文字列）"
+        description: "Project ID (numeric) or identifier (string)"
       },
       include: {
         type: "string",
-        description: "含める情報 (trackers,issue_categories,enabled_modules,time_entry_activities)",
+        description: "Include additional info (trackers,issue_categories,enabled_modules,time_entry_activities)",
         default: ""
       }
     },
@@ -64,57 +64,57 @@ export const PROJECT_GET_TOOL: Tool = {
 };
 
 /**
- * プロジェクト作成ツール
+ * Project creation tool
  */
 export const PROJECT_CREATE_TOOL: Tool = {
   name: "create_project",
   description:
-    "新しいプロジェクトを作成します。\n" +
-    "- 名前と識別子は必須\n" +
-    "- 親プロジェクトの指定も可能\n" +
-    "- モジュールやトラッカーの設定も可能",
+    "Create a new project.\n" +
+    "- Name and identifier are required\n" +
+    "- Can specify parent project\n" +
+    "- Configure modules and trackers",
   inputSchema: {
     type: "object",
     properties: {
       name: {
         type: "string",
-        description: "プロジェクト名"
+        description: "Project name"
       },
       identifier: {
         type: "string",
-        description: "プロジェクト識別子（英数字とハイフンのみ）"
+        description: "Project identifier (alphanumeric and hyphens only)"
       },
       description: {
         type: "string",
-        description: "プロジェクトの説明"
+        description: "Project description"
       },
       homepage: {
         type: "string",
-        description: "プロジェクトのホームページURL"
+        description: "Project homepage URL"
       },
       is_public: {
         type: "boolean",
-        description: "公開プロジェクトにするか",
+        description: "Make project public",
         default: true
       },
       parent_id: {
         type: "number",
-        description: "親プロジェクトのID"
+        description: "Parent project ID"
       },
       inherit_members: {
         type: "boolean",
-        description: "親プロジェクトのメンバーを継承するか",
+        description: "Inherit members from parent project",
         default: false
       },
       tracker_ids: {
         type: "array",
         items: { type: "number" },
-        description: "使用するトラッカーのID一覧"
+        description: "List of tracker IDs to enable"
       },
       enabled_module_names: {
         type: "array",
         items: { type: "string" },
-        description: "有効にするモジュール名一覧"
+        description: "List of module names to enable"
       }
     },
     required: ["name", "identifier"]
@@ -122,50 +122,50 @@ export const PROJECT_CREATE_TOOL: Tool = {
 };
 
 /**
- * プロジェクト更新ツール
+ * Project update tool
  */
 export const PROJECT_UPDATE_TOOL: Tool = {
   name: "update_project",
   description:
-    "既存のプロジェクトを更新します。\n" +
-    "- プロジェクトID（数値）または識別子（文字列）で指定\n" +
-    "- 更新したい項目のみを指定可能",
+    "Update an existing project.\n" +
+    "- Specify project ID (numeric) or identifier (string)\n" +
+    "- Only specify fields to be updated",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "string",
-        description: "プロジェクトID（数値）または識別子（文字列）"
+        description: "Project ID (numeric) or identifier (string)"
       },
       name: {
         type: "string",
-        description: "プロジェクト名"
+        description: "Project name"
       },
       description: {
         type: "string",
-        description: "プロジェクトの説明"
+        description: "Project description"
       },
       homepage: {
         type: "string",
-        description: "プロジェクトのホームページURL"
+        description: "Project homepage URL"
       },
       is_public: {
         type: "boolean",
-        description: "公開プロジェクトにするか"
+        description: "Make project public"
       },
       inherit_members: {
         type: "boolean",
-        description: "親プロジェクトのメンバーを継承するか"
+        description: "Inherit members from parent project"
       },
       tracker_ids: {
         type: "array",
         items: { type: "number" },
-        description: "使用するトラッカーのID一覧"
+        description: "List of tracker IDs to enable"
       },
       enabled_module_names: {
         type: "array",
         items: { type: "string" },
-        description: "有効にするモジュール名一覧"
+        description: "List of module names to enable"
       }
     },
     required: ["id"]
@@ -173,20 +173,20 @@ export const PROJECT_UPDATE_TOOL: Tool = {
 };
 
 /**
- * プロジェクトアーカイブツール
+ * Project archive tool
  */
 export const PROJECT_ARCHIVE_TOOL: Tool = {
   name: "archive_project",
   description:
-    "プロジェクトをアーカイブします。\n" +
-    "- プロジェクトID（数値）または識別子（文字列）で指定\n" +
-    "- アーカイブされたプロジェクトは編集不可になります",
+    "Archive a project.\n" +
+    "- Specify project ID (numeric) or identifier (string)\n" +
+    "- Archived projects cannot be edited",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "string",
-        description: "プロジェクトID（数値）または識別子（文字列）"
+        description: "Project ID (numeric) or identifier (string)"
       }
     },
     required: ["id"]
@@ -194,20 +194,20 @@ export const PROJECT_ARCHIVE_TOOL: Tool = {
 };
 
 /**
- * プロジェクトアンアーカイブツール
+ * Project unarchive tool
  */
 export const PROJECT_UNARCHIVE_TOOL: Tool = {
   name: "unarchive_project",
   description:
-    "アーカイブされたプロジェクトを復元します。\n" +
-    "- プロジェクトID（数値）または識別子（文字列）で指定\n" +
-    "- アンアーカイブ後は通常通り編集可能になります",
+    "Restore an archived project.\n" +
+    "- Specify project ID (numeric) or identifier (string)\n" +
+    "- Project becomes editable after unarchiving",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "string",
-        description: "プロジェクトID（数値）または識別子（文字列）"
+        description: "Project ID (numeric) or identifier (string)"
       }
     },
     required: ["id"]
@@ -215,21 +215,21 @@ export const PROJECT_UNARCHIVE_TOOL: Tool = {
 };
 
 /**
- * プロジェクト削除ツール
+ * Project deletion tool
  */
 export const PROJECT_DELETE_TOOL: Tool = {
   name: "delete_project",
   description:
-    "プロジェクトを削除します。\n" +
-    "- プロジェクトID（数値）または識別子（文字列）で指定\n" +
-    "- この操作は取り消せません\n" +
-    "- サブプロジェクトも同時に削除されます",
+    "Delete a project.\n" +
+    "- Specify project ID (numeric) or identifier (string)\n" +
+    "- This action cannot be undone\n" +
+    "- Subprojects will also be deleted",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "string",
-        description: "プロジェクトID（数値）または識別子（文字列）"
+        description: "Project ID (numeric) or identifier (string)"
       }
     },
     required: ["id"]

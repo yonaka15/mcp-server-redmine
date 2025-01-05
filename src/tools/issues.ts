@@ -1,37 +1,37 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 /**
- * チケット検索ツール
+ * Issue search tool
  */
 export const ISSUE_SEARCH_TOOL: Tool = {
   name: "search_issues",
   description: 
-    "Redmineのチケットを検索します。\n" +
-    "- チケットID、プロジェクトID、ステータス、担当者などで絞り込み可能\n" +
-    "- キーワードによる全文検索も可能\n" +
-    "- 最大100件まで取得可能",
+    "Search for Redmine issues.\n" +
+    "- Filter by issue ID, project ID, status, assignee, etc.\n" +
+    "- Full text search with keywords\n" +
+    "- Retrieve up to 100 issues",
   inputSchema: {
     type: "object",
     properties: {
       query: {
         type: "string",
-        description: "検索キーワード"
+        description: "Search keywords"
       },
       project_id: {
         type: "string",
-        description: "プロジェクトID"
+        description: "Project ID"
       },
       status: {
         type: "string",
-        description: "ステータス (open/closed/*)",
+        description: "Status (open/closed/*)",
       },
       assigned_to: {
         type: "string", 
-        description: "担当者ID"
+        description: "Assignee ID"
       },
       limit: {
         type: "number",
-        description: "取得件数 (1-100)",
+        description: "Number of results (1-100)",
         default: 10
       }
     },
@@ -40,73 +40,73 @@ export const ISSUE_SEARCH_TOOL: Tool = {
 };
 
 /**
- * チケット作成ツール
+ * Issue creation tool
  */
 export const ISSUE_CREATE_TOOL: Tool = {
   name: "create_issue",
   description:
-    "新しいチケットを作成します。\n" +
-    "- プロジェクトIDと件名は必須\n" +
-    "- トラッカー、ステータス、優先度などを指定可能\n" +
-    "- カスタムフィールドの値も設定可能",
+    "Create a new issue.\n" +
+    "- Project ID and subject are required\n" +
+    "- Can specify tracker, status, priority\n" +
+    "- Supports custom field values",
   inputSchema: {
     type: "object",
     properties: {
       project_id: {
         type: "number",
-        description: "プロジェクトID"
+        description: "Project ID"
       },
       subject: {
         type: "string",
-        description: "チケットの件名"
+        description: "Issue subject"
       },
       description: {
         type: "string",
-        description: "チケットの説明"
+        description: "Issue description"
       },
       tracker_id: {
         type: "number",
-        description: "トラッカーのID"
+        description: "Tracker ID"
       },
       status_id: {
         type: "number",
-        description: "ステータスのID"
+        description: "Status ID"
       },
       priority_id: {
         type: "number",
-        description: "優先度のID"
+        description: "Priority ID"
       },
       assigned_to_id: {
         type: "number",
-        description: "担当者のID"
+        description: "Assignee ID"
       },
       category_id: {
         type: "number",
-        description: "カテゴリのID"
+        description: "Category ID"
       },
       fixed_version_id: {
         type: "number",
-        description: "対象バージョンのID"
+        description: "Target version ID"
       },
       parent_issue_id: {
         type: "number",
-        description: "親チケットのID"
+        description: "Parent issue ID"
       },
       start_date: {
         type: "string",
-        description: "開始日 (YYYY-MM-DD形式)"
+        description: "Start date (YYYY-MM-DD format)"
       },
       due_date: {
         type: "string",
-        description: "期日 (YYYY-MM-DD形式)"
+        description: "Due date (YYYY-MM-DD format)"
       },
       estimated_hours: {
         type: "number",
-        description: "予定工数"
+        description: "Estimated hours"
       },
       done_ratio: {
         type: "number",
-        description: "進捗率 (0-100)"
+        description: "Completion percentage (0-100)"
       }
     },
     required: ["project_id", "subject"]
@@ -114,57 +114,57 @@ export const ISSUE_CREATE_TOOL: Tool = {
 };
 
 /**
- * チケット更新ツール
+ * Issue update tool
  */
 export const ISSUE_UPDATE_TOOL: Tool = {
   name: "update_issue",
   description:
-    "既存のチケットを更新します。\n" +
-    "- チケットIDは必須\n" +
-    "- 更新したい項目のみを指定可能\n" +
-    "- コメントを追加することも可能",
+    "Update an existing issue.\n" +
+    "- Issue ID is required\n" +
+    "- Only specify fields to be updated\n" +
+    "- Can add comments",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "更新するチケットのID"
+        description: "Issue ID to update"
       },
       subject: {
         type: "string",
-        description: "チケットの件名"
+        description: "Issue subject"
       },
       description: {
         type: "string",
-        description: "チケットの説明"
+        description: "Issue description"
       },
       status_id: {
         type: "number",
-        description: "ステータスのID"
+        description: "Status ID"
       },
       priority_id: {
         type: "number",
-        description: "優先度のID"
+        description: "Priority ID"
       },
       assigned_to_id: {
         type: "number",
-        description: "担当者のID"
+        description: "Assignee ID"
       },
       category_id: {
         type: "number",
-        description: "カテゴリのID"
+        description: "Category ID"
       },
       fixed_version_id: {
         type: "number",
-        description: "対象バージョンのID"
+        description: "Target version ID"
       },
       notes: {
         type: "string",
-        description: "更新時のコメント"
+        description: "Comment for the update"
       },
       private_notes: {
         type: "boolean",
-        description: "コメントを非公開にするか"
+        description: "Make comment private"
       }
     },
     required: ["id"]
@@ -172,20 +172,20 @@ export const ISSUE_UPDATE_TOOL: Tool = {
 };
 
 /**
- * チケット削除ツール
+ * Issue deletion tool
  */
 export const ISSUE_DELETE_TOOL: Tool = {
   name: "delete_issue",
   description:
-    "チケットを削除します。\n" +
-    "- チケットIDを指定\n" +
-    "- この操作は取り消せません",
+    "Delete an issue.\n" +
+    "- Specify issue ID\n" +
+    "- This action cannot be undone",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "削除するチケットのID"
+        description: "Issue ID to delete"
       }
     },
     required: ["id"]

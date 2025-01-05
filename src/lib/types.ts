@@ -32,6 +32,8 @@ export const IssueQuerySchema = z.object({
 export const ProjectQuerySchema = z.object({
   offset: z.number().int().min(0).optional(),
   limit: z.number().int().min(1).max(100).optional(),
+  query: z.string().optional(),
+  status: z.union([z.literal(1), z.literal(5), z.literal(9)]).optional(), // 1: active, 5: archived, 9: closed
   include: z.string()
     .transform(str => 
       str.split(",")

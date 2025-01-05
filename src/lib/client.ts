@@ -86,13 +86,18 @@ export class RedmineClient {
   private encodeQueryParams(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && value !== null) {  // null チェックを追加
         if (Array.isArray(value)) {
           if (key === "include") {
             searchParams.set(key, value.join(","));
           } else {
             value.forEach(v => searchParams.append(key, v.toString()));
           }
+        } else if (value instanceof Date) {
+          searchParams.set(key, value.toISOString().split('T')[0]);
+        } else if (typeof value === 'object') {
+          // オブジェクトの場合は文字列化
+          searchParams.set(key, JSON.stringify(value));
         } else {
           searchParams.set(key, value.toString());
         }
@@ -157,8 +162,11 @@ export class RedmineClient {
 
   // Projects
   async getProjects(params?: ProjectQueryParams): Promise<RedmineApiResponse<RedmineProject>> {
+    console.log("Search parameters:", params); // デバッグログ追加
     const validatedParams = params ? ProjectQuerySchema.parse(params) : undefined;
+    console.log("Validated parameters:", validatedParams); // デバッグログ追加
     const query = validatedParams ? this.encodeQueryParams(validatedParams) : "";
+    console.log("Encoded query:", query); // デバッグログ追加
     const response = await this.performRequest<RedmineApiResponse<RedmineProject>>(
       `projects.json${query ? `?${query}` : ""}`
     );

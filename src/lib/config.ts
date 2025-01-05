@@ -1,4 +1,8 @@
 import { z } from "zod";
+import dotenv from 'dotenv';
+
+// .envファイルの読み込み
+dotenv.config();
 
 // 設定スキーマの定義
 const ConfigSchema = z.object({
