@@ -2,7 +2,6 @@ import {
   RedmineIssue,
   RedmineProject,
   RedmineTimeEntry,
-  RedmineUser,
   RedmineApiResponse,
   RedmineErrorResponse,
   IssueQueryParams,
@@ -288,11 +287,6 @@ export class RedmineClient {
         method: "DELETE",
       }
     );
-  }
-
-  // Users
-  async getCurrentUser(): Promise<{ user: RedmineUser }> {
-    return this.performRequest<{ user: RedmineUser }>("users/current.json");
   }
 }
 
