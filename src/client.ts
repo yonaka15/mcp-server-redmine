@@ -1,0 +1,1 @@
+// Redmine APIクライアント - APIとの通信を担当

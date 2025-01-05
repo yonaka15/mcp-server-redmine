@@ -1,0 +1,50 @@
+{
+  "name": "@yonaka15/mcp-server-redmine",
+  "version": "0.1.0",
+  "description": "MCP server for Redmine integration",
+  "license": "MIT",
+  "author": "",
+  "homepage": "https://github.com/yonaka15/mcp-server-redmine",
+  "bugs": "https://github.com/yonaka15/mcp-server-redmine/issues",
+  "type": "module",
+  "bin": {
+    "mcp-server-redmine": "./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yonaka15/mcp-server-redmine.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/",
+    "test": "jest",
+    "start": "node dist/index.js",
+    "dev": "tsx watch --clear-screen=false src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.0.2",
+    "eslint": "^9.8.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.4",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "redmine",
+    "model-context-protocol"
+  ]
+}
