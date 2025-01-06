@@ -1,21 +1,36 @@
 import { z } from "zod";
 
+const validModuleNames = [
+  "boards",
+  "calendar",
+  "documents",
+  "files",
+  "gantt",
+  "issue_tracking",
+  "news",
+  "repository",
+  "time_tracking",
+  "wiki"
+] as const;
+
+type ModuleName = typeof validModuleNames[number];
+
 export const ProjectQuerySchema = z.object({
   offset: z.number().int().min(0).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   query: z.string().optional(),
   status: z.union([z.literal(1), z.literal(5), z.literal(9)]).optional(), // 1: active, 5: archived, 9: closed
-  include: z.string()
-    .transform(str => 
-      str.split(",")
-        .map(s => s.trim())
-        .filter(s => [
-          "trackers",
-          "issue_categories",
-          "enabled_modules",
-          "time_entry_activities",
-          "issue_custom_fields"
-        ].includes(s))
+  is_public: z.boolean().optional(),
+  include: z.array(z.string())
+    .refine(arr => 
+      arr.every(item => [
+        "trackers",
+        "issue_categories",
+        "enabled_modules",
+        "time_entry_activities",
+        "issue_custom_fields"
+      ].includes(item)),
+      "Invalid include value"
     )
     .optional(),
 });
@@ -35,7 +50,7 @@ export const RedmineProjectSchema = z.object({
   updated_on: z.string(),
   is_public: z.boolean(),
   inherit_members: z.boolean().optional(),
-  enabled_modules: z.array(z.string()).optional(),
+  enabled_module_names: z.array(z.enum(validModuleNames)).optional(),
   trackers: z.array(z.object({
     id: z.number(),
     name: z.string(),
@@ -67,3 +82,4 @@ export const RedmineProjectSchema = z.object({
 
 // Export the query params type
 export type ProjectQueryParams = z.infer<typeof ProjectQuerySchema>;
+export type ModuleNames = z.infer<typeof RedmineProjectSchema>["enabled_module_names"];
