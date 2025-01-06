@@ -5,11 +5,11 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { redmineClient } from "./lib/client.js";
+import { redmineClient } from "./lib/client/index.js";
 import config from "./lib/config.js";
 import * as tools from "./tools/index.js";
 import * as formatters from "./formatters/index.js";
-import type { RedmineIssueCreate, RedmineProjectCreate, RedmineTimeEntryCreate } from "./lib/types.js";
+import type { RedmineIssueCreate, RedmineProjectCreate, RedmineTimeEntryCreate } from "./lib/types/index.js";
 
 // 型チェックヘルパー
 function isNumber(value: unknown): value is number {
@@ -118,7 +118,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // チケット関連のツール
       case "search_issues": {
         const validatedArgs = extractPaginationParams(args);
-        const issues = await redmineClient.getIssues(validatedArgs);
+        const issues = await redmineClient.issues.getIssues(validatedArgs);
 
         return {
           content: [{
@@ -133,7 +133,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!isRedmineIssueCreate(args)) {
           throw new Error("Invalid issue create parameters");
         }
-        const result = await redmineClient.createIssue(args);
+        const result = await redmineClient.issues.createIssue(args);
         return {
           content: [{
             type: "text",
@@ -148,7 +148,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error("Issue ID must be a number");
         }
         const { id, ...updateData } = args;
-        const result = await redmineClient.updateIssue(id, updateData);
+        const result = await redmineClient.issues.updateIssue(id, updateData);
         return {
           content: [{
             type: "text",
@@ -160,7 +160,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "delete_issue": {
         const id = asNumber(args.id);
-        await redmineClient.deleteIssue(id);
+        await redmineClient.issues.deleteIssue(id);
         return {
           content: [{
             type: "text",
@@ -173,7 +173,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // プロジェクト関連のツール
       case "search_projects": {
         const validatedArgs = extractPaginationParams(args);
-        const projects = await redmineClient.getProjects(validatedArgs);
+        const projects = await redmineClient.projects.getProjects(validatedArgs);
 
         return {
           content: [{
@@ -186,7 +186,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "get_project": {
         const id = asStringOrNumber(args.id);
-        const result = await redmineClient.getProject(id);
+        const result = await redmineClient.projects.getProject(id);
         return {
           content: [{
             type: "text",
@@ -200,7 +200,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!isRedmineProjectCreate(args)) {
           throw new Error("Invalid project create parameters");
         }
-        const result = await redmineClient.createProject(args);
+        const result = await redmineClient.projects.createProject(args);
         return {
           content: [{
             type: "text",
@@ -213,7 +213,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "update_project": {
         const id = asStringOrNumber(args.id);
         const { id: _, ...updateData } = args;
-        const result = await redmineClient.updateProject(id, updateData);
+        const result = await redmineClient.projects.updateProject(id, updateData);
         return {
           content: [{
             type: "text",
@@ -225,7 +225,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "archive_project": {
         const id = asStringOrNumber(args.id);
-        await redmineClient.archiveProject(id);
+        await redmineClient.projects.archiveProject(id);
         return {
           content: [{
             type: "text",
@@ -237,7 +237,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "unarchive_project": {
         const id = asStringOrNumber(args.id);
-        await redmineClient.unarchiveProject(id);
+        await redmineClient.projects.unarchiveProject(id);
         return {
           content: [{
             type: "text",
@@ -249,7 +249,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "delete_project": {
         const id = asStringOrNumber(args.id);
-        await redmineClient.deleteProject(id);
+        await redmineClient.projects.deleteProject(id);
         return {
           content: [{
             type: "text",
@@ -262,7 +262,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // 作業時間関連のツール
       case "search_time_entries": {
         const validatedArgs = extractPaginationParams(args);
-        const entries = await redmineClient.getTimeEntries(validatedArgs);
+        const entries = await redmineClient.timeEntries.getTimeEntries(validatedArgs);
 
         return {
           content: [{
@@ -275,7 +275,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "get_time_entry": {
         const id = asNumber(args.id);
-        const result = await redmineClient.getTimeEntry(id);
+        const result = await redmineClient.timeEntries.getTimeEntry(id);
         return {
           content: [{
             type: "text",
@@ -289,7 +289,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!isRedmineTimeEntryCreate(args)) {
           throw new Error("Invalid time entry create parameters");
         }
-        const result = await redmineClient.createTimeEntry(args);
+        const result = await redmineClient.timeEntries.createTimeEntry(args);
         return {
           content: [{
             type: "text",
@@ -302,7 +302,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "update_time_entry": {
         const id = asNumber(args.id);
         const { id: _, ...updateData } = args;
-        const result = await redmineClient.updateTimeEntry(id, updateData);
+        const result = await redmineClient.timeEntries.updateTimeEntry(id, updateData);
         return {
           content: [{
             type: "text",
@@ -314,7 +314,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "delete_time_entry": {
         const id = asNumber(args.id);
-        await redmineClient.deleteTimeEntry(id);
+        await redmineClient.timeEntries.deleteTimeEntry(id);
         return {
           content: [{
             type: "text",

@@ -1,4 +1,4 @@
-import type { RedmineApiResponse, RedmineIssue } from "../lib/types.js";
+import type { RedmineApiResponse, RedmineIssue } from "../lib/types/index.js";
 
 /**
  * 単一のチケット情報をフォーマット
@@ -32,7 +32,7 @@ export function formatIssue(issue: RedmineIssue): string {
     sections.push(
       "",
       "Custom Fields:",
-      ...issue.custom_fields.map(field => 
+      ...issue.custom_fields.map((field: { name: string; value: string | string[] }) => 
         `${field.name}: ${Array.isArray(field.value) ? field.value.join(", ") : field.value}`
       )
     );

@@ -1,4 +1,4 @@
-import type { RedmineApiResponse, RedmineTimeEntry } from "../lib/types.js";
+import type { RedmineApiResponse, RedmineTimeEntry } from "../lib/types/index.js";
 
 /**
  * 単一の作業時間記録をフォーマット
@@ -22,7 +22,7 @@ export function formatTimeEntry(entry: RedmineTimeEntry): string {
     sections.push(
       "",
       "Custom fields:",
-      ...entry.custom_fields.map(field => 
+      ...entry.custom_fields.map((field: { name: string; value: string | string[] }) => 
         `${field.name}: ${Array.isArray(field.value) ? field.value.join(", ") : field.value}`
       )
     );
@@ -40,7 +40,7 @@ export function formatTimeEntries(response: RedmineApiResponse<RedmineTimeEntry>
   }
 
   // 合計時間の計算
-  const totalHours = response.time_entries.reduce((sum, entry) => sum + entry.hours, 0);
+  const totalHours = response.time_entries.reduce((sum: number, entry: RedmineTimeEntry) => sum + entry.hours, 0);
 
   const sections = [
     `Found ${response.total_count} time entries (Total: ${totalHours.toFixed(2)}h):`,

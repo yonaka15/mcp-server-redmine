@@ -1,4 +1,4 @@
-import type { RedmineApiResponse, RedmineProject } from "../lib/types.js";
+import type { RedmineApiResponse, RedmineProject } from "../lib/types/index.js";
 
 /**
  * プロジェクトのステータスを文字列に変換
@@ -55,7 +55,7 @@ export function formatProject(project: RedmineProject): string {
     sections.push(
       "",
       "Trackers:",
-      project.trackers.map(t => t.name).join(", ")
+      project.trackers.map((t: { name: string }) => t.name).join(", ")
     );
   }
 
@@ -64,7 +64,7 @@ export function formatProject(project: RedmineProject): string {
     sections.push(
       "",
       "Categories:",
-      project.issue_categories.map(c => c.name).join(", ")
+      project.issue_categories.map((c: { name: string }) => c.name).join(", ")
     );
   }
 
@@ -74,7 +74,8 @@ export function formatProject(project: RedmineProject): string {
       "",
       "Time entry activities:",
       project.time_entry_activities
-        .map(a => `${a.name}${a.is_default ? " (Default)" : ""}${!a.active ? " (Inactive)" : ""}`)
+        .map((a: { name: string; is_default?: boolean; active?: boolean }) => 
+          `${a.name}${a.is_default ? " (Default)" : ""}${!a.active ? " (Inactive)" : ""}`)
         .join(", ")
     );
   }
@@ -84,7 +85,7 @@ export function formatProject(project: RedmineProject): string {
     sections.push(
       "",
       "Custom fields:",
-      ...project.custom_fields.map(field => 
+      ...project.custom_fields.map((field: { name: string; value: string | string[] }) => 
         `${field.name}: ${Array.isArray(field.value) ? field.value.join(", ") : field.value}`
       )
     );
