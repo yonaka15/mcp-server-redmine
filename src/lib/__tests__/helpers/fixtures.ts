@@ -154,3 +154,69 @@ export const timeEntryListResponse = {
 export const singleTimeEntryResponse = {
   time_entry: timeEntryListResponse.time_entries[0]
 };
+
+// ユーザー関連のレスポンス
+export const userListResponse = {
+  users: [
+    {
+      id: 1,
+      login: "jsmith",
+      firstname: "John",
+      lastname: "Smith",
+      mail: "john@example.com",
+      created_on: "2025-01-01T00:00:00Z",
+      updated_on: "2025-01-01T00:00:00Z",
+      last_login_on: "2025-01-06T10:00:00Z",
+      passwd_changed_on: "2025-01-01T00:00:00Z",
+      status: 1,
+      api_key: "abcdef1234567890",
+      avatar_url: null,
+    },
+    {
+      id: 2,
+      login: "mjohnson",
+      firstname: "Mike",
+      lastname: "Johnson",
+      mail: "mike@example.com",
+      created_on: "2025-01-02T00:00:00Z",
+      updated_on: "2025-01-02T00:00:00Z",
+      last_login_on: "2025-01-06T09:00:00Z",
+      passwd_changed_on: "2025-01-02T00:00:00Z",
+      status: 1,
+      api_key: "0987654321fedcba",
+      avatar_url: null,
+    }
+  ],
+  total_count: 2,
+  offset: 0,
+  limit: 25
+};
+
+// ユーザー詳細（基本情報）
+export const singleUserResponse = {
+  user: userListResponse.users[0]
+};
+
+// ユーザー詳細（include付き）
+export const singleUserWithIncludesResponse = {
+  user: {
+    ...userListResponse.users[0],
+    custom_fields: [
+      { id: 1, name: "Department", value: "Engineering" },
+      { id: 2, name: "Location", value: "Tokyo" }
+    ],
+    memberships: [
+      {
+        project: { id: 1, name: "Test Project" },
+        roles: [
+          { id: 1, name: "Developer" },
+          { id: 2, name: "Tester" }
+        ]
+      }
+    ],
+    groups: [
+      { id: 1, name: "Development Team" },
+      { id: 2, name: "Quality Assurance" }
+    ]
+  }
+};

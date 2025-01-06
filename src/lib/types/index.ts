@@ -12,3 +12,7 @@ export * from "./projects/schema.js";
 // Time Entries
 export * from "./time_entries/types.js";
 export * from "./time_entries/schema.js";
+
+// Users
+export * from "./users/types.js";
+export * from "./users/schema.js";
