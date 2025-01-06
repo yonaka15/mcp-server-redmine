@@ -23,7 +23,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint src/",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "start": "node dist/index.js",
     "dev": "tsx watch --clear-screen=false src/index.ts"
   },
@@ -36,9 +36,12 @@
     "@eslint/js": "^9.8.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.0.2",
+    "@types/node-fetch": "^2.6.12",
     "eslint": "^9.8.0",
     "jest": "^29.7.0",
+    "node-fetch": "^2.7.0",
     "ts-jest": "^29.2.4",
+    "ts-node": "^10.9.2",
     "tsx": "^4.16.5",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.0.0"

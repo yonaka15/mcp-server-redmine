@@ -1,6 +1,5 @@
-import type { JestConfigWithTsJest } from 'ts-jest';
-
-const config: JestConfigWithTsJest = {
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+module.exports = {
   // TypeScript用の設定
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -27,8 +26,11 @@ const config: JestConfigWithTsJest = {
 
   // テストファイルのパターン
   testMatch: [
-    "**/__tests__/**/*.[jt]s?(x)",
-    "**/?(*.)+(spec|test).[jt]s?(x)"
+    "**/__tests__/**/*.(spec|test).ts"
+  ],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/helpers/"
   ],
 
   // テストタイムアウトの設定
@@ -60,5 +62,3 @@ const config: JestConfigWithTsJest = {
   moduleDirectories: ['node_modules', 'src'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
-
-export default config;

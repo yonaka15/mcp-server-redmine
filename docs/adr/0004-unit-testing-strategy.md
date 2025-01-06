@@ -5,7 +5,7 @@
 承認済み - 2025-01-06
 実装開始 - 2025-01-06
 更新 - 2025-01-06
-第2版 - 2025-01-06
+第4版 - 2025-01-06
 
 ## コンテキスト
 
@@ -14,6 +14,7 @@ Redmine用MCPサーバーのコード品質と信頼性を確保するために�
 1. プロジェクトの基本構造（0001）
 2. API実装（0002、破棄）
 3. モジュールの分割（0003）
+4. クライアントと型定義の分割（0006）
 
 以下の点を考慮したテスト戦略を決定し実装を進める必要があります：
 
@@ -22,6 +23,7 @@ Redmine用MCPサーバーのコード品質と信頼性を確保するために�
 3. 外部依存（Redmine API）のモック戦略
 4. Redmine APIの仕様に準拠した実装の検証
 5. テストコードの保守性と可読性の確保
+6. クライアントの分割に伴うテストの再構築（ADR 0006による変更）
 
 ## 決定
 
@@ -55,20 +57,32 @@ src/
 │   ├── __tests__/
 │   │   ├── helpers/          # テストヘルパー
 │   │   │   ├── fixtures.ts   # テストデータ
-│   │   │   └── setup.ts      # グローバル設定
-│   │   ├── base.test.ts      # 基本機能のテスト
-│   │   └── issues/           # Issues APIのテスト
-│   │       ├── get.test.ts   # GET /issues と GET /issues/[id]
-│   │       ├── post.test.ts  # POST /issues
-│   │       ├── put.test.ts   # PUT /issues/[id]
-│   │       └── delete.test.ts # DELETE /issues/[id]
+│   │   │   ├── setup.ts      # グローバル設定
+│   │   │   └── mocks.ts      # 共通モック
+│   │   ├── client/           # クライアントのテスト
+│   │   │   ├── base/         # 基本機能のテスト
+│   │   │   │   ├── request.test.ts
+│   │   │   │   └── params.test.ts
+│   │   │   ├── issues/       # Issues APIのテスト
+│   │   │   │   ├── get.test.ts
+│   │   │   │   ├── post.test.ts
+│   │   │   │   ├── put.test.ts
+│   │   │   │   └── delete.test.ts
+│   │   │   ├── projects/     # Projects APIのテスト
+│   │   │   └── time_entries/ # TimeEntries APIのテスト
+│   │   └── types/            # 型のテスト
+│   │       ├── issues/
+│   │       ├── projects/
+│   │       └── time_entries/
 ```
 
 この構造の利点：
 - 機能ごとのテストファイルの分離
+- ドメインごとのテストの整理
 - テストコードの見通しの向上
 - メンテナンスの容易化
 - チーム開発時の競合リスクの低減
+- クライアント分割に対応した構造
 
 ### モックの戦略
 
@@ -76,8 +90,12 @@ src/
    - グローバルfetchのモック化による外部API呼び出しのシミュレーション
    - setup.tsでのグローバルモックの設定
    ```typescript
-   beforeEach(() => {
-     global.fetch = jest.fn();
+   // モック用の型定義と設定
+   beforeAll(() => {
+     Object.defineProperty(global, "fetch", {
+       writable: true,
+       value: jest.fn()
+     });
    });
 
    afterEach(() => {
@@ -87,7 +105,51 @@ src/
 
 2. **レスポンスのモック**
    - fixtures.tsでテストデータを一元管理
-   - エラーレスポンスを含む各種パターンの定義
+   - 実際のResponseオブジェクトを返すモックを作成
+   ```typescript
+   export const mockResponse = (body: unknown, init?: ResponseInit): Response => {
+     return new Response(JSON.stringify(body), {
+       status: 200,
+       headers: { "Content-Type": "application/json" },
+       ...init
+     });
+   };
+   ```
+
+3. **モックの使用方法**
+   - jest.spyOnを使用してグローバルfetchをモック化
+   - mockResolvedValueOnceでレスポンスを設定
+   ```typescript
+   describe("IssuesClient", () => {
+     let client: IssuesClient;
+     const mockFetch = jest.spyOn(global, "fetch");
+
+     beforeEach(() => {
+       client = new IssuesClient();
+     });
+
+     it("fetches issues", async () => {
+       mockFetch.mockResolvedValueOnce(
+         mockResponse(fixtures.issueListResponse)
+       );
+       const result = await client.getIssues();
+       expect(result).toEqual(fixtures.issueListResponse);
+     });
+   });
+   ```
+
+学び：
+1. モックの型付けの重要性
+   - TypeScriptの型システムを活用してモックの型を正確に定義することで、テストの信頼性が向上
+   - 将来の型エラーを早期に発見可能
+
+2. Responseオブジェクトのモック
+   - 独自のモックオブジェクトではなく、実際のResponseオブジェクトを使用することで型の整合性を保証
+   - ヘッダーやステータスコードなど、実際のレスポンスに近い形でテストが可能
+
+3. jest.spyOnの活用
+   - グローバルオブジェクトのモック化には、型安全なjest.spyOnを使用
+   - mockImplementationOnceではなくmockResolvedValueOnceを使用してPromiseを適切に扱う
 
 ### テストフレームワークと環境
 
@@ -148,58 +210,67 @@ src/
    - TypeScriptサポートの設定
    - グローバルモックの実装
 
-2. **Issues APIのテスト実装**
-   - base.test.ts（基本機能のテスト）
-     - リクエストヘッダーの検証
-     - HTTPメソッドの検証
-     - レスポンスステータスの処理
-     - エラーハンドリング
-   - get.test.ts（GETリクエストのテスト）
-     - 一覧取得と単一リソース取得
-     - クエリパラメータの処理
-     - エラーハンドリング
-   - post.test.ts（POSTリクエストのテスト）
-     - リソースの作成
-     - バリデーション
-     - エラーハンドリング
-   - put.test.ts（PUTリクエストのテスト）
-     - リソースの更新
-     - バリデーション
-     - エラーハンドリング
-   - delete.test.ts（DELETEリクエストのテスト）
-     - リソースの削除
-     - エラーハンドリング
+2. **基本機能のテスト**
+   - BaseClientのリクエスト機能テスト
+   - パラメータエンコード機能テスト
+
+3. **再実装が必要な部分**（ADR 0006によるモジュール分割の影響）
+   - Issues APIのテスト
+   - Projects APIのテスト
+   - TimeEntries APIのテスト
+   - 各クライアントのモック
+   - フィクスチャの再整理
 
 ## 結果
 
 ### 肯定的な結果
 
-- API仕様に基づく体系的なテスト実装が可能に
-- モジュール構造に合わせたテストの整理
-- テストヘルパーとフィクスチャの再利用
-- HTTPリクエストのモック化による安定したテスト
-- プロセスの標準化によるテスト品質の均一化
-- テストファイルの分割による保守性の向上
-- テストケースの見通しの改善
-- グローバルモックの一元管理による保守性向上
+1. テストの整理と管理
+   - API仕様に基づく体系的なテスト実装が可能に
+   - モジュール構造に合わせたテストの整理
+   - テストヘルパーとフィクスチャの再利用
+   - HTTPリクエストのモック化による安定したテスト
+
+2. 実装プロセス
+   - プロセスの標準化によるテスト品質の均一化
+   - テストファイルの分割による保守性の向上
+   - テストケースの見通しの改善
+   - グローバルモックの一元管理
+
+3. モジュール分割効果
+   - 個別のクライアントテストが容易に
+   - 依存関係が明確で影響範囲が把握しやすい
+   - 共通機能のテストが再利用可能
 
 ### 否定的な結果
 
-- ファイル数の増加に伴う初期学習コストの上昇
-- API仕様の詳細な確認が必要で実装に時間がかかる
-- フィクスチャの保守が必要
-- テストファイル間の依存関係の管理が必要
+1. コスト面
+   - ファイル数の増加に伴う初期学習コストの上昇
+   - API仕様の詳細な確認が必要で実装に時間がかかる
+   - モジュール分割による再実装の必要性
 
-### 今後の課題
+2. 管理面
+   - フィクスチャの保守が必要
+   - テストファイル間の依存関係の管理が必要
+   - モックの一貫性維持が必要
 
-1. Projects APIのテスト実装
-2. Time Entries APIのテスト実装
-3. カバレッジ目標の達成状況の監視
-4. テストの実行時間の最適化
+### 今後のタスク
+
+1. テスト実装の優先順位
+   - BaseClientの基本機能テスト
+   - Issues APIのテスト再実装
+   - Projects APIのテスト再実装
+   - TimeEntries APIのテスト再実装
+
+2. 品質管理
+   - カバレッジ目標の達成状況の監視
+   - テストの実行時間の最適化
+   - モックデータの整理と管理
 
 ## 参考資料
 
-- [Jest Documentation](https://jestjs.io/docs/getting-started) - テストフレームワークの基本設定とベストプラクティス
-- [ts-jest Documentation](https://kulshekhar.github.io/ts-jest) - TypeScriptサポートの設定方法
-- [Redmine REST API](https://www.redmine.org/projects/redmine/wiki/Rest_api) - APIの仕様と制約
-- [Issues REST API](https://www.redmine.org/projects/redmine/wiki/Rest_Issues) - Issuesリソースの詳細仕様
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [ts-jest Documentation](https://kulshekhar.github.io/ts-jest)
+- [Redmine REST API](https://www.redmine.org/projects/redmine/wiki/Rest_api)
+- [Issues REST API](https://www.redmine.org/projects/redmine/wiki/Rest_Issues)
+- [ADR 0006: クライアントと型定義の分割](./0006-separate-client-and-types.md)
