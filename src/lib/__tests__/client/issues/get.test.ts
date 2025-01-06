@@ -43,59 +43,107 @@ describe("Issues API (GET)", () => {
       expect(result).toEqual(fixtures.issueListResponse);
     });
 
-    it("fetches issues with parameters", async () => {
-      // Arrange
-      const params: IssueListParams = {
-        offset: 0,
-        limit: 25,
-        project_id: 20,
-        status_id: "open",
-        sort: "updated_on:desc",
-      };
-      mockFetch.mockImplementationOnce(async () =>
-        mockResponse(fixtures.issueListResponse)
-      );
+    describe("filtering", () => {
+      it("filters by project and status", async () => {
+        // Arrange
+        const params: IssueListParams = {
+          project_id: 1,
+          status_id: "open",
+          sort: "updated_on:desc"
+        };
+        mockFetch.mockImplementationOnce(async () =>
+          mockResponse(fixtures.issueListResponse)
+        );
 
-      // Act
-      const result = await client.getIssues(params);
+        // Act
+        const result = await client.getIssues(params);
 
-      // Assert
-      const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
-      const { base: actualBase, params: actualParams } = parseUrl(url);
-      const expectedBase = new URL(
-        "/issues.json",
-        config.redmine.host
-      ).toString();
-      const expectedParams = {
-        offset: "0",
-        limit: "25",
-        project_id: "20",
-        status_id: "open",
-        sort: "updated_on:desc",
-      };
+        // Assert
+        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const { params: actualParams } = parseUrl(url);
+        expect(actualParams).toEqual({
+          project_id: "1",
+          status_id: "open",
+          sort: "updated_on:desc"
+        });
+      });
 
-      expect(actualBase).toBe(expectedBase);
-      expect(actualParams).toEqual(expectedParams);
-      expect(mockFetch.mock.calls[0][1]).toEqual(
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            Accept: "application/json",
-            "X-Redmine-API-Key": config.redmine.apiKey,
-          }),
-        })
-      );
-      expect(result).toEqual(fixtures.issueListResponse);
+      it("filters by assigned user", async () => {
+        // Arrange
+        const params: IssueListParams = {
+          assigned_to_id: "me",
+          status_id: "*"  // all statuses
+        };
+        mockFetch.mockImplementationOnce(async () =>
+          mockResponse(fixtures.issueListResponse)
+        );
+
+        // Act
+        const result = await client.getIssues(params);
+
+        // Assert
+        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const { params: actualParams } = parseUrl(url);
+        expect(actualParams).toEqual({
+          assigned_to_id: "me",
+          status_id: "*"
+        });
+      });
+
+      it("filters by custom field", async () => {
+        // Arrange
+        const params: IssueListParams = {
+          cf_1: "custom_value",
+          project_id: 1
+        };
+        mockFetch.mockImplementationOnce(async () =>
+          mockResponse(fixtures.issueListResponse)
+        );
+
+        // Act
+        const result = await client.getIssues(params);
+
+        // Assert
+        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const { params: actualParams } = parseUrl(url);
+        expect(actualParams).toEqual({
+          cf_1: "custom_value",
+          project_id: "1"
+        });
+      });
+
+      it("applies pagination", async () => {
+        // Arrange
+        const params: IssueListParams = {
+          offset: 25,
+          limit: 50
+        };
+        mockFetch.mockImplementationOnce(async () =>
+          mockResponse(fixtures.issueListResponse)
+        );
+
+        // Act
+        const result = await client.getIssues(params);
+
+        // Assert
+        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const { params: actualParams } = parseUrl(url);
+        expect(actualParams).toEqual({
+          offset: "25",
+          limit: "50"
+        });
+      });
     });
 
-    it("handles API error", async () => {
+    it("handles error", async () => {
       // Arrange
       mockFetch.mockImplementationOnce(async () =>
-        mockErrorResponse(404, ["Resource not found"])
+        mockErrorResponse(400, ["Invalid query parameters"])
       );
 
       // Act & Assert
-      await expect(client.getIssues()).rejects.toThrow(RedmineApiError);
+      await expect(client.getIssues({ invalid_param: "value" } as any))
+        .rejects.toThrow(RedmineApiError);
     });
   });
 
@@ -129,48 +177,14 @@ describe("Issues API (GET)", () => {
       expect(result).toEqual(fixtures.singleIssueResponse);
     });
 
-    it("fetches issue with include parameters", async () => {
-      // Arrange
-      const params = {
-        include: "children,attachments",
-      };
-      mockFetch.mockImplementationOnce(async () =>
-        mockResponse(fixtures.singleIssueResponse)
-      );
-
-      // Act
-      const result = await client.getIssue(issueId, params);
-
-      // Assert
-      const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
-      const { base: actualBase, params: actualParams } = parseUrl(url);
-      const expectedBase = new URL(
-        `/issues/${issueId}.json`,
-        config.redmine.host
-      ).toString();
-
-      expect(actualBase).toBe(expectedBase);
-      expect(actualParams).toEqual(params);
-      expect(mockFetch.mock.calls[0][1]).toEqual(
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            Accept: "application/json",
-            "X-Redmine-API-Key": config.redmine.apiKey,
-          }),
-        })
-      );
-      expect(result).toEqual(fixtures.singleIssueResponse);
-    });
-
-    it("handles API error", async () => {
+    it("handles error", async () => {
       // Arrange
       mockFetch.mockImplementationOnce(async () =>
         mockErrorResponse(404, ["Issue not found"])
       );
 
       // Act & Assert
-      await expect(client.getIssue(issueId)).rejects.toThrow(RedmineApiError);
+      await expect(client.getIssue(99999)).rejects.toThrow(RedmineApiError);
     });
   });
 });

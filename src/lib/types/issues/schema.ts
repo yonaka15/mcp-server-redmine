@@ -21,7 +21,8 @@ export function validateShowIssueIncludes(include: string): boolean {
   return includes.every(inc => SHOW_ISSUE_INCLUDES.includes(inc as any));
 }
 
-export const IssueQuerySchema = z.object({
+// 基本的なクエリパラメータのスキーマ
+const baseQuerySchema = z.object({
   offset: z.number().int().min(0).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   sort: z.string().optional(),
@@ -38,10 +39,12 @@ export const IssueQuerySchema = z.object({
   ]).optional(),
   assigned_to_id: z.union([z.number().int(), z.literal("me")]).optional(),
   parent_id: z.number().int().optional(),
-  cf_x: z.string().optional(),
   created_on: z.string().optional(),
   updated_on: z.string().optional(),
 });
+
+// カスタムフィールドを含むクエリパラメータのスキーマ
+export const IssueQuerySchema = baseQuerySchema.catchall(z.union([z.string(), z.number()]));
 
 const RedmineRelationSchema = z.object({
   id: z.number(),
