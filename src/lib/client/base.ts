@@ -10,7 +10,7 @@ export class RedmineApiError extends Error {
     public readonly statusText: string,
     public readonly errors: string[]
   ) {
-    super(`Redmine API error: ${status} ${statusText}\n${errors.join(", ")}`);
+    super(`Redmine API error: ${status} ${statusText}\n${errors ? errors.join(", ") : "Unknown error"}`);
     this.name = "RedmineApiError";
   }
 }
@@ -27,7 +27,8 @@ export class BaseClient {
     options?: RequestInit
   ): Promise<T> {
     const url = new URL(path, config.redmine.host);
-    const response = await fetch(url, {
+    const response = await fetch(url.toString(), {  // URL.toString()を明示的に呼び出す
+      method: 'GET',  // デフォルトメソッドを設定
       ...options,
       headers: {
         "X-Redmine-API-Key": config.redmine.apiKey,
@@ -41,9 +42,9 @@ export class BaseClient {
       let errorMessage: string[];
       try {
         const errorResponse = await response.json() as RedmineErrorResponse;
-        errorMessage = errorResponse.errors;
+        errorMessage = errorResponse.errors || ["Unknown error"];  // errorのフォールバック
       } catch {
-        errorMessage = [await response.text()];
+        errorMessage = [await response.text() || "Unknown error"];  // テキストのフォールバック
       }
       throw new RedmineApiError(
         response.status,
@@ -66,9 +67,10 @@ export class BaseClient {
   protected encodeQueryParams(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {  // null チェックを追加
+      if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
-          value.forEach(v => searchParams.append(key, v.toString()));
+          // 配列の場合はカンマ区切りの文字列として設定
+          searchParams.set(key, value.join(','));
         } else if (value instanceof Date) {
           searchParams.set(key, value.toISOString().split('T')[0]);
         } else if (typeof value === 'object') {

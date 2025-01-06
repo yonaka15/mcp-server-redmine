@@ -5,7 +5,7 @@
 承認済み - 2025-01-06
 実装開始 - 2025-01-06
 更新 - 2025-01-06
-第4版 - 2025-01-06
+第7版 - 2025-01-06
 
 ## コンテキスト
 
@@ -27,24 +27,72 @@ Redmine用MCPサーバーのコード品質と信頼性を確保するために�
 
 ## 決定
 
+### テストの安全性戦略
+
+1. **データ変更操作の取り扱い**
+   - POST（作成）、PUT（更新）、DELETE（削除）の成功ケースはスキップ
+   - これらの操作のエラーケースのみをテスト
+   - テストコードに意図を明確に記述（スキップ理由のコメント等）
+
+2. **エラーケースの優先的なテスト**
+   - 権限エラー（403）
+   - リソース不在エラー（404）
+   - バリデーションエラー（422）
+   - サーバーエラー（500）
+   など、データに影響を与えないエラーケースを重点的にテスト
+
+3. **モックの使用**
+   - 実際のAPIコールは行わない
+   - モックレスポンスのみを使用
+   - エラーレスポンスの形式は実際のAPIに準拠
+
+テスト例：
+```typescript
+describe("Issues API (POST)", () => {
+  // 成功ケースはスキップ
+  it.skip("creates a new issue", async () => {
+    // このテストは実データを変更する可能性があるためスキップ
+  });
+
+  // エラーケースはテスト
+  it("handles validation error", async () => {
+    mockFetch.mockResolvedValueOnce(
+      mockResponse(
+        { errors: ['Subject cannot be blank'] },
+        { status: 422, statusText: 'Unprocessable Entity' }
+      )
+    );
+
+    await expect(client.createIssue(invalidData))
+      .rejects
+      .toThrow(RedmineApiError);
+  });
+});
+```
+
 ### テスト実装のプロセス
 
 各APIエンドポイントのテストを実装する際は、以下の手順で進める：
 
-1. **API仕様の確認**
+1. **安全性の確認**
+   - テストが実データに影響を与えないことを確認
+   - データを変更する操作（POST/PUT/DELETE）は原則としてスキップ
+   - エラーケースのテストを優先的に実装
+
+2. **API仕様の確認**
    - RedmineのREST API仕様を確認
    - エンドポイントの詳細な仕様を確認（パラメータ、レスポンス形式等）
    - バージョンによる違いの有無を確認
 
-2. **既存コードの確認**
+3. **既存コードの確認**
    - 実装済みのコードを確認
    - API仕様との整合性を確認
    - 実装上の制約や拡張を確認
 
-3. **テストケースの実装**
-   - 基本的なケース
+4. **テストケースの実装**
+   - エラーケース（優先的に実装）
    - エッジケース
-   - エラーケース
+   - 基本的なケース（データ変更を伴わないもの）
    - Redmine API仕様に基づく検証
 
 ### ファイル構造
@@ -84,142 +132,25 @@ src/
 - チーム開発時の競合リスクの低減
 - クライアント分割に対応した構造
 
-### モックの戦略
+### 実装状況（2025-01-06第4版）
 
-1. **外部APIのモック化**
-   - グローバルfetchのモック化による外部API呼び出しのシミュレーション
-   - setup.tsでのグローバルモックの設定
-   ```typescript
-   // モック用の型定義と設定
-   beforeAll(() => {
-     Object.defineProperty(global, "fetch", {
-       writable: true,
-       value: jest.fn()
-     });
-   });
-
-   afterEach(() => {
-     jest.resetAllMocks();
-   });
-   ```
-
-2. **レスポンスのモック**
-   - fixtures.tsでテストデータを一元管理
-   - 実際のResponseオブジェクトを返すモックを作成
-   ```typescript
-   export const mockResponse = (body: unknown, init?: ResponseInit): Response => {
-     return new Response(JSON.stringify(body), {
-       status: 200,
-       headers: { "Content-Type": "application/json" },
-       ...init
-     });
-   };
-   ```
-
-3. **モックの使用方法**
-   - jest.spyOnを使用してグローバルfetchをモック化
-   - mockResolvedValueOnceでレスポンスを設定
-   ```typescript
-   describe("IssuesClient", () => {
-     let client: IssuesClient;
-     const mockFetch = jest.spyOn(global, "fetch");
-
-     beforeEach(() => {
-       client = new IssuesClient();
-     });
-
-     it("fetches issues", async () => {
-       mockFetch.mockResolvedValueOnce(
-         mockResponse(fixtures.issueListResponse)
-       );
-       const result = await client.getIssues();
-       expect(result).toEqual(fixtures.issueListResponse);
-     });
-   });
-   ```
-
-学び：
-1. モックの型付けの重要性
-   - TypeScriptの型システムを活用してモックの型を正確に定義することで、テストの信頼性が向上
-   - 将来の型エラーを早期に発見可能
-
-2. Responseオブジェクトのモック
-   - 独自のモックオブジェクトではなく、実際のResponseオブジェクトを使用することで型の整合性を保証
-   - ヘッダーやステータスコードなど、実際のレスポンスに近い形でテストが可能
-
-3. jest.spyOnの活用
-   - グローバルオブジェクトのモック化には、型安全なjest.spyOnを使用
-   - mockImplementationOnceではなくmockResolvedValueOnceを使用してPromiseを適切に扱う
-
-### テストフレームワークと環境
-
-1. **フレームワーク構成**
-   - Jest：テストランナーとアサーション
-   - ts-jest：TypeScriptサポート
-   - Node.js環境でのテスト実行
-
-2. **環境設定（jest.config.ts）**
-   ```typescript
-   const config: JestConfigWithTsJest = {
-     preset: 'ts-jest',
-     testEnvironment: 'node',
-     
-     // ESM対応
-     extensionsToTreatAsEsm: ['.ts'],
-     moduleNameMapper: {
-       '^(\\.{1,2}/.*)\\.js$': '$1',
-       '^@/(.*)$': '<rootDir>/src/$1'
-     },
-     transform: {
-       '^.+\\.tsx?$': [
-         'ts-jest',
-         {
-           useESM: true,
-         },
-       ],
-     },
-
-     // グローバルセットアップ
-     setupFilesAfterEnv: [
-       '<rootDir>/src/lib/__tests__/helpers/setup.ts'
-     ],
-
-     // テストファイルのパターン
-     testMatch: [
-       "**/__tests__/**/*.[jt]s?(x)",
-       "**/?(*.)+(spec|test).[jt]s?(x)"
-     ],
-
-     // カバレッジ設定
-     collectCoverage: true,
-     coverageThreshold: {
-       global: {
-         branches: 80,
-         functions: 90,
-         lines: 80,
-         statements: 80,
-       },
-     },
-   };
-   ```
-
-### 実装状況（2025-01-06時点）
-
-1. **テスト環境の整備**
+1. **テスト環境の整備**（完了）
    - ベースとなるテスト環境の構築
    - TypeScriptサポートの設定
    - グローバルモックの実装
+   - jest.config.tsの設定
+   - ts-jestの設定
 
-2. **基本機能のテスト**
-   - BaseClientのリクエスト機能テスト
-   - パラメータエンコード機能テスト
-
-3. **再実装が必要な部分**（ADR 0006によるモジュール分割の影響）
-   - Issues APIのテスト
-   - Projects APIのテスト
-   - TimeEntries APIのテスト
-   - 各クライアントのモック
-   - フィクスチャの再整理
+2. **型定義の改善**（進行中）
+   - ベーステストの実装完了
+   - `base.test.ts`での型定義の適用成功
+   - `issues/get.test.ts`の型定義の修正完了
+     - `jest.SpyInstance`から`Mock`型への移行
+     - グローバルモックの正しい型付け
+   - 残りのテストファイルは未修正
+     - `post.test.ts`
+     - `put.test.ts`
+     - `delete.test.ts`
 
 ## 結果
 
@@ -242,6 +173,11 @@ src/
    - 依存関係が明確で影響範囲が把握しやすい
    - 共通機能のテストが再利用可能
 
+4. テストの安全性
+   - データ変更操作のスキップによる実環境への影響防止
+   - エラーケースの優先的なテストによる安全性の向上
+   - モックの活用による実APIへのアクセス制限
+
 ### 否定的な結果
 
 1. コスト面
@@ -254,23 +190,12 @@ src/
    - テストファイル間の依存関係の管理が必要
    - モックの一貫性維持が必要
 
-### 今後のタスク
-
-1. テスト実装の優先順位
-   - BaseClientの基本機能テスト
-   - Issues APIのテスト再実装
-   - Projects APIのテスト再実装
-   - TimeEntries APIのテスト再実装
-
-2. 品質管理
-   - カバレッジ目標の達成状況の監視
-   - テストの実行時間の最適化
-   - モックデータの整理と管理
+3. テストカバレッジ
+   - データ変更操作のテストスキップによるカバレッジの低下
+   - 実際の成功ケースの動作確認が限定的
 
 ## 参考資料
 
-- [Jest Documentation](https://jestjs.io/docs/getting-started)
-- [ts-jest Documentation](https://kulshekhar.github.io/ts-jest)
 - [Redmine REST API](https://www.redmine.org/projects/redmine/wiki/Rest_api)
 - [Issues REST API](https://www.redmine.org/projects/redmine/wiki/Rest_Issues)
-- [ADR 0006: クライアントと型定義の分割](./0006-separate-client-and-types.md)
+- [ADR 0007: ユニットテストのツールと設定](./0007-unit-testing-tools-and-configs.md)

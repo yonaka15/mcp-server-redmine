@@ -50,6 +50,7 @@ export interface RedmineIssue {
   status: {
     id: number;
     name: string;
+    is_closed?: boolean;
   };
   priority: {
     id: number;
@@ -77,10 +78,12 @@ export interface RedmineIssue {
   subject: string;
   description?: string;
   start_date?: string;
-  due_date?: string;
+  due_date?: string | null;
   done_ratio: number;
-  estimated_hours?: number;
+  estimated_hours?: number | null;
+  total_estimated_hours?: number | null;
   spent_hours?: number;
+  total_spent_hours?: number;
   custom_fields?: {
     id: number;
     name: string;
@@ -88,11 +91,18 @@ export interface RedmineIssue {
   }[];
   created_on: string;
   updated_on: string;
-  closed_on?: string;
+  closed_on?: string | null;
   notes?: string;
   private_notes?: boolean;
   is_private?: boolean;
   watcher_user_ids?: number[];
+  relations?: {
+    id: number,
+    issue_id: number,
+    issue_to_id: number,
+    relation_type: string,
+    delay: number | null,
+  }[];
 }
 
 export interface RedmineIssueCreate {

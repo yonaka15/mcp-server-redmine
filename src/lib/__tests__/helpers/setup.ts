@@ -1,4 +1,5 @@
-// グローバルのfetchのモックを設定
+import { jest } from '@jest/globals';
+
 beforeAll(() => {
   Object.defineProperty(global, "fetch", {
     writable: true,
