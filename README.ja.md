@@ -48,6 +48,41 @@ Redmine REST APIのStableなリソースに対応しています：
   - カスタムフィールド対応
 - 作業時間の削除
 
+## Claudeでの利用
+
+⚠️ **注意**: 現在、Claudeアプリではサーバーの負荷が高くダウンする可能性があります。改善を検討中です。
+
+Claudeでこのサーバーを利用する場合、以下のような設定を行います：
+
+```json
+{
+  "mcp-server-redmine": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "--prefix",
+      "/path/to/mcp-server-redmine",
+      "mcp-server-redmine"
+    ],
+    "env": {
+      "REDMINE_HOST": "https://your-redmine.example.com",
+      "REDMINE_API_KEY": "your-api-key-here"
+    }
+  }
+}
+```
+
+### 設定項目の説明
+
+- `command`: npmパッケージを実行するためのコマンド
+- `args`: 
+  - `-y`: プロンプトに自動で「yes」と応答
+  - `--prefix`: インストール先のディレクトリを指定
+  - 最後の引数はパッケージ名を指定
+- `env`: 環境変数の設定
+  - `REDMINE_HOST`: RedmineサーバーのURL
+  - `REDMINE_API_KEY`: Redmineで取得したAPIキー
+
 ## セットアップ
 
 ### APIキーの取得
@@ -61,6 +96,44 @@ Redmine REST APIのStableなリソースに対応しています：
 
 - `REDMINE_API_KEY`: Redmineのユーザー設定で取得したAPIキー
 - `REDMINE_HOST`: RedmineサーバーのURL（例：`https://redmine.example.com`）
+
+## テストについて
+
+### ユニットテスト
+
+```bash
+# テストの実行
+npm test
+```
+
+データの安全性のため、GET操作のみをテスト対象としています。
+
+### インスペクタによるテスト
+
+[MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)を使用して動作確認を行うことができます：
+
+```bash
+# ビルド
+npm run build
+
+# 実行権限の付与（重要）
+chmod +x dist/index.js
+
+# インスペクタの起動
+npx @modelcontextprotocol/inspector dist/index.js
+```
+
+## 権限について
+
+一部の機能は管理者権限が必要です：
+
+### ユーザー関連
+- `list_users`: 管理者権限必須
+- `create_user`: 管理者権限必須
+- `update_user`: 管理者権限必須
+- `delete_user`: 管理者権限必須
+
+各ユーザーの権限レベルによって、取得できる情報が異なります。詳細は[Redmine APIのドキュメント](https://www.redmine.org/projects/redmine/wiki/Rest_Users)を参照してください。
 
 ## 開発
 
@@ -116,12 +189,9 @@ npm run build
 npm run dev
 ```
 
-### 設計方針
+### アーキテクチャ決定記録
 
-アーキテクチャの決定記録（ADR）は `docs/adr` に保存されています。主な決定事項：
-
-1. プロジェクトの基本構造（0001-base-project-structure.md）
-2. モジュールの分割方針（0003-separate-modules.md）
+プロジェクトの主要な設計判断は `docs/adr` に記録されています。新しい機能の追加や変更を行う際は、これらのドキュメントを参照してください。
 
 ## ライセンス
 
