@@ -1,11 +1,10 @@
 import { HandlerContext, ToolResponse, asStringOrNumber } from "./types.js";
-import * as formatters from "../formatters/index.js";
 import {
   RedmineProjectCreate,
   ProjectSearchParams,
   ProjectStatus,
 } from "../lib/types/index.js";
-import { PROJECT_STATUS } from "../lib/types/projects/types.js"; // Import as value
+import { PROJECT_STATUS } from "../lib/types/projects/types.js";
 
 /**
  * Type guard for RedmineProjectCreate
@@ -72,7 +71,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProjects(projects),
+            text: JSON.stringify(projects, null, 2),
           },
         ],
         isError: false,
@@ -88,7 +87,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProject(result.project),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,
@@ -106,7 +105,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProjectResult(result.project, "created"),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,
@@ -123,7 +122,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProjectResult(result.project, "updated"),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,
@@ -139,7 +138,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProjectArchiveStatus(id, true),
+            text: JSON.stringify({ status: "success", message: `Project #${id} has been archived` }),
           },
         ],
         isError: false,
@@ -155,7 +154,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProjectArchiveStatus(id, false),
+            text: JSON.stringify({ status: "success", message: `Project #${id} has been unarchived` }),
           },
         ],
         isError: false,
@@ -171,7 +170,7 @@ export function createProjectsHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatProjectDeleted(id),
+            text: JSON.stringify({ status: "success", message: `Project #${id} has been deleted` }),
           },
         ],
         isError: false,

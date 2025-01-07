@@ -8,6 +8,12 @@ import { RedmineApiError } from "../../../client/base.js";
 import { IssueListParams } from "../../../types/index.js";
 import { parseUrl } from "../../helpers/url.js";
 
+// Default pagination parameters
+const DEFAULT_PAGINATION = {
+  offset: "0",
+  limit: "25"
+};
+
 describe("Issues API (GET)", () => {
   let client: IssuesClient;
   let mockFetch: Mock;
@@ -30,16 +36,16 @@ describe("Issues API (GET)", () => {
 
       // Assert
       const expectedUrl = new URL("/issues.json", config.redmine.host);
-      expect(mockFetch).toHaveBeenCalledWith(
-        expectedUrl.toString(),
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            Accept: "application/json",
-            "X-Redmine-API-Key": config.redmine.apiKey,
-          }),
-        })
-      );
+      const [actualUrl, options] = mockFetch.mock.calls[0] as [string, RequestInit];
+      const { params } = parseUrl(actualUrl);
+      expect(params).toEqual(DEFAULT_PAGINATION);
+      expect(options).toMatchObject({
+        method: "GET",
+        headers: expect.objectContaining({
+          Accept: "application/json",
+          "X-Redmine-API-Key": config.redmine.apiKey,
+        }),
+      });
       expect(result).toEqual(fixtures.issueListResponse);
     });
 
@@ -62,6 +68,7 @@ describe("Issues API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
+          ...DEFAULT_PAGINATION,
           project_id: "1",
           status_id: "open",
           sort: "updated_on:desc"
@@ -82,9 +89,10 @@ describe("Issues API (GET)", () => {
         const result = await client.getIssues(params);
 
         // Assert
-        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
+          ...DEFAULT_PAGINATION,
           assigned_to_id: "me",
           status_id: "*"
         });
@@ -104,15 +112,16 @@ describe("Issues API (GET)", () => {
         const result = await client.getIssues(params);
 
         // Assert
-        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
+          ...DEFAULT_PAGINATION,
           cf_1: "custom_value",
           project_id: "1"
         });
       });
 
-      it("applies pagination", async () => {
+      it("applies pagination with custom values", async () => {
         // Arrange
         const params: IssueListParams = {
           offset: 25,
@@ -126,7 +135,7 @@ describe("Issues API (GET)", () => {
         const result = await client.getIssues(params);
 
         // Assert
-        const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
+        const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
           offset: "25",

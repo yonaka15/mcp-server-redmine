@@ -43,38 +43,38 @@ API のエンドポイントに合わせて命名を統一：
 
 1. Issues
 
-   - list_issues
-   - show_issue
-   - create_issue
-   - update_issue
-   - delete_issue
-   - add_issue_watcher
-   - remove_issue_watcher
+   - [x] list_issues
+   - [x] show_issue
+   - [x] create_issue
+   - [x] update_issue
+   - [x] delete_issue
+   - [x] add_issue_watcher
+   - [x] remove_issue_watcher
 
 2. Projects
 
-   - list_projects
-   - show_project
-   - create_project
-   - update_project
-   - delete_project
-   - archive_project
-   - unarchive_project
+   - [ ] list_projects
+   - [ ] show_project
+   - [ ] create_project
+   - [ ] update_project
+   - [ ] delete_project
+   - [ ] archive_project
+   - [ ] unarchive_project
 
 3. Time Entries
 
-   - list_time_entries
-   - show_time_entry
-   - create_time_entry
-   - update_time_entry
-   - delete_time_entry
+   - [ ] list_time_entries
+   - [ ] show_time_entry
+   - [ ] create_time_entry
+   - [ ] update_time_entry
+   - [ ] delete_time_entry
 
 4. Users
-   - list_users
-   - show_user
-   - create_user
-   - update_user
-   - delete_user
+   - [ ] list_users
+   - [ ] show_user
+   - [ ] create_user
+   - [ ] update_user
+   - [ ] delete_user
 
 ### 3. パラメータ定義の標準化
 

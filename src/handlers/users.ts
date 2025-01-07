@@ -1,5 +1,4 @@
 import { HandlerContext, ToolResponse, asNumber, extractPaginationParams } from "./types.js";
-import * as formatters from "../formatters/index.js";
 import type { UserListParams, UserShowParams } from "../lib/types/index.js";
 
 export function createUsersHandlers(context: HandlerContext) {
@@ -14,7 +13,7 @@ export function createUsersHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatUsers(users),
+            text: JSON.stringify(users, null, 2),
           },
         ],
         isError: false,
@@ -32,7 +31,7 @@ export function createUsersHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatUser(result.user),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,

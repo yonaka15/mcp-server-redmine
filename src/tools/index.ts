@@ -1,12 +1,14 @@
-// チケット関連ツール
+// Issue-related tools
 export {
-  ISSUE_SEARCH_TOOL,
+  ISSUE_LIST_TOOL,
   ISSUE_CREATE_TOOL,
   ISSUE_UPDATE_TOOL,
   ISSUE_DELETE_TOOL,
+  ISSUE_ADD_WATCHER_TOOL,
+  ISSUE_REMOVE_WATCHER_TOOL,
 } from "./issues.js";
 
-// プロジェクト関連ツール
+// Project-related tools
 export {
   PROJECT_SEARCH_TOOL,
   PROJECT_GET_TOOL,
@@ -17,7 +19,7 @@ export {
   PROJECT_DELETE_TOOL,
 } from "./projects.js";
 
-// 作業時間関連ツール
+// Time entry tools
 export {
   TIME_ENTRY_SEARCH_TOOL,
   TIME_ENTRY_GET_TOOL,
@@ -26,7 +28,7 @@ export {
   TIME_ENTRY_DELETE_TOOL,
 } from "./time_entries.js";
 
-// ユーザー関連ツール
+// User-related tools
 export {
   USER_SEARCH_TOOL,
   USER_GET_TOOL,

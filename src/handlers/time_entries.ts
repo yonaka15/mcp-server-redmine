@@ -4,7 +4,6 @@ import {
   asNumber,
   extractPaginationParams,
 } from "./types.js";
-import * as formatters from "../formatters/index.js";
 import type { RedmineTimeEntryCreate } from "../lib/types/index.js";
 
 // RedmineTimeEntryCreateの型チェック
@@ -25,7 +24,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatTimeEntries(entries),
+            text: JSON.stringify(entries, null, 2),
           },
         ],
         isError: false,
@@ -39,7 +38,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatTimeEntry(result.time_entry),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,
@@ -55,7 +54,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatTimeEntryResult(result.time_entry, "created"),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,
@@ -70,7 +69,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatTimeEntryResult(result.time_entry, "updated"),
+            text: JSON.stringify(result, null, 2),
           },
         ],
         isError: false,
@@ -84,7 +83,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         content: [
           {
             type: "text",
-            text: formatters.formatTimeEntryDeleted(id),
+            text: JSON.stringify({ status: "success", message: `Time entry #${id} has been deleted` }),
           },
         ],
         isError: false,

@@ -38,7 +38,7 @@ const handlers = {
 // 利用可能なツール一覧
 const TOOLS: Tool[] = [
   // チケット関連
-  tools.ISSUE_SEARCH_TOOL,
+  tools.ISSUE_LIST_TOOL,
   tools.ISSUE_CREATE_TOOL,
   tools.ISSUE_UPDATE_TOOL,
   tools.ISSUE_DELETE_TOOL,
@@ -133,3 +133,4 @@ async function runServer() {
 
 // エクスポート
 export { server, runServer };
+
