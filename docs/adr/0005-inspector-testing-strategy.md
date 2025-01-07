@@ -4,6 +4,7 @@
 
 承認済み - 2025-01-05
 更新済み - 2025-01-06
+完了 - 2025-01-07
 
 ## コンテキスト
 
@@ -92,6 +93,39 @@ export REDMINE_API_KEY="test_api_key"
 export REDMINE_HOST="http://test.redmine.local"
 ```
 
+### テスト範囲
+
+ADR 0004（ユニットテスト戦略）に従い、データの変更を伴わない GET 操作のみをテストの対象とします。
+
+#### テスト対象ツール
+
+1. **Issues**
+
+   - `search_issues`: チケット検索
+   - その他のツール（作成・更新・削除）はテスト対象外
+
+2. **Projects**
+
+   - `search_projects`: プロジェクト検索
+   - `get_project`: プロジェクト詳細取得
+   - その他のツール（作成・更新・アーカイブ・削除）はテスト対象外
+
+3. **Time Entries**
+
+   - `search_time_entries`: 作業時間検索
+   - `get_time_entry`: 作業時間詳細取得
+   - その他のツール（作成・更新・削除）はテスト対象外
+
+4. **Users**
+   - `search_users`: ユーザー検索
+   - `get_user`: ユーザー詳細取得
+
+この方針により、以下の利点が得られます：
+
+- テスト実行による実データへの影響を完全に防止
+- 読み取り操作の完全性の確認
+- 本番環境での安全なテスト実行が可能
+
 ## 実装と改善
 
 ### 2025-01-06 の更新
@@ -152,9 +186,48 @@ export REDMINE_HOST="http://test.redmine.local"
    - `chmod +x dist/index.js` による実行権限の付与が必要です
    - この設定は Git でトラッキングされないため、新規クローン時や CI 環境では必ず実行する必要があります
 
-2. **国際化（i18n）対応**
+2. **英語化**
    - ツール定義の説明文を英語化しました（2025-01-06）
-   - 今後の国際化対応の基礎となります
+
+## ツールの一覧
+
+### Issues (`src/tools/issues.ts`)
+
+| Tool            | Constant            | Description                                                                                                                                               |
+| --------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `search_issues` | `ISSUE_SEARCH_TOOL` | Search for Redmine issues.<br>- Filter by issue ID, project ID, status, assignee, etc.<br>- Full text search with keywords<br>- Retrieve up to 100 issues |
+| `create_issue`  | `ISSUE_CREATE_TOOL` | Create a new issue.<br>- Project ID and subject are required<br>- Can specify tracker, status, priority<br>- Supports custom field values                 |
+| `update_issue`  | `ISSUE_UPDATE_TOOL` | Update an existing issue.<br>- Issue ID is required<br>- Only specify fields to be updated<br>- Can add comments                                          |
+| `delete_issue`  | `ISSUE_DELETE_TOOL` | Delete an issue.<br>- Specify issue ID<br>- This action cannot be undone                                                                                  |
+
+### Projects (`src/tools/projects.ts`)
+
+| Tool                | Constant                 | Description                                                                                                                                                  |
+| ------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `search_projects`   | `PROJECT_SEARCH_TOOL`    | Search for Redmine projects.<br>- Search by name or ID<br>- Filter by status<br>- Retrieve up to 100 projects                                                |
+| `get_project`       | `PROJECT_GET_TOOL`       | Get detailed project information.<br>- Specify project ID (numeric) or identifier (string)<br>- Can include related information like trackers and categories |
+| `create_project`    | `PROJECT_CREATE_TOOL`    | Create a new project.<br>- Name and identifier are required<br>- Can specify parent project<br>- Configure modules and trackers                              |
+| `update_project`    | `PROJECT_UPDATE_TOOL`    | Update an existing project.<br>- Specify project ID (numeric) or identifier (string)<br>- Only specify fields to be updated                                  |
+| `archive_project`   | `PROJECT_ARCHIVE_TOOL`   | Archive a project.<br>- Specify project ID (numeric) or identifier (string)<br>- Archived projects cannot be edited                                          |
+| `unarchive_project` | `PROJECT_UNARCHIVE_TOOL` | Restore an archived project.<br>- Specify project ID (numeric) or identifier (string)<br>- Project becomes editable after unarchiving                        |
+| `delete_project`    | `PROJECT_DELETE_TOOL`    | Delete a project.<br>- Specify project ID (numeric) or identifier (string)<br>- This action cannot be undone<br>- Subprojects will also be deleted           |
+
+### Time Entries (`src/tools/time_entries.ts`)
+
+| Tool                  | Constant                 | Description                                                                                                                                       |
+| --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `search_time_entries` | `TIME_ENTRY_SEARCH_TOOL` | Search for time entries.<br>- Filter by user ID, project ID, and date<br>- Search within a date range<br>- Retrieve up to 100 entries             |
+| `get_time_entry`      | `TIME_ENTRY_GET_TOOL`    | Get detailed time entry information.<br>- Retrieve a single time entry by ID                                                                      |
+| `create_time_entry`   | `TIME_ENTRY_CREATE_TOOL` | Create a new time entry.<br>- Either project ID or issue ID is required<br>- Hours and activity ID are required<br>- Supports custom field values |
+| `update_time_entry`   | `TIME_ENTRY_UPDATE_TOOL` | Update an existing time entry.<br>- Update a single time entry by ID<br>- Only specify fields to be updated<br>- Cannot change project            |
+| `delete_time_entry`   | `TIME_ENTRY_DELETE_TOOL` | Delete a time entry.<br>- Delete a single time entry by ID<br>- This action cannot be undone                                                      |
+
+### Users (`src/tools/users.ts`)
+
+| Tool           | Constant           | Description      |
+| -------------- | ------------------ | ---------------- |
+| `search_users` | `USER_SEARCH_TOOL` | Search for users |
+| `get_user`     | `USER_GET_TOOL`    | Get user details |
 
 ## 参考資料
 
@@ -162,4 +235,3 @@ export REDMINE_HOST="http://test.redmine.local"
 - [Inspector Documentation](https://modelcontextprotocol.io/docs/tools/inspector)
 - [Redmine API Documentation](https://www.redmine.org/projects/redmine/wiki/Rest_api)
 - [ADR 0004: Unit Testing Strategy](./0004-unit-testing-strategy.md)
-

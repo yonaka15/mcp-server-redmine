@@ -5,7 +5,6 @@ import {
   UserListParams,
   UserShowParams,
   RedmineUserResponse,
-  RedmineUserLimited,
   RedmineUsersResponse,
 } from "../types/index.js";
 import {

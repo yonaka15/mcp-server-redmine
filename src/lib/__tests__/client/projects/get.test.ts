@@ -1,5 +1,5 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
-import type { Mock } from 'jest-mock';
+import { jest, expect, describe, it, beforeEach } from "@jest/globals";
+import type { Mock } from "jest-mock";
 import { ProjectsClient } from "../../../client/projects.js";
 import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
 import * as fixtures from "../../helpers/fixtures.js";
@@ -47,7 +47,7 @@ describe("Projects API (GET)", () => {
       it("filters by status", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          status: 1 // Active status
+          status: 1, // Active status
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -60,14 +60,14 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          status: "1"
+          status: "1",
         });
       });
 
       it("filters by is_public flag", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          is_public: true
+          is_public: true,
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -80,14 +80,14 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          is_public: "1"
+          is_public: "1",
         });
       });
 
       it("filters by search query", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          query: "test project"
+          name: "test project",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -100,7 +100,7 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          query: "test project"
+          name: "test project",
         });
       });
 
@@ -109,8 +109,8 @@ describe("Projects API (GET)", () => {
         const params: ProjectQueryParams = {
           status: 1,
           is_public: true,
-          query: "test",
-          include: ["trackers"]
+          name: "test",
+          include: "trackers",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -125,15 +125,15 @@ describe("Projects API (GET)", () => {
         expect(actualParams).toEqual({
           status: "1",
           is_public: "1",
-          query: "test",
-          include: "trackers"
+          name: "test",
+          include: "trackers",
         });
       });
 
       it("includes associated data with single include", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          include: ["trackers"]
+          include: "trackers",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -146,14 +146,14 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          include: "trackers"
+          include: "trackers",
         });
       });
 
       it("includes multiple associated data", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          include: ["trackers", "issue_categories", "enabled_modules"]
+          include: "trackers,issue_categories,enabled_modules",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -166,20 +166,15 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          include: "trackers,issue_categories,enabled_modules"
+          include: "trackers,issue_categories,enabled_modules",
         });
       });
 
       it("includes all available associated data", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          include: [
-            "trackers",
-            "issue_categories",
-            "enabled_modules",
-            "time_entry_activities",
-            "issue_custom_fields"
-          ]
+          include:
+            "trackers,issue_categories,enabled_modules,time_entry_activities,issue_custom_fields",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -192,7 +187,8 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          include: "trackers,issue_categories,enabled_modules,time_entry_activities,issue_custom_fields"
+          include:
+            "trackers,issue_categories,enabled_modules,time_entry_activities,issue_custom_fields",
         });
       });
 
@@ -200,7 +196,7 @@ describe("Projects API (GET)", () => {
         // Arrange
         const params: ProjectQueryParams = {
           offset: 25,
-          limit: 50
+          limit: 50,
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.projectListResponse)
@@ -214,7 +210,7 @@ describe("Projects API (GET)", () => {
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
           offset: "25",
-          limit: "50"
+          limit: "50",
         });
       });
     });
@@ -227,22 +223,24 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProjects({ status: 999 } as any))
-          .rejects.toThrow(RedmineApiError);
+        await expect(
+          client.getProjects({ status: 999 } as any)
+        ).rejects.toThrow(RedmineApiError);
       });
 
       it("handles invalid include parameter", async () => {
         // Arrange
         const params: ProjectQueryParams = {
-          include: ["invalid_module" as any]
+          include: "invalid_module",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockErrorResponse(400, ["Invalid include value"])
         );
 
         // Act & Assert
-        await expect(client.getProjects(params))
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProjects(params)).rejects.toThrow(
+          RedmineApiError
+        );
       });
 
       it("handles server error", async () => {
@@ -252,8 +250,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProjects())
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProjects()).rejects.toThrow(RedmineApiError);
       });
 
       it("handles unauthorized access", async () => {
@@ -263,8 +260,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProjects())
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProjects()).rejects.toThrow(RedmineApiError);
       });
     });
   });
@@ -330,7 +326,7 @@ describe("Projects API (GET)", () => {
     describe("including associated data", () => {
       it("includes single type of associated data", async () => {
         // Arrange
-        const params = { include: ["trackers"] };
+        const params = { include: "trackers" };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.singleProjectWithIncludesResponse)
         );
@@ -342,14 +338,14 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          include: "trackers"
+          include: "trackers",
         });
       });
 
       it("includes multiple types of associated data", async () => {
         // Arrange
         const params = {
-          include: ["trackers", "issue_categories", "enabled_modules"]
+          include: "trackers,issue_categories,enabled_modules",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.singleProjectWithIncludesResponse)
@@ -362,20 +358,15 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          include: "trackers,issue_categories,enabled_modules"
+          include: "trackers,issue_categories,enabled_modules",
         });
       });
 
       it("includes all available associated data", async () => {
         // Arrange
         const params = {
-          include: [
-            "trackers",
-            "issue_categories",
-            "enabled_modules",
-            "time_entry_activities",
-            "issue_custom_fields"
-          ]
+          include:
+            "trackers,issue_categories,enabled_modules,time_entry_activities,issue_custom_fields",
         };
         mockFetch.mockImplementationOnce(async () =>
           mockResponse(fixtures.singleProjectWithIncludesResponse)
@@ -388,7 +379,8 @@ describe("Projects API (GET)", () => {
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
         const { params: actualParams } = parseUrl(url);
         expect(actualParams).toEqual({
-          include: "trackers,issue_categories,enabled_modules,time_entry_activities,issue_custom_fields"
+          include:
+            "trackers,issue_categories,enabled_modules,time_entry_activities,issue_custom_fields",
         });
       });
     });
@@ -401,8 +393,9 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProject("invalid-id"))
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProject("invalid-id")).rejects.toThrow(
+          RedmineApiError
+        );
       });
 
       it("handles project not found", async () => {
@@ -412,8 +405,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProject(99999))
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProject(99999)).rejects.toThrow(RedmineApiError);
       });
 
       it("handles server error", async () => {
@@ -423,8 +415,9 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProject(projectId))
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProject(projectId)).rejects.toThrow(
+          RedmineApiError
+        );
       });
 
       it("handles unauthorized access", async () => {
@@ -434,9 +427,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act & Assert
-        await expect(client.getProject(projectId))
-          .rejects.toThrow(RedmineApiError);
+        await expect(client.getProject(projectId)).rejects.toThrow(
+          RedmineApiError
+        );
       });
     });
   });
 });
+

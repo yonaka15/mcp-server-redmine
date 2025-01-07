@@ -25,3 +25,9 @@ export {
   TIME_ENTRY_UPDATE_TOOL,
   TIME_ENTRY_DELETE_TOOL,
 } from "./time_entries.js";
+
+// ユーザー関連ツール
+export {
+  USER_SEARCH_TOOL,
+  USER_GET_TOOL,
+} from "./users.js";

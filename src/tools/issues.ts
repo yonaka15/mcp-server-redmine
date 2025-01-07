@@ -13,29 +13,39 @@ export const ISSUE_SEARCH_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      query: {
+      status_id: {
         type: "string",
-        description: "Search keywords"
+        description: "Status ('open', 'closed', '*', or specific ID)",
+        default: "open",
+        enum: ["open", "closed", "*"]
       },
       project_id: {
-        type: "string",
-        description: "Project ID"
+        type: ["string", "number"],
+        description: "Project ID (optional)"
       },
-      status: {
-        type: "string",
-        description: "Status (open/closed/*)",
-      },
-      assigned_to: {
-        type: "string", 
-        description: "Assignee ID"
+      assigned_to_id: {
+        type: ["string", "number"],
+        description: "Assignee ID (optional)"
       },
       limit: {
         type: "number",
         description: "Number of results (1-100)",
-        default: 10
+        minimum: 1,
+        maximum: 100,
+        default: 25
+      },
+      offset: {
+        type: "number",
+        description: "Number of results to skip",
+        minimum: 0,
+        default: 0
+      },
+      sort: {
+        type: "string",
+        description: "Sort field (e.g., 'updated_on:desc')",
+        pattern: "^[a-z_]+(:(asc|desc))?$"
       }
-    },
-    required: ["query"]
+    }
   }
 };
 

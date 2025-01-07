@@ -1,3 +1,13 @@
+// Define valid status values as a const array
+export const PROJECT_STATUS = [1, 5, 9] as const;
+export type ProjectStatus = (typeof PROJECT_STATUS)[number];
+
+// Base pagination parameters
+export interface PaginationParams {
+  offset?: number;
+  limit?: number;
+}
+
 // Resource types
 export interface RedmineProject {
   id: number;
@@ -58,4 +68,11 @@ export interface RedmineProjectCreate {
   custom_field_values?: Record<string, string>;
   default_assigned_to_id?: number;
   default_version_id?: number;
+}
+
+// Parameters for project search API
+export interface ProjectSearchParams extends PaginationParams {
+  name?: string; // Project name to search for
+  status?: ProjectStatus; // Project status (1: active, 5: archived, 9: closed)
+  include?: string; // Additional information to include in response
 }

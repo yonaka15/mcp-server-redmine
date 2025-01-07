@@ -17,14 +17,11 @@ export class ProjectsClient extends BaseClient {
       const validatedParams = params ? ProjectQuerySchema.parse(params) : undefined;
       const encodedParams = validatedParams ? {
         ...validatedParams,
-        // booleanを0/1に変換
+        // Convert boolean to 0/1
         ...(validatedParams.is_public !== undefined && {
           is_public: validatedParams.is_public ? "1" : "0"
         }),
-        // 配列をカンマ区切り文字列に変換
-        ...(validatedParams.include && {
-          include: validatedParams.include.join(",")
-        })
+        // include is already a string, no need for conversion
       } : undefined;
       
       const query = encodedParams ? this.encodeQueryParams(encodedParams) : "";
@@ -49,13 +46,7 @@ export class ProjectsClient extends BaseClient {
         include: true
       }).parse(params) : undefined;
 
-      const encodedParams = validatedParams ? {
-        ...(validatedParams.include && {
-          include: validatedParams.include.join(",")
-        })
-      } : undefined;
-
-      const query = encodedParams ? this.encodeQueryParams(encodedParams) : "";
+      const query = validatedParams ? this.encodeQueryParams(validatedParams) : "";
       const response = await this.performRequest<{ project: RedmineProject }>(
         `projects/${idOrIdentifier}.json${query ? `?${query}` : ""}`
       );

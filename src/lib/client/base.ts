@@ -27,38 +27,82 @@ export class BaseClient {
     options?: RequestInit
   ): Promise<T> {
     const url = new URL(path, config.redmine.host);
-    const response = await fetch(url.toString(), {  // URL.toString()を明示的に呼び出す
-      method: 'GET',  // デフォルトメソッドを設定
-      ...options,
+    
+    // デフォルトのリクエストオプション
+    const defaultOptions: RequestInit = {
+      method: 'GET',
       headers: {
         "X-Redmine-API-Key": config.redmine.apiKey,
         "Content-Type": "application/json",
         Accept: "application/json",
+      },
+      // タイムアウトの設定
+      signal: AbortSignal.timeout(30000), // 30秒
+    };
+
+    // オプションのマージ（ヘッダーは個別にマージ）
+    const requestOptions: RequestInit = {
+      ...defaultOptions,
+      ...options,
+      headers: {
+        ...defaultOptions.headers,
         ...options?.headers,
       },
-    });
+    };
 
-    if (!response.ok) {
-      let errorMessage: string[];
+    try {
+      const response = await fetch(url.toString(), requestOptions);
+
+      // エラーレスポンスの詳細なハンドリング
+      if (!response.ok) {
+        let errorMessage: string[];
+        const contentType = response.headers.get("content-type");
+
+        if (contentType?.includes("application/json")) {
+          try {
+            const errorResponse = await response.json() as RedmineErrorResponse;
+            errorMessage = errorResponse.errors || ["Unknown error"];
+          } catch {
+            errorMessage = [`Failed to parse error response: ${await response.text() || "Empty response"}`];
+          }
+        } else {
+          // JSONでない場合はテキストとして読み取り
+          errorMessage = [await response.text() || "Unknown error"];
+        }
+
+        throw new RedmineApiError(
+          response.status,
+          response.statusText,
+          errorMessage
+        );
+      }
+
+      // 204 No Content
+      if (response.status === 204) {
+        return {} as T;
+      }
+
+      // レスポンスのパース
       try {
-        const errorResponse = await response.json() as RedmineErrorResponse;
-        errorMessage = errorResponse.errors || ["Unknown error"];  // errorのフォールバック
-      } catch {
-        errorMessage = [await response.text() || "Unknown error"];  // テキストのフォールバック
+        return await response.json() as T;
+      } catch (error) {
+        throw new RedmineApiError(
+          response.status,
+          "Failed to parse response",
+          [(error as Error).message]
+        );
+      }
+    } catch (error) {
+      // ネットワークエラーやタイムアウトの処理
+      if (error instanceof RedmineApiError) {
+        throw error;
       }
       throw new RedmineApiError(
-        response.status,
-        response.statusText,
-        errorMessage
+        0,
+        "Network Error",
+        [(error as Error).message]
       );
     }
-
-    // 204 No Content
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    return response.json() as Promise<T>;
   }
 
   /**
@@ -66,12 +110,15 @@ export class BaseClient {
    */
   protected encodeQueryParams(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
+
+    // nullやundefinedの値は除外
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
           // 配列の場合はカンマ区切りの文字列として設定
           searchParams.set(key, value.join(','));
         } else if (value instanceof Date) {
+          // 日付型の場合はYYYY-MM-DD形式に変換
           searchParams.set(key, value.toISOString().split('T')[0]);
         } else if (typeof value === 'object') {
           // オブジェクトの場合は文字列化
@@ -81,6 +128,7 @@ export class BaseClient {
         }
       }
     });
+
     return searchParams.toString();
   }
 }

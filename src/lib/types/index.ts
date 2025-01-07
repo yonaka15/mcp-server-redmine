@@ -1,18 +1,9 @@
-// Common types
+// 共通型のエクスポート
 export * from "./common.js";
 
-// Issues
-export * from "./issues/types.js";
-export * from "./issues/schema.js";
-
-// Projects
-export * from "./projects/types.js";
-export * from "./projects/schema.js";
-
-// Time Entries
-export * from "./time_entries/types.js";
-export * from "./time_entries/schema.js";
-
-// Users
-export * from "./users/types.js";
+// リソース固有の型のエクスポート
+export * from "./issues/index.js";
+export * from "./projects/index.js";
+export * from "./time_entries/index.js";
+export * from "./users/index.js";
 export * from "./users/schema.js";

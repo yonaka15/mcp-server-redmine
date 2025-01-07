@@ -15,22 +15,50 @@ import {
 } from "../types/issues/schema.js";
 
 export class IssuesClient extends BaseClient {
+  /**
+   * Get a list of issues with pagination and filters
+   */
   async getIssues(params?: IssueListParams): Promise<RedmineApiResponse<RedmineIssue>> {
-    // includeパラメータのバリデーション
+    // Validate include parameter
     if (params?.include && !validateListIssueIncludes(params.include)) {
       throw new Error("Invalid include parameter for issue list. Valid values are: attachments, relations");
     }
 
-    const validatedParams = params ? IssueQuerySchema.parse(params) : undefined;
-    const query = validatedParams ? this.encodeQueryParams(validatedParams) : "";
+    // Validate and format parameters with default values
+    const defaultParams = {
+      limit: 25,  // Default value
+      offset: 0   // Default value
+    };
+
+    // Merge with provided params
+    const mergedParams = {
+      ...defaultParams,
+      ...params
+    };
+
+    // Validate merged params
+    const validatedParams = IssueQuerySchema.parse(mergedParams);
+
+    const query = this.encodeQueryParams(validatedParams);
     const response = await this.performRequest<RedmineApiResponse<RedmineIssue>>(
       `issues.json${query ? `?${query}` : ""}`
     );
+
+    // Enforce response limit using default value if limit is undefined
+    const effectiveLimit = defaultParams.limit;
+    if (Array.isArray(response.issues) && response.issues.length > effectiveLimit) {
+      response.issues = response.issues.slice(0, effectiveLimit);
+      response.total_count = Math.min(response.total_count || 0, effectiveLimit);
+    }
+
     return response;
   }
 
+  /**
+   * Get a single issue by ID
+   */
   async getIssue(id: number, params?: IssueShowParams): Promise<{ issue: RedmineIssue }> {
-    // includeパラメータのバリデーション
+    // Validate include parameter
     if (params?.include && !validateShowIssueIncludes(params.include)) {
       throw new Error("Invalid include parameter for single issue. Valid values are: children, attachments, relations, changesets, journals, watchers, allowed_statuses");
     }
@@ -44,6 +72,9 @@ export class IssuesClient extends BaseClient {
     };
   }
 
+  /**
+   * Create a new issue
+   */
   async createIssue(issue: RedmineIssueCreate): Promise<{ issue: RedmineIssue }> {
     const response = await this.performRequest<{ issue: RedmineIssue }>(
       "issues.json",
@@ -57,6 +88,9 @@ export class IssuesClient extends BaseClient {
     };
   }
 
+  /**
+   * Update an existing issue
+   */
   async updateIssue(
     id: number,
     issue: RedmineIssueUpdate
@@ -73,6 +107,9 @@ export class IssuesClient extends BaseClient {
     };
   }
 
+  /**
+   * Delete an issue
+   */
   async deleteIssue(id: number): Promise<void> {
     await this.performRequest(`issues/${id}.json`, {
       method: "DELETE",

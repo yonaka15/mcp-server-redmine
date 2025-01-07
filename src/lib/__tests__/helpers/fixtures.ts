@@ -20,12 +20,12 @@ export const issueListResponse = {
       total_spent_hours: 0,
       custom_fields: [
         { id: 1, name: "Custom Field 1", value: "1" },
-        { id: 2, name: "Custom Field 2", value: "" }
+        { id: 2, name: "Custom Field 2", value: "" },
       ],
       created_on: "2025-01-01T00:00:00Z",
       updated_on: "2025-01-01T00:00:00Z",
       closed_on: null,
-    }
+    },
   ],
   total_count: 1,
   offset: 0,
@@ -51,15 +51,9 @@ export const projectListResponse = {
       updated_on: "2025-01-01T00:00:00Z",
       is_public: true,
       inherit_members: true,
-      custom_fields: [
-        { id: 1, name: "Custom Field 1", value: "1" }
-      ],
-      enabled_module_names: [
-        "issue_tracking",
-        "time_tracking",
-        "wiki"
-      ]
-    }
+      custom_fields: [{ id: 1, name: "Custom Field 1", value: "1" }],
+      enabled_module_names: ["issue_tracking", "time_tracking", "wiki"],
+    },
   ],
   total_count: 1,
   offset: 0,
@@ -68,7 +62,7 @@ export const projectListResponse = {
 
 // プロジェクト詳細（include無し）
 export const singleProjectResponse = {
-  project: projectListResponse.projects[0]
+  project: projectListResponse.projects[0],
 };
 
 // プロジェクト詳細（include付き）
@@ -77,38 +71,38 @@ export const singleProjectWithIncludesResponse = {
     ...projectListResponse.projects[0],
     trackers: [
       { id: 1, name: "Bug" },
-      { id: 2, name: "Feature" }
+      { id: 2, name: "Feature" },
     ],
     issue_categories: [
       { id: 1, name: "Backend" },
-      { id: 2, name: "Frontend" }
+      { id: 2, name: "Frontend" },
     ],
     time_entry_activities: [
       { id: 1, name: "Development", is_default: true, active: true },
-      { id: 2, name: "Design", is_default: false, active: true }
+      { id: 2, name: "Design", is_default: false, active: true },
     ],
     default_version: { id: 3, name: "2.0" },
-    default_assignee: { id: 2, name: "John Smith" }
-  }
+    default_assignee: { id: 2, name: "John Smith" },
+  },
 };
 
 // POSTリクエスト用のテストデータ
 export const issueCreateData = {
   invalidIssue: {
     project_id: 1,
-    priority_id: 2
+    priority_id: 2,
     // subject is missing (required)
   },
   nonExistentProject: {
     project_id: 999,
     subject: "Test issue",
-    priority_id: 2
+    priority_id: 2,
   },
   normalIssue: {
     project_id: 1,
     subject: "Test issue",
-    priority_id: 2
-  }
+    priority_id: 2,
+  },
 } as const;
 
 // タイムエントリー関連のレスポンス
@@ -117,7 +111,7 @@ export const timeEntryListResponse = {
     {
       id: 1,
       project: { id: 1, name: "Test Project" },
-      issue: { id: 1 },  // subject フィールドを削除
+      issue: { id: 1 }, // subject フィールドを削除
       user: { id: 1, name: "Test User" },
       activity: { id: 1, name: "Development" },
       hours: 2.5,
@@ -125,14 +119,12 @@ export const timeEntryListResponse = {
       spent_on: "2025-01-06",
       created_on: "2025-01-06T10:00:00Z",
       updated_on: "2025-01-06T10:00:00Z",
-      custom_fields: [
-        { id: 1, name: "Location", value: "Office" }
-      ]
+      custom_fields: [{ id: 1, name: "Location", value: "Office" }],
     },
     {
       id: 2,
       project: { id: 1, name: "Test Project" },
-      issue: { id: 2 },  // subject フィールドを削除
+      issue: { id: 2 }, // subject フィールドを削除
       user: { id: 1, name: "Test User" },
       activity: { id: 2, name: "Design" },
       hours: 1.5,
@@ -140,19 +132,17 @@ export const timeEntryListResponse = {
       spent_on: "2025-01-06",
       created_on: "2025-01-06T14:00:00Z",
       updated_on: "2025-01-06T14:00:00Z",
-      custom_fields: [
-        { id: 1, name: "Location", value: "Remote" }
-      ]
-    }
+      custom_fields: [{ id: 1, name: "Location", value: "Remote" }],
+    },
   ],
   total_count: 2,
   offset: 0,
-  limit: 25
+  limit: 25,
 };
 
 // 単一タイムエントリーのレスポンス
 export const singleTimeEntryResponse = {
-  time_entry: timeEntryListResponse.time_entries[0]
+  time_entry: timeEntryListResponse.time_entries[0],
 };
 
 // ユーザー関連のレスポンス
@@ -170,7 +160,7 @@ export const userListResponse = {
       passwd_changed_on: "2025-01-01T00:00:00Z",
       status: 1,
       api_key: "abcdef1234567890",
-      avatar_url: null,
+      avatar_url: "",
     },
     {
       id: 2,
@@ -184,17 +174,17 @@ export const userListResponse = {
       passwd_changed_on: "2025-01-02T00:00:00Z",
       status: 1,
       api_key: "0987654321fedcba",
-      avatar_url: null,
-    }
+      avatar_url: "",
+    },
   ],
   total_count: 2,
   offset: 0,
-  limit: 25
+  limit: 25,
 };
 
 // ユーザー詳細（基本情報）
 export const singleUserResponse = {
-  user: userListResponse.users[0]
+  user: userListResponse.users[0],
 };
 
 // ユーザー詳細（include付き）
@@ -203,20 +193,21 @@ export const singleUserWithIncludesResponse = {
     ...userListResponse.users[0],
     custom_fields: [
       { id: 1, name: "Department", value: "Engineering" },
-      { id: 2, name: "Location", value: "Tokyo" }
+      { id: 2, name: "Location", value: "Tokyo" },
     ],
     memberships: [
       {
         project: { id: 1, name: "Test Project" },
         roles: [
           { id: 1, name: "Developer" },
-          { id: 2, name: "Tester" }
-        ]
-      }
+          { id: 2, name: "Tester" },
+        ],
+      },
     ],
     groups: [
       { id: 1, name: "Development Team" },
-      { id: 2, name: "Quality Assurance" }
-    ]
-  }
+      { id: 2, name: "Quality Assurance" },
+    ],
+  },
 };
+
