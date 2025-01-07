@@ -6,6 +6,15 @@ import {
 } from "../lib/types/index.js";
 import { PROJECT_STATUS } from "../lib/types/projects/types.js";
 
+// Valid include values for projects
+const VALID_INCLUDE_VALUES = [
+  "trackers",
+  "issue_categories",
+  "enabled_modules",
+  "time_entry_activities",
+  "issue_custom_fields",
+];
+
 /**
  * Type guard for RedmineProjectCreate
  * Validates required fields for project creation
@@ -14,6 +23,16 @@ function isRedmineProjectCreate(value: unknown): value is RedmineProjectCreate {
   if (typeof value !== "object" || !value) return false;
   const v = value as Record<string, unknown>;
   return typeof v.name === "string" && typeof v.identifier === "string";
+}
+
+/**
+ * Validates include parameter values
+ * @param include The include string to validate
+ * @returns true if valid, false otherwise
+ */
+function validateIncludeValues(include: string): boolean {
+  const values = include.split(",").map(v => v.trim());
+  return values.every(v => VALID_INCLUDE_VALUES.includes(v));
 }
 
 /**
@@ -37,11 +56,6 @@ function extractSearchParams(
     params.offset = args.offset;
   }
 
-  // Extract project name from query parameter
-  if (typeof args.query === "string") {
-    params.name = args.query;
-  }
-
   // Validate and set status parameter
   if (
     typeof args.status === "number" &&
@@ -50,9 +64,13 @@ function extractSearchParams(
     params.status = args.status as ProjectStatus;
   }
 
-  // Set include parameter for additional information
+  // Validate and set include parameter
   if (typeof args.include === "string" && args.include.length > 0) {
-    params.include = args.include; // Keep as string
+    if (!validateIncludeValues(args.include)) {
+      throw new Error("Invalid include value. Must be comma-separated list of: " +
+                     VALID_INCLUDE_VALUES.join(", "));
+    }
+    params.include = args.include;
   }
 
   return params;
@@ -62,7 +80,7 @@ export function createProjectsHandlers(context: HandlerContext) {
   const { client } = context;
 
   return {
-    search_projects: async (
+    list_projects: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       const searchParams = extractSearchParams(args);
@@ -78,7 +96,7 @@ export function createProjectsHandlers(context: HandlerContext) {
       };
     },
 
-    get_project: async (
+    show_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       const id = asStringOrNumber(args.id);

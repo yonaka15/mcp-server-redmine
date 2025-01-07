@@ -4,6 +4,8 @@
 
 提案中 - 2025-01-07
 
+完了 - 2025-01-07
+
 ## コンテキスト
 
 現在の MCP ツール実装が、Redmine REST API の仕様と完全には一致していない問題が発覚しました：
@@ -53,28 +55,28 @@ API のエンドポイントに合わせて命名を統一：
 
 2. Projects
 
-   - [ ] list_projects
-   - [ ] show_project
-   - [ ] create_project
-   - [ ] update_project
-   - [ ] delete_project
-   - [ ] archive_project
-   - [ ] unarchive_project
+   - [x] list_projects
+   - [x] show_project
+   - [x] create_project
+   - [x] update_project
+   - [x] delete_project
+   - [x] archive_project
+   - [x] unarchive_project
 
 3. Time Entries
 
-   - [ ] list_time_entries
-   - [ ] show_time_entry
-   - [ ] create_time_entry
-   - [ ] update_time_entry
-   - [ ] delete_time_entry
+   - [x] list_time_entries
+   - [x] show_time_entry
+   - [x] create_time_entry
+   - [x] update_time_entry
+   - [x] delete_time_entry
 
 4. Users
-   - [ ] list_users
-   - [ ] show_user
-   - [ ] create_user
-   - [ ] update_user
-   - [ ] delete_user
+   - [x] list_users（管理者権限必須）
+   - [x] show_user
+   - [x] create_user（管理者権限必須）
+   - [x] update_user（管理者権限必須）
+   - [x] delete_user（管理者権限必須）
 
 ### 3. パラメータ定義の標準化
 
@@ -123,6 +125,48 @@ API のエンドポイントに合わせて命名を統一：
   - カスタムフィールドの取得をサポート
   - include=issue_custom_fields で取得可能
 
+#### 4.3 Users
+
+- list_users:
+
+  - 管理者権限が必須
+
+- show_user:
+
+  - `/users/current`で現在のユーザー情報を取得可能
+  - 権限によって返却フィールドが異なる：
+
+    1. 非管理者でロックされていないユーザーの場合：
+
+       - firstname
+       - lastname
+       - mail
+       - created_on
+
+    2. 管理者でロックされていないユーザーの場合：
+
+       - firstname
+       - lastname
+       - created_on
+       - last_login_on
+
+    3. 自分自身の情報を取得する場合、追加フィールド：
+
+       - login
+       - api_key
+
+    4. 管理者が他のユーザー情報を取得する場合、すべての情報：
+       - api_key（2.3.0 以降）
+       - status（2.4.0 以降）
+
+  - include パラメータによるオプションフィールド：
+    - memberships: プロジェクトメンバーシップと役割
+    - groups: グループメンバーシップ（2.1 以降）
+
+- create_user, update_user, delete_user:
+  - 管理者権限が必須
+  - create/update ではパスワード生成オプションあり
+
 ## 結果
 
 ### 肯定的な結果
@@ -142,6 +186,7 @@ API のエンドポイントに合わせて命名を統一：
 3. 保守性の向上
    - 明確な機能範囲
    - API ドキュメントとの整合性
+   - 権限要件の明示
 
 ### 否定的な結果
 
@@ -155,6 +200,7 @@ API のエンドポイントに合わせて命名を統一：
 
    - より詳細なバリデーション
    - エラーハンドリングの増加
+   - 権限に応じたレスポンス形式の分岐
 
 3. 移行コスト
    - 既存実装の改修
@@ -168,3 +214,4 @@ API のエンドポイントに合わせて命名を統一：
 - [Redmine REST API Time Entries](https://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries)
 - [Redmine REST API Users](https://www.redmine.org/projects/redmine/wiki/Rest_Users)
 - [Redmine REST API Custom Fields](https://www.redmine.org/projects/redmine/wiki/Rest_api#Working-with-custom-fields)
+

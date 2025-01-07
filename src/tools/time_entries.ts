@@ -1,25 +1,29 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
 /**
- * Time entry search tool
+ * Time entry list tool
  */
-export const TIME_ENTRY_SEARCH_TOOL: Tool = {
-  name: "search_time_entries",
+export const TIME_ENTRY_LIST_TOOL: Tool = {
+  name: "list_time_entries",
   description:
-    "Search for time entries.\n" +
+    "List time entries.\n" +
     "- Filter by user ID, project ID, and date\n" +
     "- Search within a date range\n" +
-    "- Retrieve up to 100 entries",
+    "- Retrieve up to 100 entries\n" +
+    "- Available since Redmine 1.1",
   inputSchema: {
     type: "object",
     properties: {
       user_id: {
         type: "number",
-        description: "User ID (me: your own entries)"
+        description: "User ID (Use 'me' for your own entries)"
       },
       project_id: {
-        type: "string",
-        description: "Project ID (numeric) or identifier (string)"
+        type: ["string", "number"],
+        description: "Project ID (numeric) or identifier (string)\n" +
+          "Examples:\n" +
+          "- Numeric ID: project_id=123\n" +
+          "- String identifier: project_id=my-custom-project"
       },
       spent_on: {
         type: "string",
@@ -27,16 +31,26 @@ export const TIME_ENTRY_SEARCH_TOOL: Tool = {
       },
       from: {
         type: "string",
-        description: "Start date (YYYY-MM-DD format)"
+        description: "Start date (YYYY-MM-DD format)",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
       },
       to: {
         type: "string",
-        description: "End date (YYYY-MM-DD format)"
+        description: "End date (YYYY-MM-DD format)",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      offset: {
+        type: "number",
+        description: "Number of entries to skip",
+        minimum: 0,
+        default: 0
       },
       limit: {
         type: "number",
         description: "Number of results (1-100)",
-        default: 10
+        minimum: 1,
+        maximum: 100,
+        default: 25
       }
     }
   }
@@ -45,11 +59,12 @@ export const TIME_ENTRY_SEARCH_TOOL: Tool = {
 /**
  * Time entry details tool
  */
-export const TIME_ENTRY_GET_TOOL: Tool = {
-  name: "get_time_entry",
+export const TIME_ENTRY_SHOW_TOOL: Tool = {
+  name: "show_time_entry",
   description:
     "Get detailed time entry information.\n" +
-    "- Retrieve a single time entry by ID",
+    "- Retrieve a single time entry by ID\n" +
+    "- Available since Redmine 1.1",
   inputSchema: {
     type: "object",
     properties: {
@@ -69,15 +84,18 @@ export const TIME_ENTRY_CREATE_TOOL: Tool = {
   name: "create_time_entry",
   description:
     "Create a new time entry.\n" +
-    "- Either project ID or issue ID is required\n" +
-    "- Hours and activity ID are required\n" +
-    "- Supports custom field values",
+    "- Either project_id or issue_id is required\n" +
+    "- hours is required\n" +
+    "- activity_id is required unless a default activity is defined\n" +
+    "- Returns 201 Created on success\n" +
+    "- Returns 422 Unprocessable Entity on validation failure\n" +
+    "- Available since Redmine 1.1",
   inputSchema: {
     type: "object",
     properties: {
       project_id: {
-        type: "number",
-        description: "Project ID"
+        type: ["string", "number"],
+        description: "Project ID (numeric) or identifier (string)"
       },
       issue_id: {
         type: "number",
@@ -85,30 +103,34 @@ export const TIME_ENTRY_CREATE_TOOL: Tool = {
       },
       spent_on: {
         type: "string",
-        description: "Date (YYYY-MM-DD format)"
+        description: "Date (YYYY-MM-DD format, defaults to current date)",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
       },
       hours: {
         type: "number",
-        description: "Hours spent"
+        description: "Number of spent hours (can include decimals)",
+        minimum: 0,
+        exclusiveMinimum: true
       },
       activity_id: {
         type: "number",
-        description: "Activity ID"
+        description: "Activity ID (required unless a default activity is defined)"
       },
       comments: {
         type: "string",
-        description: "Comments"
+        description: "Comments (max 255 characters)",
+        maxLength: 255
       },
       user_id: {
         type: "number",
-        description: "User ID (admin only)"
-      },
-      custom_field_values: {
-        type: "object",
-        description: "Custom field values (key: custom field ID)"
+        description: "User ID (requires admin privileges)"
       }
     },
-    required: ["hours", "activity_id"]
+    required: ["hours"],
+    oneOf: [
+      { required: ["project_id"] },
+      { required: ["issue_id"] }
+    ]
   }
 };
 
@@ -121,7 +143,10 @@ export const TIME_ENTRY_UPDATE_TOOL: Tool = {
     "Update an existing time entry.\n" +
     "- Update a single time entry by ID\n" +
     "- Only specify fields to be updated\n" +
-    "- Cannot change project",
+    "- Cannot change project\n" +
+    "- Returns 204 No Content on success\n" +
+    "- Returns 422 Unprocessable Entity on validation failure\n" +
+    "- Available since Redmine 1.1",
   inputSchema: {
     type: "object",
     properties: {
@@ -135,11 +160,14 @@ export const TIME_ENTRY_UPDATE_TOOL: Tool = {
       },
       spent_on: {
         type: "string",
-        description: "Date (YYYY-MM-DD format)"
+        description: "Date (YYYY-MM-DD format)",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
       },
       hours: {
         type: "number",
-        description: "Hours spent"
+        description: "Number of spent hours (can include decimals)",
+        minimum: 0,
+        exclusiveMinimum: true
       },
       activity_id: {
         type: "number",
@@ -147,11 +175,8 @@ export const TIME_ENTRY_UPDATE_TOOL: Tool = {
       },
       comments: {
         type: "string",
-        description: "Comments"
-      },
-      custom_field_values: {
-        type: "object",
-        description: "Custom field values (key: custom field ID)"
+        description: "Comments (max 255 characters)",
+        maxLength: 255
       }
     },
     required: ["id"]
@@ -166,7 +191,8 @@ export const TIME_ENTRY_DELETE_TOOL: Tool = {
   description:
     "Delete a time entry.\n" +
     "- Delete a single time entry by ID\n" +
-    "- This action cannot be undone",
+    "- This action cannot be undone\n" +
+    "- Available since Redmine 1.1",
   inputSchema: {
     type: "object",
     properties: {

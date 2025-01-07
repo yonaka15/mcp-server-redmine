@@ -57,3 +57,33 @@ export interface UserShowParams {
   include?: string; // オプション: 'memberships' and/or 'groups'（カンマ区切り）
 }
 
+// ユーザー作成のパラメータ
+export interface RedmineUserCreate {
+  login: string;
+  password?: string;
+  firstname: string;
+  lastname: string;
+  mail: string;
+  auth_source_id?: number;
+  mail_notification?: string;
+  must_change_passwd?: boolean;
+  generate_password?: boolean;
+  status?: number;
+  custom_fields?: Record<string, unknown>;
+  send_information?: boolean;
+}
+
+// ユーザー更新のパラメータ
+export interface RedmineUserUpdate {
+  login?: string;
+  firstname?: string;
+  lastname?: string;
+  mail?: string;
+  password?: string;
+  auth_source_id?: number;
+  mail_notification?: string;
+  must_change_passwd?: boolean;
+  admin?: boolean;
+  status?: number;
+  custom_fields?: Record<string, unknown>;
+}

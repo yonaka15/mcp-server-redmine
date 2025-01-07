@@ -15,19 +15,19 @@ import { createProjectsHandlers } from "./projects.js";
 import { createTimeEntriesHandlers } from "./time_entries.js";
 import { createUsersHandlers } from "./users.js";
 
-// ハンドラーコンテキストの作成
+// Create handler context
 const context: HandlerContext = {
   client: redmineClient,
   config: config,
 };
 
-// 各リソースのハンドラー作成
+// Create resource handlers
 const issuesHandlers = createIssuesHandlers(context);
 const projectsHandlers = createProjectsHandlers(context);
 const timeEntriesHandlers = createTimeEntriesHandlers(context);
 const usersHandlers = createUsersHandlers(context);
 
-// ハンドラーマップの作成
+// Create handler map
 const handlers = {
   ...issuesHandlers,
   ...projectsHandlers,
@@ -35,33 +35,41 @@ const handlers = {
   ...usersHandlers,
 };
 
-// 利用可能なツール一覧
+// Available tools list
 const TOOLS: Tool[] = [
-  // チケット関連
+  // Issue-related tools
   tools.ISSUE_LIST_TOOL,
   tools.ISSUE_CREATE_TOOL,
   tools.ISSUE_UPDATE_TOOL,
   tools.ISSUE_DELETE_TOOL,
-  // プロジェクト関連
-  tools.PROJECT_SEARCH_TOOL,
-  tools.PROJECT_GET_TOOL,
+  tools.ISSUE_ADD_WATCHER_TOOL,
+  tools.ISSUE_REMOVE_WATCHER_TOOL,
+  
+  // Project-related tools
+  tools.PROJECT_LIST_TOOL,
+  tools.PROJECT_SHOW_TOOL,
   tools.PROJECT_CREATE_TOOL,
   tools.PROJECT_UPDATE_TOOL,
   tools.PROJECT_ARCHIVE_TOOL,
   tools.PROJECT_UNARCHIVE_TOOL,
   tools.PROJECT_DELETE_TOOL,
-  // 作業時間関連
-  tools.TIME_ENTRY_SEARCH_TOOL,
-  tools.TIME_ENTRY_GET_TOOL,
+  
+  // Time entry tools
+  tools.TIME_ENTRY_LIST_TOOL,
+  tools.TIME_ENTRY_SHOW_TOOL,
   tools.TIME_ENTRY_CREATE_TOOL,
   tools.TIME_ENTRY_UPDATE_TOOL,
   tools.TIME_ENTRY_DELETE_TOOL,
-  // ユーザー関連
-  tools.USER_SEARCH_TOOL,
-  tools.USER_GET_TOOL,
+  
+  // User-related tools
+  tools.USER_LIST_TOOL,
+  tools.USER_SHOW_TOOL,
+  tools.USER_CREATE_TOOL,
+  tools.USER_UPDATE_TOOL,
+  tools.USER_DELETE_TOOL,
 ];
 
-// サーバーの初期化
+// Initialize server
 const server = new Server(
   {
     name: config.server.name,
@@ -74,12 +82,12 @@ const server = new Server(
   }
 );
 
-// ツール一覧を返すハンドラー
+// Tools list handler
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: TOOLS,
 }));
 
-// ツール実行ハンドラー
+// Tool execution handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     const { name, arguments: args } = request.params;
@@ -88,18 +96,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new Error("No arguments provided");
     }
 
-    // ハンドラーの実行
+    // Execute handler
     if (name in handlers) {
       return await handlers[name as keyof typeof handlers](args);
     }
 
-    // 未知のツール名の場合
+    // Unknown tool
     return {
       content: [{ type: "text", text: `Unknown tool: ${name}` }],
       isError: true,
     };
   } catch (error) {
-    // エラー詳細をログ出力
+    // Log error details
     console.error("Error in request handler:");
     if (error instanceof Error) {
       console.error("Error type:", error.constructor.name);
@@ -112,7 +120,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       console.error("Unknown error:", String(error));
     }
 
-    // ユーザーへはシンプルなエラーメッセージを返す
+    // Return simple error message to user
     return {
       content: [
         {
@@ -125,12 +133,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// サーバー起動
+// Start server
 async function runServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
-// エクスポート
+// Exports
 export { server, runServer };
-

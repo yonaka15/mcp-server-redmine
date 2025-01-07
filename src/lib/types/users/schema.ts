@@ -1,19 +1,29 @@
 import { z } from "zod";
 
+/**
+ * Redmineユーザースキーマ
+ * - 管理者権限がない場合は限られたフィールドのみ返される
+ * - 自分自身の情報を取得する場合は追加フィールドが返される
+ */
 export const RedmineUserSchema = z.object({
-  id: z.number(),
-  login: z.string(),
+  // 基本フィールド（非管理者でも取得可能）
   firstname: z.string(),
   lastname: z.string(),
-  mail: z.string(),
   created_on: z.string(),
-  last_login_on: z.string().nullable(),
-  passwd_changed_on: z.string().optional(),
+
+  // 一般的なフィールド（オプショナル）
+  id: z.number().optional(),
+  mail: z.string().optional(),
+  status: z.number().optional(),
+  last_login_on: z.string().nullable().optional(),
+  login: z.string().optional(),
   api_key: z.string().optional(),
-  status: z.number(),
-  avatar_url: z.string(),
+  avatar_url: z.string().optional(),
   updated_on: z.string().optional(),
   admin: z.boolean().optional(),
+  passwd_changed_on: z.string().optional(),
+
+  // 追加情報（オプショナル）
   custom_fields: z
     .array(
       z.object({
@@ -82,4 +92,3 @@ export interface RedmineUsersResponse {
   offset?: number;
   limit?: number;
 }
-

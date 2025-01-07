@@ -1,51 +1,61 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 
-/**
- * Project search tool
- */
-export const PROJECT_SEARCH_TOOL: Tool = {
-  name: "search_projects",
+// List projects tool
+export const PROJECT_LIST_TOOL: Tool = {
+  name: "list_projects",
   description:
-    "Search for Redmine projects.\n" +
-    "- Search by name or ID\n" +
-    "- Filter by status\n" +
-    "- Retrieve up to 100 projects",
+    "List all accessible projects (public and authorized private projects).\n" +
+    "- Include additional data (trackers, categories, etc.)\n" +
+    "- Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
-      query: {
-        type: "string",
-        description: "Search keywords"
-      },
-      status: {
-        type: "number",
-        description: "Status (1: active, 5: archived, 9: closed)",
-        enum: [1, 5, 9]
-      },
+      // Include additional data
       include: {
         type: "string",
-        description: "Include additional info (trackers,issue_categories,enabled_modules,time_entry_activities)",
-        default: ""
+        description: "Additional data to include (comma-separated):\n" +
+          "- trackers: Project trackers\n" +
+          "- issue_categories: Project categories\n" +
+          "- enabled_modules: Enabled modules (since 2.6.0)\n" +
+          "- time_entry_activities: Time entry activities (since 3.4.0)\n" +
+          "- issue_custom_fields: Custom fields (since 4.2.0)",
+        pattern: "^(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields)(,(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields))*$",
       },
+      // Status filter
+      status: {
+        type: "number",
+        description: "Project status filter:\n" +
+          "1: active (default)\n" +
+          "5: archived\n" +
+          "9: closed",
+        enum: [1, 5, 9]
+      },
+      // Pagination
       limit: {
         type: "number",
-        description: "Number of results (1-100)",
-        default: 10
+        description: "Maximum number of projects to return (1-100)",
+        minimum: 1,
+        maximum: 100,
+        default: 25
+      },
+      offset: {
+        type: "number",
+        description: "Number of projects to skip",
+        minimum: 0,
+        default: 0
       }
-    },
-    required: ["query"]
+    }
   }
 };
 
-/**
- * Project details tool
- */
-export const PROJECT_GET_TOOL: Tool = {
-  name: "get_project",
+// Show project tool
+export const PROJECT_SHOW_TOOL: Tool = {
+  name: "show_project",
   description:
-    "Get detailed project information.\n" +
-    "- Specify project ID (numeric) or identifier (string)\n" +
-    "- Can include related information like trackers and categories",
+    "Get detailed information about a specific project.\n" +
+    "- Retrieve by ID or identifier\n" +
+    "- Include additional related data\n" +
+    "- Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
@@ -55,24 +65,27 @@ export const PROJECT_GET_TOOL: Tool = {
       },
       include: {
         type: "string",
-        description: "Include additional info (trackers,issue_categories,enabled_modules,time_entry_activities)",
-        default: ""
+        description: "Additional data to include (comma-separated):\n" +
+          "- trackers: Project trackers\n" +
+          "- issue_categories: Project categories\n" +
+          "- enabled_modules: Enabled modules (since 2.6.0)\n" +
+          "- time_entry_activities: Time entry activities (since 3.4.0)\n" +
+          "- issue_custom_fields: Custom fields (since 4.2.0)",
+        pattern: "^(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields)(,(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields))*$",
       }
     },
     required: ["id"]
   }
 };
 
-/**
- * Project creation tool
- */
+// Create project tool
 export const PROJECT_CREATE_TOOL: Tool = {
   name: "create_project",
   description:
     "Create a new project.\n" +
-    "- Name and identifier are required\n" +
-    "- Can specify parent project\n" +
-    "- Configure modules and trackers",
+    "- Required: name and identifier\n" +
+    "- Optional: modules, trackers, custom fields\n" +
+    "- Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
@@ -82,7 +95,8 @@ export const PROJECT_CREATE_TOOL: Tool = {
       },
       identifier: {
         type: "string",
-        description: "Project identifier (alphanumeric and hyphens only)"
+        description: "Project identifier (used in URLs)",
+        pattern: "^[a-z0-9][a-z0-9_-]*$"
       },
       description: {
         type: "string",
@@ -94,7 +108,7 @@ export const PROJECT_CREATE_TOOL: Tool = {
       },
       is_public: {
         type: "boolean",
-        description: "Make project public",
+        description: "Whether the project is public",
         default: true
       },
       parent_id: {
@@ -106,30 +120,70 @@ export const PROJECT_CREATE_TOOL: Tool = {
         description: "Inherit members from parent project",
         default: false
       },
+      default_version_id: {
+        type: "number",
+        description: "Default version ID (must be a shared version)"
+      },
+      default_assigned_to_id: {
+        type: "number",
+        description: "Default assignee ID (only works for subprojects with inherited members)"
+      },
       tracker_ids: {
         type: "array",
-        items: { type: "number" },
-        description: "List of tracker IDs to enable"
+        description: "Enabled tracker IDs",
+        items: {
+          type: "number"
+        }
       },
       enabled_module_names: {
         type: "array",
-        items: { type: "string" },
-        description: "List of module names to enable"
+        description: "Enabled module names",
+        items: {
+          type: "string",
+          enum: [
+            "boards",
+            "calendar",
+            "documents",
+            "files",
+            "gantt",
+            "issue_tracking",
+            "news",
+            "repository",
+            "time_tracking",
+            "wiki"
+          ]
+        }
+      },
+      issue_custom_field_ids: {
+        type: "array",
+        description: "Enabled issue custom field IDs",
+        items: {
+          type: "number"
+        }
+      },
+      custom_field_values: {
+        type: "object",
+        description: "Custom field values (key: field_id, value: field_value)",
+        additionalProperties: {
+          type: ["string", "array"],
+          items: {
+            type: "string"
+          }
+        }
       }
     },
     required: ["name", "identifier"]
   }
 };
 
-/**
- * Project update tool
- */
+// Update project tool
 export const PROJECT_UPDATE_TOOL: Tool = {
   name: "update_project",
   description:
     "Update an existing project.\n" +
-    "- Specify project ID (numeric) or identifier (string)\n" +
-    "- Only specify fields to be updated",
+    "- Specify project by ID or identifier\n" +
+    "- Only specified fields will be updated\n" +
+    "- Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
@@ -141,6 +195,11 @@ export const PROJECT_UPDATE_TOOL: Tool = {
         type: "string",
         description: "Project name"
       },
+      identifier: {
+        type: "string",
+        description: "Project identifier (used in URLs)",
+        pattern: "^[a-z0-9][a-z0-9_-]*$"
+      },
       description: {
         type: "string",
         description: "Project description"
@@ -151,36 +210,79 @@ export const PROJECT_UPDATE_TOOL: Tool = {
       },
       is_public: {
         type: "boolean",
-        description: "Make project public"
+        description: "Whether the project is public"
+      },
+      parent_id: {
+        type: "number",
+        description: "Parent project ID"
       },
       inherit_members: {
         type: "boolean",
         description: "Inherit members from parent project"
       },
+      default_version_id: {
+        type: "number",
+        description: "Default version ID (must be a shared version)"
+      },
+      default_assigned_to_id: {
+        type: "number",
+        description: "Default assignee ID (only works for subprojects with inherited members)"
+      },
       tracker_ids: {
         type: "array",
-        items: { type: "number" },
-        description: "List of tracker IDs to enable"
+        description: "Enabled tracker IDs",
+        items: {
+          type: "number"
+        }
       },
       enabled_module_names: {
         type: "array",
-        items: { type: "string" },
-        description: "List of module names to enable"
+        description: "Enabled module names",
+        items: {
+          type: "string",
+          enum: [
+            "boards",
+            "calendar",
+            "documents",
+            "files",
+            "gantt",
+            "issue_tracking",
+            "news",
+            "repository",
+            "time_tracking",
+            "wiki"
+          ]
+        }
+      },
+      issue_custom_field_ids: {
+        type: "array",
+        description: "Enabled issue custom field IDs",
+        items: {
+          type: "number"
+        }
+      },
+      custom_field_values: {
+        type: "object",
+        description: "Custom field values (key: field_id, value: field_value)",
+        additionalProperties: {
+          type: ["string", "array"],
+          items: {
+            type: "string"
+          }
+        }
       }
     },
     required: ["id"]
   }
 };
 
-/**
- * Project archive tool
- */
+// Archive project tool (since Redmine 5.0)
 export const PROJECT_ARCHIVE_TOOL: Tool = {
   name: "archive_project",
   description:
     "Archive a project.\n" +
-    "- Specify project ID (numeric) or identifier (string)\n" +
-    "- Archived projects cannot be edited",
+    "- Project becomes read-only\n" +
+    "- Available since Redmine 5.0",
   inputSchema: {
     type: "object",
     properties: {
@@ -193,15 +295,13 @@ export const PROJECT_ARCHIVE_TOOL: Tool = {
   }
 };
 
-/**
- * Project unarchive tool
- */
+// Unarchive project tool (since Redmine 5.0)
 export const PROJECT_UNARCHIVE_TOOL: Tool = {
   name: "unarchive_project",
   description:
-    "Restore an archived project.\n" +
-    "- Specify project ID (numeric) or identifier (string)\n" +
-    "- Project becomes editable after unarchiving",
+    "Unarchive a previously archived project.\n" +
+    "- Project becomes editable again\n" +
+    "- Available since Redmine 5.0",
   inputSchema: {
     type: "object",
     properties: {
@@ -214,16 +314,15 @@ export const PROJECT_UNARCHIVE_TOOL: Tool = {
   }
 };
 
-/**
- * Project deletion tool
- */
+// Delete project tool
 export const PROJECT_DELETE_TOOL: Tool = {
   name: "delete_project",
   description:
-    "Delete a project.\n" +
-    "- Specify project ID (numeric) or identifier (string)\n" +
-    "- This action cannot be undone\n" +
-    "- Subprojects will also be deleted",
+    "Permanently delete a project.\n" +
+    "- WARNING: This action cannot be undone\n" +
+    "- All project data will be deleted\n" +
+    "- Subprojects will also be deleted\n" +
+    "- Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
