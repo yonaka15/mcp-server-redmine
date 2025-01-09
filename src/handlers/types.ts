@@ -82,13 +82,22 @@ export function asNumber(value: unknown): number {
 }
 
 /**
- * Convert value to string or number, throw error if invalid
+ * Convert value to string and validate as number if needed
+ * @param value The value to convert
+ * @param allowSpecial Optional array of special string values to allow (e.g., ["current", "me"])
+ * @returns The original string if it's a special value, or converts to string if it's a valid number
  */
-export function asStringOrNumber(value: unknown): string | number {
-  if (typeof value === 'string' || typeof value === 'number') {
-    return value;
+export function asNumberOrSpecial(value: unknown, allowSpecial: string[] = []): string {
+  if (typeof value === "string") {
+    if (allowSpecial.includes(value)) {
+      return value;
+    }
   }
-  throw new ValidationError(`Value must be string or number: ${value}`);
+  const num = Number(value);
+  if (isNaN(num)) {
+    throw new ValidationError(`Invalid value: ${value} (must be a number or one of: ${allowSpecial.join(", ")})`);
+  }
+  return String(num);
 }
 
 /**

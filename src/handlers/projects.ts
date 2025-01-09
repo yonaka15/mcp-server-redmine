@@ -1,4 +1,4 @@
-import { HandlerContext, ToolResponse, asStringOrNumber, ValidationError } from "./types.js";
+import { HandlerContext, ToolResponse, ValidationError, asNumberOrSpecial } from "./types.js";
 import {
   RedmineProjectCreate,
   ProjectSearchParams,
@@ -115,7 +115,7 @@ export function createProjectsHandlers(context: HandlerContext) {
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       try {
-        const id = asStringOrNumber(args.id);
+        const id = asNumberOrSpecial(args.id);
         const { project } = await client.projects.getProject(id);
         return {
           content: [
@@ -173,7 +173,7 @@ export function createProjectsHandlers(context: HandlerContext) {
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       try {
-        const id = asStringOrNumber(args.id);
+        const id = asNumberOrSpecial(args.id);
         const { id: _, ...updateData } = args;
         const { project } = await client.projects.updateProject(id, updateData);
         return {
@@ -202,7 +202,7 @@ export function createProjectsHandlers(context: HandlerContext) {
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       try {
-        const id = asStringOrNumber(args.id);
+        const id = asNumberOrSpecial(args.id);
         await client.projects.archiveProject(id);
         return {
           content: [
@@ -230,7 +230,7 @@ export function createProjectsHandlers(context: HandlerContext) {
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       try {
-        const id = asStringOrNumber(args.id);
+        const id = asNumberOrSpecial(args.id);
         await client.projects.unarchiveProject(id);
         return {
           content: [
@@ -258,7 +258,7 @@ export function createProjectsHandlers(context: HandlerContext) {
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
       try {
-        const id = asStringOrNumber(args.id);
+        const id = asNumberOrSpecial(args.id);
         await client.projects.deleteProject(id);
         return {
           content: [
