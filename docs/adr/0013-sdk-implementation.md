@@ -4,6 +4,7 @@
 
 承認済み - 2025-01-09
 実装中 - 2025-01-09
+更新 - 2025-01-09 - XML形式でのレスポンス実装を追加
 
 ## コンテキスト
 
@@ -21,6 +22,10 @@ MCP (Model Context Protocol) SDKを導入していますが、特に以下の点
 3. テストの期待値が仕様と一致していない
    - 古い形式（`text/plain`）を期待する内容になっている
    - テストケースの更新が必要
+
+4. レスポンスの可読性
+   - list_issuesなどのレスポンスが人間にとって読みづらい
+   - API応答の構造が分かりにくい
 
 ## 決定
 
@@ -78,11 +83,67 @@ const assertMcpResponse = (response: ToolResponse) => {
 };
 ```
 
-### 4. 適用範囲
+### 4. レスポンスのXML形式対応
+
+レスポンスの可読性を向上させるため、formatters/issues.tsをXML形式に対応：
+
+```typescript
+// チケット一覧の応答
+export function formatIssues(response: RedmineApiResponse<RedmineIssue>): string {
+  const issues = response.issues.map(formatIssue).join('\n');
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<issues total_count="${response.total_count}" offset="${response.offset}" limit="${response.limit}">
+${issues}
+</issues>`;
+}
+
+// チケット1件の応答
+export function formatIssueResult(issue: RedmineIssue, action: "created" | "updated"): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <message>Issue #${issue.id} was successfully ${action}.</message>
+  ${formatIssue(issue)}
+</response>`;
+}
+```
+
+出力例：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<issues total_count="193" offset="0" limit="25">
+  <issue>
+    <id>1021</id>
+    <subject>【製造依頼(新規)】(XX様)案件名</subject>
+    <project>03-製造依頼</project>
+    <status>新規</status>
+    <priority>通常</priority>
+    <assigned_to>藤原 拓生</assigned_to>
+    <start_date>2025-01-08</start_date>
+    <progress>0%</progress>
+    <custom_fields>
+      <field>
+        <name>確認担当者</name>
+        <value>6</value>
+      </field>
+      <field>
+        <name>優先度の理由</name>
+        <value></value>
+      </field>
+    </custom_fields>
+  </issue>
+  ...
+</issues>
+```
+
+### 5. 適用範囲
 
 最初のステップとしてissues関連の実装を完了：
-- handlers/issues.ts
-- handlers/__tests__/issues/get.test.ts
+- client/base.ts - formatオプションの追加
+- client/issues.ts - format指定による応答形式の制御
+- handlers/issues.ts - MCPプロトコルへの準拠
+- formatters/issues.ts - XML形式での応答生成
+- handlers/__tests__/issues/get.test.ts - テストケースの更新
 
 ## 結果
 
@@ -102,6 +163,11 @@ const assertMcpResponse = (response: ToolResponse) => {
    - 標準化された実装
    - 分かりやすいコード
    - 将来の変更への対応が容易
+
+4. レスポンスの改善
+   - XML形式による高い可読性
+   - 構造化された応答形式
+   - エラーメッセージの明確化
 
 ### 否定的な結果
 
@@ -133,3 +199,4 @@ const assertMcpResponse = (response: ToolResponse) => {
 - [Model Context Protocol Specification](https://spec.modelcontextprotocol.io/)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [MCP Protocol Schema](https://github.com/modelcontextprotocol/specification/blob/main/schema/schema.ts)
+- [Redmine REST API](https://www.redmine.org/projects/redmine/wiki/Rest_api)
