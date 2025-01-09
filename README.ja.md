@@ -1,10 +1,11 @@
 # Redmine MCP Server
 
-Model Context Protocol (MCP) に対応した Redmine サーバーの実装です。RedmineのREST APIと連携して、チケット情報やプロジェクト情報をLLMに提供します。
+Model Context Protocol (MCP) に対応した Redmine サーバーの実装です。Redmine の REST API と連携して、チケット情報やプロジェクト情報を LLM に提供します。
 
 ## 機能
 
-Redmine REST APIのStableなリソースに対応しています：
+Redmine REST API の Stable なリソースに対応しています：
+
 - Issues (1.0~) - チケット
 - Projects (1.0~) - プロジェクト
 - Users (1.1~) - ユーザー
@@ -48,11 +49,9 @@ Redmine REST APIのStableなリソースに対応しています：
   - カスタムフィールド対応
 - 作業時間の削除
 
-## Claudeでの利用
+## Claude での利用
 
-⚠️ **注意**: 現在、Claudeアプリではサーバーの負荷が高くダウンする可能性があります。改善を検討中です。
-
-Claudeでこのサーバーを利用する場合、以下のような設定を行います：
+Claude でこのサーバーを利用する場合、以下のような設定を行います：
 
 ```json
 {
@@ -74,28 +73,28 @@ Claudeでこのサーバーを利用する場合、以下のような設定を�
 
 ### 設定項目の説明
 
-- `command`: npmパッケージを実行するためのコマンド
-- `args`: 
+- `command`: npm パッケージを実行するためのコマンド
+- `args`:
   - `-y`: プロンプトに自動で「yes」と応答
   - `--prefix`: インストール先のディレクトリを指定
   - 最後の引数はパッケージ名を指定
 - `env`: 環境変数の設定
-  - `REDMINE_HOST`: RedmineサーバーのURL
-  - `REDMINE_API_KEY`: Redmineで取得したAPIキー
+  - `REDMINE_HOST`: Redmine サーバーの URL
+  - `REDMINE_API_KEY`: Redmine で取得した API キー
 
 ## セットアップ
 
-### APIキーの取得
+### API キーの取得
 
-1. Redmineの管理者設定でRESTAPIを有効化
-2. ユーザー設定ページからAPIキーを取得
+1. Redmine の管理者設定で RESTAPI を有効化
+2. ユーザー設定ページから API キーを取得
 
 ### 環境変数の設定
 
 以下の環境変数を設定してください：
 
-- `REDMINE_API_KEY`: Redmineのユーザー設定で取得したAPIキー
-- `REDMINE_HOST`: RedmineサーバーのURL（例：`https://redmine.example.com`）
+- `REDMINE_API_KEY`: Redmine のユーザー設定で取得した API キー
+- `REDMINE_HOST`: Redmine サーバーの URL（例：`https://redmine.example.com`）
 
 ## テストについて
 
@@ -106,7 +105,7 @@ Claudeでこのサーバーを利用する場合、以下のような設定を�
 npm test
 ```
 
-データの安全性のため、GET操作のみをテスト対象としています。
+データの安全性のため、GET 操作のみをテスト対象としています。
 
 ### インスペクタによるテスト
 
@@ -128,19 +127,20 @@ npx @modelcontextprotocol/inspector dist/index.js
 一部の機能は管理者権限が必要です：
 
 ### ユーザー関連
+
 - `list_users`: 管理者権限必須
 - `create_user`: 管理者権限必須
 - `update_user`: 管理者権限必須
 - `delete_user`: 管理者権限必須
 
-各ユーザーの権限レベルによって、取得できる情報が異なります。詳細は[Redmine APIのドキュメント](https://www.redmine.org/projects/redmine/wiki/Rest_Users)を参照してください。
+各ユーザーの権限レベルによって、取得できる情報が異なります。詳細は[Redmine API のドキュメント](https://www.redmine.org/projects/redmine/wiki/Rest_Users)を参照してください。
 
 ## 開発
 
 ### 必要な環境
 
-- Node.js 18以上
-- npm 9以上
+- Node.js 18 以上
+- npm 9 以上
 
 ### 使用ライブラリ
 
@@ -202,3 +202,4 @@ MIT
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Redmine](https://www.redmine.org/)
+
