@@ -30,6 +30,22 @@ function formatStatus(status: number): string {
 }
 
 /**
+ * Format roles for membership
+ */
+function formatRoles(roles?: { id: number; name: string; }[]): string {
+  if (!roles?.length) return '';
+  
+  return `
+      <roles type="array">
+        ${roles.map(role => `
+        <role>
+          <id>${role.id}</id>
+          <name>${escapeXml(role.name)}</name>
+        </role>`).join('')}
+      </roles>`;
+}
+
+/**
  * Format a single user
  * Fields returned depend on user privileges:
  * - For non-admin viewing non-admin: firstname, lastname, mail, created_on
@@ -67,11 +83,11 @@ export function formatUser(user: RedmineUser): string {
   if (user.custom_fields?.length) {
     xml += '  <custom_fields type="array">\n';
     for (const field of user.custom_fields) {
-      xml += '    <custom_field>\n';
+      xml += '    <field>\n';
       xml += `      <id>${field.id}</id>\n`;
       xml += `      <name>${escapeXml(field.name)}</name>\n`;
       xml += `      <value>${Array.isArray(field.value) ? escapeXml(field.value.join(", ")) : escapeXml(field.value)}</value>\n`;
-      xml += '    </custom_field>\n';
+      xml += '    </field>\n';
     }
     xml += '  </custom_fields>\n';
   }
@@ -88,16 +104,7 @@ export function formatUser(user: RedmineUser): string {
       xml += `        <id>${membership.project.id}</id>\n`;
       xml += `        <name>${escapeXml(membership.project.name)}</name>\n`;
       xml += '      </project>\n';
-      if (membership.roles?.length) {
-        xml += '      <roles type="array">\n';
-        for (const role of membership.roles) {
-          xml += '        <role>\n';
-          xml += `          <id>${role.id}</id>\n`;
-          xml += `          <name>${escapeXml(role.name)}</name>\n`;
-          xml += '        </role>\n';
-        }
-        xml += '      </roles>\n';
-      }
+      xml += formatRoles(membership.roles);
       xml += '    </membership>\n';
     }
     xml += '  </memberships>\n';
@@ -151,9 +158,10 @@ export function formatUserResult(user: RedmineUser, action: "created" | "updated
  * Format user deletion result
  */
 export function formatUserDeleted(id: number): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
+  const response = `<?xml version="1.0" encoding="UTF-8"?>
 <response>
   <status>success</status>
   <message>User #${id} was successfully deleted.</message>
 </response>`;
+  return response;
 }
