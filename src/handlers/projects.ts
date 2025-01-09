@@ -1,10 +1,11 @@
-import { HandlerContext, ToolResponse, asStringOrNumber } from "./types.js";
+import { HandlerContext, ToolResponse, asStringOrNumber, ValidationError } from "./types.js";
 import {
   RedmineProjectCreate,
   ProjectSearchParams,
   ProjectStatus,
 } from "../lib/types/index.js";
 import { PROJECT_STATUS } from "../lib/types/projects/types.js";
+import * as formatters from "../formatters/index.js";
 
 // Valid include values for projects
 const VALID_INCLUDE_VALUES = [
@@ -67,8 +68,10 @@ function extractSearchParams(
   // Validate and set include parameter
   if (typeof args.include === "string" && args.include.length > 0) {
     if (!validateIncludeValues(args.include)) {
-      throw new Error("Invalid include value. Must be comma-separated list of: " +
-                     VALID_INCLUDE_VALUES.join(", "));
+      throw new ValidationError(
+        "Invalid include value. Must be comma-separated list of: " +
+        VALID_INCLUDE_VALUES.join(", ")
+      );
     }
     params.include = args.include;
   }
@@ -83,116 +86,200 @@ export function createProjectsHandlers(context: HandlerContext) {
     list_projects: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      const searchParams = extractSearchParams(args);
-      const projects = await client.projects.getProjects(searchParams);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(projects, null, 2),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const searchParams = extractSearchParams(args);
+        const projects = await client.projects.getProjects(searchParams);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProjects(projects),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     show_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      const id = asStringOrNumber(args.id);
-      const result = await client.projects.getProject(id);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const id = asStringOrNumber(args.id);
+        const { project } = await client.projects.getProject(id);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProject(project),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     create_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      if (!isRedmineProjectCreate(args)) {
-        throw new Error("Invalid project create parameters");
+      try {
+        if (!isRedmineProjectCreate(args)) {
+          throw new ValidationError("Invalid project create parameters");
+        }
+        const { project } = await client.projects.createProject(args);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProjectResult(project, "created"),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
       }
-      const result = await client.projects.createProject(args);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: false,
-      };
     },
 
     update_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      const id = asStringOrNumber(args.id);
-      const { id: _, ...updateData } = args;
-      const result = await client.projects.updateProject(id, updateData);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const id = asStringOrNumber(args.id);
+        const { id: _, ...updateData } = args;
+        const { project } = await client.projects.updateProject(id, updateData);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProjectResult(project, "updated"),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     archive_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      const id = asStringOrNumber(args.id);
-      await client.projects.archiveProject(id);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({ status: "success", message: `Project #${id} has been archived` }),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const id = asStringOrNumber(args.id);
+        await client.projects.archiveProject(id);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProjectArchiveStatus(id, true),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     unarchive_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      const id = asStringOrNumber(args.id);
-      await client.projects.unarchiveProject(id);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({ status: "success", message: `Project #${id} has been unarchived` }),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const id = asStringOrNumber(args.id);
+        await client.projects.unarchiveProject(id);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProjectArchiveStatus(id, false),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     delete_project: async (
       args: Record<string, unknown>
     ): Promise<ToolResponse> => {
-      const id = asStringOrNumber(args.id);
-      await client.projects.deleteProject(id);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({ status: "success", message: `Project #${id} has been deleted` }),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const id = asStringOrNumber(args.id);
+        await client.projects.deleteProject(id);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatProjectDeleted(id),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
   };
 }

@@ -1,108 +1,159 @@
 import type { RedmineUser, RedmineUserList } from "../lib/types/users/index.js";
 
-// ユーザーステータスの文字列化
+/**
+ * Escape XML special characters
+ */
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/[&]/g, '&amp;')
+    .replace(/[<]/g, '&lt;')
+    .replace(/[>]/g, '&gt;')
+    .replace(/["]/g, '&quot;')
+    .replace(/[']/g, '&apos;');
+}
+
+/**
+ * Format user status
+ * See app/models/principal.rb for available statuses
+ */
 function formatStatus(status: number): string {
   switch (status) {
     case 1:
-      return 'Active';
+      return 'active';     // User can login and use their account
     case 2:
-      return 'Registered';
+      return 'registered'; // User has registered but not yet confirmed/activated
     case 3:
-      return 'Locked';
+      return 'locked';     // User was once active and is now locked
     default:
-      return 'Unknown';
+      return 'unknown';
   }
 }
 
-// 単一ユーザーの文字列フォーマット
+/**
+ * Format a single user
+ * Fields returned depend on user privileges:
+ * - For non-admin viewing non-admin: firstname, lastname, mail, created_on
+ * - For non-admin viewing admin: firstname, lastname, created_on, last_login_on
+ * - For admin: all fields
+ * - For self: login, api_key added
+ */
 export function formatUser(user: RedmineUser): string {
-  let text = `User #${user.id}: ${user.login}\n`;
-  text += `- Name: ${user.firstname} ${user.lastname}\n`;
-  text += `- Email: ${user.mail}\n`;
+  const fields = new Map<string, string>();
 
-  // ステータスは管理者のみ表示
-  if ('status' in user) {
-    text += `- Status: ${formatStatus(user.status)}\n`;
-  }
-  
-  if (user.admin) {
-    text += `- Role: Administrator\n`;
+  // Required fields (always visible)
+  fields.set('id', String(user.id));
+  fields.set('firstname', user.firstname);
+  fields.set('lastname', user.lastname);
+  fields.set('created_on', user.created_on);
+
+  // Additional fields based on access level
+  if (user.login) fields.set('login', user.login);
+  if (user.mail) fields.set('mail', user.mail);
+  if (user.api_key) fields.set('api_key', user.api_key);
+  if (user.status !== undefined) fields.set('status', formatStatus(user.status));
+  if (user.last_login_on) fields.set('last_login_on', user.last_login_on);
+  if (user.admin) fields.set('admin', 'true');
+  if (user.updated_on) fields.set('updated_on', user.updated_on);
+  if (user.passwd_changed_on) fields.set('passwd_changed_on', user.passwd_changed_on);
+  fields.set('avatar_url', user.avatar_url || '');
+
+  // Build XML for basic fields
+  let xml = '<user>\n';
+  for (const [key, value] of fields) {
+    xml += `  <${key}>${escapeXml(value)}</${key}>\n`;
   }
 
-  text += `- Created: ${user.created_on}\n`;
-  if (user.last_login_on) {
-    text += `- Last login: ${user.last_login_on}\n`;
-  }
-  if (user.passwd_changed_on) {
-    text += `- Password changed: ${user.passwd_changed_on}\n`;
-  }
-
-  // APIキーは管理者と自身のみ表示
-  if (user.api_key) {
-    text += `- API key: ${user.api_key}\n`;
-  }
-
-  // カスタムフィールド
-  if (user.custom_fields && user.custom_fields.length > 0) {
-    text += "\nCustom Fields:\n";
+  // Add custom fields if present
+  if (user.custom_fields?.length) {
+    xml += '  <custom_fields type="array">\n';
     for (const field of user.custom_fields) {
-      text += `- ${field.name}: ${field.value}\n`;
+      xml += '    <custom_field>\n';
+      xml += `      <id>${field.id}</id>\n`;
+      xml += `      <name>${escapeXml(field.name)}</name>\n`;
+      xml += `      <value>${Array.isArray(field.value) ? escapeXml(field.value.join(", ")) : escapeXml(field.value)}</value>\n`;
+      xml += '    </custom_field>\n';
     }
+    xml += '  </custom_fields>\n';
   }
 
-  // メンバーシップ情報
-  if (user.memberships && user.memberships.length > 0) {
-    text += "\nProject Memberships:\n";
+  // Add memberships if present
+  if (user.memberships?.length) {
+    xml += '  <memberships type="array">\n';
     for (const membership of user.memberships) {
-      text += `- ${membership.project.name}`;
-      if (membership.roles && membership.roles.length > 0) {
-        text += ` (${membership.roles.map(r => r.name).join(", ")})`;
+      xml += '    <membership>\n';
+      if (membership.id) {
+        xml += `      <id>${membership.id}</id>\n`;
       }
-      text += "\n";
+      xml += '      <project>\n';
+      xml += `        <id>${membership.project.id}</id>\n`;
+      xml += `        <name>${escapeXml(membership.project.name)}</name>\n`;
+      xml += '      </project>\n';
+      if (membership.roles?.length) {
+        xml += '      <roles type="array">\n';
+        for (const role of membership.roles) {
+          xml += '        <role>\n';
+          xml += `          <id>${role.id}</id>\n`;
+          xml += `          <name>${escapeXml(role.name)}</name>\n`;
+          xml += '        </role>\n';
+        }
+        xml += '      </roles>\n';
+      }
+      xml += '    </membership>\n';
     }
+    xml += '  </memberships>\n';
   }
 
-  // グループ情報
-  if (user.groups && user.groups.length > 0) {
-    text += "\nGroups:\n";
-    text += user.groups.map(g => `- ${g.name}`).join("\n");
-    text += "\n";
+  // Add groups if present
+  if (user.groups?.length) {
+    xml += '  <groups type="array">\n';
+    for (const group of user.groups) {
+      xml += '    <group>\n';
+      xml += `      <id>${group.id}</id>\n`;
+      xml += `      <name>${escapeXml(group.name)}</name>\n`;
+      xml += '    </group>\n';
+    }
+    xml += '  </groups>\n';
   }
 
-  return text;
+  xml += '</user>';
+  return xml;
 }
 
-// ユーザー一覧の文字列フォーマット
+/**
+ * Format list of users
+ */
 export function formatUsers(response: RedmineUserList): string {
   if (response.users.length === 0) {
-    return "No users found.";
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<users type="array" total_count="0" limit="0" offset="0" />';
   }
-
-  let text = `Found ${response.total_count} users:\n\n`;
   
-  for (const user of response.users) {
-    text += `#${user.id} ${user.login} (${user.firstname} ${user.lastname})\n`;
-    if ('status' in user) {
-      text += `- Status: ${formatStatus(user.status)}\n`;
-    }
-    if (user.admin) {
-      text += `- Role: Administrator\n`;
-    }
-    if (user.mail) {
-      text += `- Email: ${user.mail}\n`;
-    }
-    if (user.last_login_on) {
-      text += `- Last login: ${user.last_login_on}\n`;
-    }
-    text += "\n";
-  }
+  const users = response.users.map(formatUser).join('\n');
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<users type="array" total_count="${response.total_count}" limit="${response.limit || response.users.length}" offset="${response.offset || 0}">
+${users}
+</users>`;
+}
 
-  // ページネーション情報
-  if (response.total_count > response.users.length) {
-    const offset = response.offset || 0;
-    const limit = response.limit || response.users.length;
-    text += `\nShowing items ${offset + 1}-${Math.min(offset + limit, response.total_count)} of ${response.total_count}`;
-  }
+/**
+ * Format user create/update result
+ */
+export function formatUserResult(user: RedmineUser, action: "created" | "updated"): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <status>success</status>
+  <message>User #${user.id} was successfully ${action}.</message>
+  ${formatUser(user)}
+</response>`;
+}
 
-  return text;
+/**
+ * Format user deletion result
+ */
+export function formatUserDeleted(id: number): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <status>success</status>
+  <message>User #${id} was successfully deleted.</message>
+</response>`;
 }

@@ -21,7 +21,18 @@ export interface HandlerContext {
 }
 
 /**
+ * Custom validation error
+ */
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+/**
  * Extract and validate pagination parameters
+ * @throws {ValidationError} if parameters are invalid
  */
 export function extractPaginationParams(args: Record<string, unknown>): PaginationParams {
   const params: PaginationParams = {
@@ -32,17 +43,28 @@ export function extractPaginationParams(args: Record<string, unknown>): Paginati
   // Validate limit
   if ('limit' in args) {
     const limit = Number(args.limit);
-    if (!isNaN(limit) && limit > 0 && limit <= 100) {
-      params.limit = limit;
+    if (isNaN(limit)) {
+      throw new ValidationError(`Invalid limit value: ${args.limit} (must be a number)`);
     }
+    if (limit <= 0) {
+      throw new ValidationError(`Invalid limit value: ${limit} (must be greater than 0)`);
+    }
+    if (limit > 100) {
+      throw new ValidationError(`Invalid limit value: ${limit} (must not exceed 100)`);
+    }
+    params.limit = limit;
   }
 
   // Validate offset
   if ('offset' in args) {
     const offset = Number(args.offset);
-    if (!isNaN(offset) && offset >= 0) {
-      params.offset = offset;
+    if (isNaN(offset)) {
+      throw new ValidationError(`Invalid offset value: ${args.offset} (must be a number)`);
     }
+    if (offset < 0) {
+      throw new ValidationError(`Invalid offset value: ${offset} (must not be negative)`);
+    }
+    params.offset = offset;
   }
 
   return params;
@@ -54,7 +76,7 @@ export function extractPaginationParams(args: Record<string, unknown>): Paginati
 export function asNumber(value: unknown): number {
   const num = Number(value);
   if (isNaN(num)) {
-    throw new Error(`Invalid number value: ${value}`);
+    throw new ValidationError(`Invalid number value: ${value}`);
   }
   return num;
 }
@@ -66,7 +88,7 @@ export function asStringOrNumber(value: unknown): string | number {
   if (typeof value === 'string' || typeof value === 'number') {
     return value;
   }
-  throw new Error(`Value must be string or number: ${value}`);
+  throw new ValidationError(`Value must be string or number: ${value}`);
 }
 
 /**

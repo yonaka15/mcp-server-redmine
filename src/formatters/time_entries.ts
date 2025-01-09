@@ -1,77 +1,79 @@
 import type { RedmineApiResponse, RedmineTimeEntry } from "../lib/types/index.js";
 
 /**
- * 単一の作業時間記録をフォーマット
+ * Format a single time entry
  */
 export function formatTimeEntry(entry: RedmineTimeEntry): string {
-  const sections = [
-    // 基本情報
-    `[${entry.spent_on}] ${entry.hours}h - ${entry.comments || "(no comment)"}`,
-    [
-      `Project: ${entry.project.name}`,
-      entry.issue ? `Issue: #${entry.issue.id}` : null,
-      `User: ${entry.user.name}`,
-      `Activity: ${entry.activity.name}`,
-      `Created: ${entry.created_on}`,
-      `Updated: ${entry.updated_on}`,
-    ].filter(Boolean).join(" | ")
-  ];
-
-  // カスタムフィールド
-  if (entry.custom_fields?.length) {
-    sections.push(
-      "",
-      "Custom fields:",
-      ...entry.custom_fields.map((field: { name: string; value: string | string[] }) => 
-        `${field.name}: ${Array.isArray(field.value) ? field.value.join(", ") : field.value}`
-      )
-    );
-  }
-
-  return sections.join("\n");
+  return `<time_entry>
+  <id>${entry.id}</id>
+  <project>
+    <id>${entry.project.id}</id>
+    <name>${entry.project.name}</name>
+  </project>
+  ${entry.issue ? `
+  <issue>
+    <id>${entry.issue.id}</id>
+  </issue>` : ''}
+  <user>
+    <id>${entry.user.id}</id>
+    <name>${entry.user.name}</name>
+  </user>
+  <activity>
+    <id>${entry.activity.id}</id>
+    <name>${entry.activity.name}</name>
+  </activity>
+  <hours>${entry.hours}</hours>
+  <comments>${entry.comments || ""}</comments>
+  <spent_on>${entry.spent_on}</spent_on>
+  <created_on>${entry.created_on}</created_on>
+  <updated_on>${entry.updated_on}</updated_on>
+  ${entry.custom_fields?.length ? `
+  <custom_fields>
+    ${entry.custom_fields.map(field => `
+    <field>
+      <name>${field.name}</name>
+      <value>${Array.isArray(field.value) ? field.value.join(", ") : field.value}</value>
+    </field>`).join('')}
+  </custom_fields>` : ''}
+</time_entry>`;
 }
 
 /**
- * 作業時間記録の一覧をフォーマット
+ * Format list of time entries
  */
 export function formatTimeEntries(response: RedmineApiResponse<RedmineTimeEntry>): string {
   if (!Array.isArray(response.time_entries) || response.time_entries.length === 0) {
-    return "No time entries found.";
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<time_entries />";
   }
 
-  // 合計時間の計算
-  const totalHours = response.time_entries.reduce((sum: number, entry: RedmineTimeEntry) => sum + entry.hours, 0);
-
-  const sections = [
-    `Found ${response.total_count} time entries (Total: ${totalHours.toFixed(2)}h):`,
-    "",
-    ...response.time_entries.map(formatTimeEntry)
-  ];
-
-  if (response.offset && response.limit && response.total_count) {
-    sections.push(
-      "",
-      `Showing ${response.offset + 1}-${Math.min(response.offset + response.limit, response.total_count)} of ${response.total_count} entries`
-    );
-  }
-
-  return sections.join("\n");
+  // Calculate total hours
+  const totalHours = response.time_entries.reduce((sum, entry) => sum + entry.hours, 0);
+  
+  const entries = response.time_entries.map(formatTimeEntry).join('\n');
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<time_entries total_count="${response.total_count}" offset="${response.offset}" limit="${response.limit}" total_hours="${totalHours.toFixed(2)}">
+${entries}
+</time_entries>`;
 }
 
 /**
- * 作業時間記録の作成/更新結果をフォーマット
+ * Format time entry create/update result
  */
 export function formatTimeEntryResult(entry: RedmineTimeEntry, action: "created" | "updated"): string {
-  return [
-    `Time entry was successfully ${action}.`,
-    "",
-    formatTimeEntry(entry)
-  ].join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <message>Time entry was successfully ${action}.</message>
+  ${formatTimeEntry(entry)}
+</response>`;
 }
 
 /**
- * 作業時間記録の削除結果をフォーマット
+ * Format time entry deletion result
  */
 export function formatTimeEntryDeleted(id: number): string {
-  return `Time entry #${id} was successfully deleted.`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <message>Time entry #${id} was successfully deleted.</message>
+</response>`;
 }

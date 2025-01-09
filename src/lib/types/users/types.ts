@@ -1,18 +1,23 @@
-// ベースとなるユーザー情報
+// Base User Information
 export interface RedmineUser {
+  // Basic fields (always available)
   id: number;
-  login: string;
   firstname: string;
   lastname: string;
-  mail: string;
   created_on: string;
-  last_login_on: string | null;
+  
+  // Fields available based on permissions
+  login?: string;
+  mail?: string;
+  last_login_on?: string | null;
   passwd_changed_on?: string;
   api_key?: string;
-  status: number;
-  avatar_url: string;
+  status?: number;
+  avatar_url?: string;
   updated_on?: string;
   admin?: boolean;
+  
+  // Optional associations
   custom_fields?: Array<{
     id: number;
     name: string;
@@ -35,7 +40,7 @@ export interface RedmineUser {
   }>;
 }
 
-// ユーザー一覧のレスポンス
+// User List Response
 export interface RedmineUserList {
   users: RedmineUser[];
   total_count: number;
@@ -43,21 +48,34 @@ export interface RedmineUserList {
   limit?: number;
 }
 
-// ユーザー取得のパラメータ
+// Redmine API User Response
+export interface RedmineUsersResponse {
+  users: RedmineUser[];
+  total_count: number;
+  offset?: number;
+  limit?: number;
+}
+
+// Redmine API Single User Response
+export interface RedmineUserResponse {
+  user: RedmineUser;
+}
+
+// User List Parameters
 export interface UserListParams {
   status?: number; // 1=active, 2=registered, 3=locked
-  name?: string; // フィルター: ログイン名、名、姓、メール
-  group_id?: number; // フィルター: グループID
-  offset?: number; // ページネーション: スキップ数
-  limit?: number; // ページネーション: 1ページの上限（max: 100）
+  name?: string; // Filter: login name, first name, last name, email
+  group_id?: number; // Filter: group ID
+  offset?: number; // Pagination: number to skip
+  limit?: number; // Pagination: page size (max: 100)
 }
 
-// 単一ユーザー取得のパラメータ
+// Single User Parameters
 export interface UserShowParams {
-  include?: string; // オプション: 'memberships' and/or 'groups'（カンマ区切り）
+  include?: string; // Optional: 'memberships' and/or 'groups' (comma separated)
 }
 
-// ユーザー作成のパラメータ
+// User Creation Parameters
 export interface RedmineUserCreate {
   login: string;
   password?: string;
@@ -73,7 +91,7 @@ export interface RedmineUserCreate {
   send_information?: boolean;
 }
 
-// ユーザー更新のパラメータ
+// User Update Parameters
 export interface RedmineUserUpdate {
   login?: string;
   firstname?: string;

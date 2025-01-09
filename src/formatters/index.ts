@@ -22,4 +22,6 @@ export {
 export {
   formatUser,
   formatUsers,
+  formatUserResult,
+  formatUserDeleted,
 } from "./users.js";
