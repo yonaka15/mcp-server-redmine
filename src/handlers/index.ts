@@ -44,7 +44,7 @@ const TOOLS: Tool[] = [
   tools.ISSUE_DELETE_TOOL,
   tools.ISSUE_ADD_WATCHER_TOOL,
   tools.ISSUE_REMOVE_WATCHER_TOOL,
-  
+
   // Project-related tools
   tools.PROJECT_LIST_TOOL,
   tools.PROJECT_SHOW_TOOL,
@@ -53,14 +53,14 @@ const TOOLS: Tool[] = [
   tools.PROJECT_ARCHIVE_TOOL,
   tools.PROJECT_UNARCHIVE_TOOL,
   tools.PROJECT_DELETE_TOOL,
-  
+
   // Time entry tools
   tools.TIME_ENTRY_LIST_TOOL,
   tools.TIME_ENTRY_SHOW_TOOL,
   tools.TIME_ENTRY_CREATE_TOOL,
   tools.TIME_ENTRY_UPDATE_TOOL,
   tools.TIME_ENTRY_DELETE_TOOL,
-  
+
   // User-related tools
   tools.USER_LIST_TOOL,
   tools.USER_SHOW_TOOL,

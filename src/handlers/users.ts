@@ -2,7 +2,7 @@ import {
   HandlerContext, 
   ToolResponse, 
   asNumber, 
-  asStringOrNumber, 
+  asNumberOrSpecial,
   extractPaginationParams,
   ValidationError
 } from "./types.js";
@@ -136,7 +136,9 @@ export function createUsersHandlers(context: HandlerContext) {
 
     show_user: async (args: Record<string, unknown>): Promise<ToolResponse> => {
       try {
-        const id = args.id === "current" ? "current" : asNumber(args.id);
+        // Handle ID parameter
+        const rawId = asNumberOrSpecial(args.id, ["current"]);
+        const id = rawId === "current" ? "current" : parseInt(rawId, 10);
         
         const params: UserShowParams = {};
         if (typeof args.include === "string") {
@@ -146,7 +148,7 @@ export function createUsersHandlers(context: HandlerContext) {
           params.include = args.include;
         }
 
-        const response = await client.users.getUser(id, params) as RedmineUserResponse;
+        const response = await client.users.getUser(id, params);
         if (!response.user.id) {
           throw new ValidationError("Invalid user response: missing id");
         }
@@ -179,7 +181,7 @@ export function createUsersHandlers(context: HandlerContext) {
           throw new ValidationError("Invalid user creation parameters");
         }
 
-        const response = await client.users.createUser(args) as RedmineUserResponse;
+        const response = await client.users.createUser(args);
         if (!response.user.id) {
           throw new ValidationError("Invalid user response: missing id");
         }
@@ -211,7 +213,7 @@ export function createUsersHandlers(context: HandlerContext) {
         const id = asNumber(args.id);
         const { id: _, ...updateData } = args;
 
-        const response = await client.users.updateUser(id, updateData) as RedmineUserResponse;
+        const response = await client.users.updateUser(id, updateData);
         if (!response.user.id) {
           throw new ValidationError("Invalid user response: missing id");
         }

@@ -3,12 +3,11 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 // List issues tool
 export const ISSUE_LIST_TOOL: Tool = {
   name: "list_issues",
-  description: 
-    "List Redmine issues with filtering and pagination.\n" +
-    "- Filter by project, tracker, status, assignee\n" +
-    "- Custom field filtering with cf_x parameters\n" +
-    "- Sort results by any field\n" +
-    "- Include related data (attachments, relations)",
+  description:
+    "List and search Redmine issues. " +
+    "Provides flexible filtering and sorting options. " +
+    "Supports filtering by custom fields using field IDs and patterns. " +
+    "Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
@@ -16,11 +15,12 @@ export const ISSUE_LIST_TOOL: Tool = {
       offset: {
         type: "number",
         description: "Number of issues to skip",
+        default: 0,
         minimum: 0,
       },
       limit: {
         type: "number",
-        description: "Issues per page (max: 100)",
+        description: "Maximum issues to return, from 1 to 100",
         minimum: 1,
         maximum: 100,
         default: 25,
@@ -28,59 +28,65 @@ export const ISSUE_LIST_TOOL: Tool = {
       // Sorting
       sort: {
         type: "string",
-        description: "Sort field with optional direction (e.g. updated_on:desc, priority:asc)",
+        description:
+          "Sort field and direction like last.updated:desc or priority:asc",
         pattern: "^[a-z_]+(:(asc|desc))?$",
       },
       // Include additional data
       include: {
         type: "string",
-        description: "Additional data to include (comma-separated): attachments, relations",
+        description:
+          "Additional data to include as comma separated values\n" +
+          "- attachments: file attachments\n" +
+          "- relations: issue relations",
         pattern: "^(attachments|relations)(,(attachments|relations))*$",
       },
       // Basic filters
       issue_id: {
-        type: ["string", "number"],
-        description: "Single issue ID or comma-separated list",
+        type: "string",
+        description: "Filter by one or more issue IDs as comma separated list",
       },
       project_id: {
-        type: ["string", "number"],
-        description: "Project ID",
+        type: "string",
+        description: "Filter by project ID as number or key as text",
       },
       subproject_id: {
         type: "string",
-        description: "Subproject filter ('!*' to exclude subprojects)",
+        description:
+          "Control subproject inclusion. Use !* to exclude subprojects",
       },
       tracker_id: {
         type: "number",
-        description: "Tracker ID",
+        description: "Filter by tracker ID",
       },
       status_id: {
-        type: ["string", "number"],
-        description: "Status filter: 'open', 'closed', '*' or specific ID",
+        type: "string",
+        description: "Filter by open, closed, * for any, or specific status ID",
         enum: ["open", "closed", "*"],
       },
       assigned_to_id: {
-        type: ["string", "number"],
-        description: "Assignee ID or 'me' for current user",
+        type: "string",
+        description: "Filter by assignee. Use me for your assignments",
       },
       parent_id: {
         type: "number",
-        description: "Parent issue ID",
+        description: "Filter by parent issue ID",
       },
-      // Date filters (ISO format with optional operators)
+      // Date filters
       created_on: {
         type: "string",
-        description: "Filter by creation date (e.g. >=2024-01-01)",
+        description: "Filter by creation date like >=2024-01-01",
         pattern: "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(\\|\\d{4}-\\d{2}-\\d{2})?$",
       },
       updated_on: {
         type: "string",
-        description: "Filter by update date (e.g. >=2024-01-01T00:00:00Z)",
-        pattern: "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?(\\|\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?)?$",
+        description: "Filter by update date like >=2024-01-01T00:00:00Z",
+        pattern:
+          "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?(\\|\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?)?$",
       },
-      // Custom fields (dynamic property names)
+      // Custom fields
       additionalProperties: {
-        type: ["string", "number"],
+        type: "string",
         pattern: "^cf_\\d+$",
       },
     },
@@ -90,53 +96,57 @@ export const ISSUE_LIST_TOOL: Tool = {
 // Create issue tool
 export const ISSUE_CREATE_TOOL: Tool = {
   name: "create_issue",
-  description: "Create a new issue",
+  description:
+    "Create a new issue. " +
+    "Requires project ID and subject fields. " +
+    "Returns success or validation error status. " +
+    "Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
       project_id: {
         type: "number",
-        description: "Project ID",
+        description: "Project ID where issue will be created",
       },
       tracker_id: {
         type: "number",
-        description: "Tracker ID",
+        description: "Type of issue determined by tracker ID",
       },
       status_id: {
         type: "number",
-        description: "Status ID",
+        description: "Initial status ID for the issue",
       },
       priority_id: {
         type: "number",
-        description: "Priority ID",
+        description: "Priority level ID",
       },
       subject: {
         type: "string",
-        description: "Issue subject",
+        description: "Issue title or summary",
       },
       description: {
         type: "string",
-        description: "Issue description",
+        description: "Detailed issue description",
       },
       category_id: {
         type: "number",
-        description: "Category ID",
+        description: "Issue category ID",
       },
       fixed_version_id: {
         type: "number",
-        description: "Target version ID",
+        description: "Target version or milestone ID",
       },
       assigned_to_id: {
         type: "number",
-        description: "Assignee user ID",
+        description: "User ID to assign this issue to",
       },
       parent_issue_id: {
         type: "number",
-        description: "Parent issue ID",
+        description: "Parent issue ID for subtasks",
       },
       custom_fields: {
         type: "array",
-        description: "Custom field values",
+        description: "List of custom field values",
         items: {
           type: "object",
           properties: {
@@ -145,11 +155,8 @@ export const ISSUE_CREATE_TOOL: Tool = {
               description: "Custom field ID",
             },
             value: {
-              type: ["string", "array"],
-              description: "Custom field value(s)",
-              items: {
-                type: "string",
-              },
+              type: "string",
+              description: "Value or list of values for the field as JSON string",
             },
           },
           required: ["id", "value"],
@@ -157,27 +164,27 @@ export const ISSUE_CREATE_TOOL: Tool = {
       },
       watcher_user_ids: {
         type: "array",
-        description: "User IDs to add as watchers",
+        description: "List of user IDs to add as watchers",
         items: {
           type: "number",
         },
       },
       is_private: {
         type: "boolean",
-        description: "Whether the issue is private",
+        description: "Set true to make issue private",
       },
       estimated_hours: {
         type: "number",
-        description: "Estimated hours",
+        description: "Estimated time in hours",
       },
       start_date: {
         type: "string",
-        description: "Start date (YYYY-MM-DD)",
+        description: "Issue start date as YYYY-MM-DD",
         pattern: "^\\d{4}-\\d{2}-\\d{2}$",
       },
       due_date: {
         type: "string",
-        description: "Due date (YYYY-MM-DD)",
+        description: "Issue due date as YYYY-MM-DD",
         pattern: "^\\d{4}-\\d{2}-\\d{2}$",
       },
     },
@@ -188,71 +195,71 @@ export const ISSUE_CREATE_TOOL: Tool = {
 // Update issue tool
 export const ISSUE_UPDATE_TOOL: Tool = {
   name: "update_issue",
-  description: "Update an existing issue",
+  description:
+    "Update an existing issue. " +
+    "Modify any issue fields as needed. " +
+    "Returns success or validation error status. " +
+    "Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "Issue ID to update",
+        description: "ID of issue to update",
       },
-      // Same properties as create_issue, but all optional
       project_id: {
         type: "number",
-        description: "Project ID",
+        description: "Move issue to this project ID",
       },
       tracker_id: {
         type: "number",
-        description: "Tracker ID",
+        description: "Change issue type to this tracker ID",
       },
       status_id: {
         type: "number",
-        description: "Status ID",
+        description: "Change status to this ID",
       },
       priority_id: {
         type: "number",
-        description: "Priority ID",
+        description: "Change priority level",
       },
       subject: {
         type: "string",
-        description: "Issue subject",
+        description: "New issue title or summary",
       },
       description: {
         type: "string",
-        description: "Issue description",
+        description: "New issue description",
       },
       category_id: {
         type: "number",
-        description: "Category ID",
+        description: "Change issue category",
       },
       fixed_version_id: {
         type: "number",
-        description: "Target version ID",
+        description: "Change target version or milestone",
       },
       assigned_to_id: {
         type: "number",
-        description: "Assignee user ID",
+        description: "Reassign issue to this user ID",
       },
       parent_issue_id: {
         type: "number",
-        description: "Parent issue ID",
+        description: "Move issue under this parent ID",
       },
       custom_fields: {
         type: "array",
-        description: "Custom field values",
+        description: "Update custom field values",
         items: {
           type: "object",
           properties: {
             id: {
               type: "number",
-              description: "Custom field ID",
+              description: "Custom field ID to update",
             },
             value: {
-              type: ["string", "array"],
-              description: "Custom field value(s)",
-              items: {
-                type: "string",
-              },
+              type: "string",
+              description: "New value or list of values for the field as JSON string",
             },
           },
           required: ["id", "value"],
@@ -260,28 +267,28 @@ export const ISSUE_UPDATE_TOOL: Tool = {
       },
       notes: {
         type: "string",
-        description: "Comments about the update",
+        description: "Add a note about the changes",
       },
       private_notes: {
         type: "boolean",
-        description: "Whether the notes are private",
+        description: "Set true to make note private",
       },
       is_private: {
         type: "boolean",
-        description: "Whether the issue is private",
+        description: "Change issue privacy setting",
       },
       estimated_hours: {
         type: "number",
-        description: "Estimated hours",
+        description: "Update time estimate in hours",
       },
       start_date: {
         type: "string",
-        description: "Start date (YYYY-MM-DD)",
+        description: "Change start date as YYYY-MM-DD",
         pattern: "^\\d{4}-\\d{2}-\\d{2}$",
       },
       due_date: {
         type: "string",
-        description: "Due date (YYYY-MM-DD)",
+        description: "Change due date as YYYY-MM-DD",
         pattern: "^\\d{4}-\\d{2}-\\d{2}$",
       },
     },
@@ -292,13 +299,17 @@ export const ISSUE_UPDATE_TOOL: Tool = {
 // Delete issue tool
 export const ISSUE_DELETE_TOOL: Tool = {
   name: "delete_issue",
-  description: "Delete an issue",
+  description:
+    "Delete an issue permanently. " +
+    "This action cannot be undone. " +
+    "Returns success status on completion. " +
+    "Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "number",
-        description: "Issue ID to delete",
+        description: "ID of issue to delete",
       },
     },
     required: ["id"],
@@ -308,17 +319,20 @@ export const ISSUE_DELETE_TOOL: Tool = {
 // Add issue watcher tool
 export const ISSUE_ADD_WATCHER_TOOL: Tool = {
   name: "add_issue_watcher",
-  description: "Add a user as a watcher to an issue",
+  description:
+    "Add a user as watcher to an issue. " +
+    "Enables user to receive issue updates. " +
+    "Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
       issue_id: {
         type: "number",
-        description: "Issue ID",
+        description: "Issue ID to add watcher to",
       },
       user_id: {
         type: "number",
-        description: "User ID to add as a watcher",
+        description: "User ID to add as watcher",
       },
     },
     required: ["issue_id", "user_id"],
@@ -328,13 +342,16 @@ export const ISSUE_ADD_WATCHER_TOOL: Tool = {
 // Remove issue watcher tool
 export const ISSUE_REMOVE_WATCHER_TOOL: Tool = {
   name: "remove_issue_watcher",
-  description: "Remove a user from issue watchers",
+  description:
+    "Remove a user from issue watchers. " +
+    "Stops issue update notifications. " +
+    "Available since Redmine 1.0",
   inputSchema: {
     type: "object",
     properties: {
       issue_id: {
         type: "number",
-        description: "Issue ID",
+        description: "Issue ID to remove watcher from",
       },
       user_id: {
         type: "number",

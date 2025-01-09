@@ -2,7 +2,7 @@ import {
   HandlerContext,
   ToolResponse,
   asNumber,
-  asStringOrNumber,
+  asNumberOrSpecial,
   extractPaginationParams,
   ValidationError,
 } from "./types.js";
@@ -25,9 +25,10 @@ function isValidDate(date: string): boolean {
 function extractTimeEntryParams(args: Record<string, unknown>): Record<string, unknown> {
   const params: Record<string, unknown> = {};
 
-  // Handle project_id which can be string or number
+  // Handle project_id as string
   if ("project_id" in args) {
-    params.project_id = asStringOrNumber(args.project_id);
+    const projectId = asNumberOrSpecial(args.project_id);
+    params.project_id = parseInt(projectId, 10);
   }
 
   // Handle date filters
@@ -159,10 +160,19 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
 
     create_time_entry: async (args: Record<string, unknown>): Promise<ToolResponse> => {
       try {
-        if (!isRedmineTimeEntryCreate(args)) {
+        // Convert project_id to number if present
+        let updatedArgs = { ...args };
+        if ('project_id' in args) {
+          const projectIdStr = asNumberOrSpecial(args.project_id);
+          updatedArgs = { ...updatedArgs, project_id: parseInt(projectIdStr, 10) };
+        }
+
+        // Validate the modified arguments
+        if (!isRedmineTimeEntryCreate(updatedArgs)) {
           throw new ValidationError("Invalid time entry create parameters");
         }
-        const { time_entry } = await client.timeEntries.createTimeEntry(args);
+
+        const { time_entry } = await client.timeEntries.createTimeEntry(updatedArgs);
         return {
           content: [
             {
