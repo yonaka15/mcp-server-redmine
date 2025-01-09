@@ -1,7 +1,7 @@
 import type { RedmineApiResponse, RedmineIssue } from "../lib/types/index.js";
 
 /**
- * 単一のチケット情報をフォーマット
+ * Format a single issue
  */
 export function formatIssue(issue: RedmineIssue): string {
   const sections = [
@@ -42,7 +42,7 @@ export function formatIssue(issue: RedmineIssue): string {
 }
 
 /**
- * チケット一覧をフォーマット
+ * Format list of issues
  */
 export function formatIssues(response: RedmineApiResponse<RedmineIssue>): string {
   if (!Array.isArray(response.issues) || response.issues.length === 0) {
@@ -66,7 +66,7 @@ export function formatIssues(response: RedmineApiResponse<RedmineIssue>): string
 }
 
 /**
- * チケット作成/更新結果をフォーマット
+ * Format issue create/update result
  */
 export function formatIssueResult(issue: RedmineIssue, action: "created" | "updated"): string {
   return [
@@ -77,7 +77,7 @@ export function formatIssueResult(issue: RedmineIssue, action: "created" | "upda
 }
 
 /**
- * チケット削除結果をフォーマット 
+ * Format issue deletion result
  */
 export function formatIssueDeleted(id: number): string {
   return `Issue #${id} was successfully deleted.`;
