@@ -1,5 +1,20 @@
-import { HandlerContext, ToolResponse, asNumber, asStringOrNumber, extractPaginationParams } from "./types.js";
-import type { UserListParams, UserShowParams, RedmineUserCreate } from "../lib/types/index.js";
+import { 
+  HandlerContext, 
+  ToolResponse, 
+  asNumber, 
+  asStringOrNumber, 
+  extractPaginationParams,
+  ValidationError
+} from "./types.js";
+import type { 
+  UserListParams, 
+  UserShowParams, 
+  RedmineUserCreate,
+  RedmineUsersResponse,
+  RedmineUserList,
+  RedmineUserResponse
+} from "../lib/types/index.js";
+import * as formatters from "../formatters/index.js";
 
 /**
  * Validate include parameter for user details
@@ -19,26 +34,26 @@ function isRedmineUserCreate(value: unknown): value is RedmineUserCreate {
 
   // Check required fields
   if (typeof v.login !== "string" || v.login.trim() === "") {
-    throw new Error("login is required and must be a non-empty string");
+    throw new ValidationError("login is required and must be a non-empty string");
   }
   if (typeof v.firstname !== "string" || v.firstname.trim() === "") {
-    throw new Error("firstname is required and must be a non-empty string");
+    throw new ValidationError("firstname is required and must be a non-empty string");
   }
   if (typeof v.lastname !== "string" || v.lastname.trim() === "") {
-    throw new Error("lastname is required and must be a non-empty string");
+    throw new ValidationError("lastname is required and must be a non-empty string");
   }
   if (typeof v.mail !== "string" || !v.mail.includes("@")) {
-    throw new Error("mail is required and must be a valid email address");
+    throw new ValidationError("mail is required and must be a valid email address");
   }
 
   // If password is provided but generate_password is true
   if (v.password && v.generate_password) {
-    throw new Error("Cannot specify both password and generate_password");
+    throw new ValidationError("Cannot specify both password and generate_password");
   }
 
   // If neither password nor generate_password is provided
   if (!v.password && !v.generate_password) {
-    throw new Error("Either password or generate_password must be specified");
+    throw new ValidationError("Either password or generate_password must be specified");
   }
 
   return true;
@@ -55,7 +70,7 @@ function extractUserListParams(args: Record<string, unknown>): UserListParams {
   // Status validation
   if (typeof args.status === "number") {
     if (![1, 2, 3].includes(args.status)) {
-      throw new Error("Invalid status. Must be 1 (Active), 2 (Registered), or 3 (Locked)");
+      throw new ValidationError("Invalid status. Must be 1 (Active), 2 (Registered), or 3 (Locked)");
     }
     params.status = args.status;
   }
@@ -73,92 +88,180 @@ function extractUserListParams(args: Record<string, unknown>): UserListParams {
   return params;
 }
 
+/**
+ * Convert RedmineUsersResponse to RedmineUserList
+ */
+function toUserList(response: RedmineUsersResponse): RedmineUserList {
+  return {
+    users: response.users.map(user => ({
+      ...user,
+      id: user.id!,  // Ensure id is present
+    })),
+    total_count: response.total_count,
+    offset: response.offset,
+    limit: response.limit,
+  };
+}
+
 export function createUsersHandlers(context: HandlerContext) {
   const { client } = context;
 
   return {
     list_users: async (args: Record<string, unknown>): Promise<ToolResponse> => {
-      const params = extractUserListParams(args);
-      const users = await client.users.getUsers(params);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(users, null, 2),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const params = extractUserListParams(args);
+        const response = await client.users.getUsers(params);
+        const userList = toUserList(response);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatUsers(userList),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     show_user: async (args: Record<string, unknown>): Promise<ToolResponse> => {
-      const id = args.id === "current" ? "current" : asNumber(args.id);
-      
-      const params: UserShowParams = {};
-      if (typeof args.include === "string") {
-        if (!validateInclude(args.include)) {
-          throw new Error("Invalid include value. Must be comma-separated list of: memberships, groups");
+      try {
+        const id = args.id === "current" ? "current" : asNumber(args.id);
+        
+        const params: UserShowParams = {};
+        if (typeof args.include === "string") {
+          if (!validateInclude(args.include)) {
+            throw new ValidationError("Invalid include value. Must be comma-separated list of: memberships, groups");
+          }
+          params.include = args.include;
         }
-        params.include = args.include;
-      }
 
-      const result = await client.users.getUser(id, params);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: false,
-      };
+        const response = await client.users.getUser(id, params) as RedmineUserResponse;
+        if (!response.user.id) {
+          throw new ValidationError("Invalid user response: missing id");
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatUser(response.user),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     create_user: async (args: Record<string, unknown>): Promise<ToolResponse> => {
-      if (!isRedmineUserCreate(args)) {
-        throw new Error("Invalid user creation parameters");
-      }
+      try {
+        if (!isRedmineUserCreate(args)) {
+          throw new ValidationError("Invalid user creation parameters");
+        }
 
-      const result = await client.users.createUser(args);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: false,
-      };
+        const response = await client.users.createUser(args) as RedmineUserResponse;
+        if (!response.user.id) {
+          throw new ValidationError("Invalid user response: missing id");
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatUserResult(response.user, "created"),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     update_user: async (args: Record<string, unknown>): Promise<ToolResponse> => {
-      const id = asNumber(args.id);
-      const { id: _, ...updateData } = args;
+      try {
+        const id = asNumber(args.id);
+        const { id: _, ...updateData } = args;
 
-      const result = await client.users.updateUser(id, updateData);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: false,
-      };
+        const response = await client.users.updateUser(id, updateData) as RedmineUserResponse;
+        if (!response.user.id) {
+          throw new ValidationError("Invalid user response: missing id");
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatUserResult(response.user, "updated"),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
 
     delete_user: async (args: Record<string, unknown>): Promise<ToolResponse> => {
-      const id = asNumber(args.id);
-      await client.users.deleteUser(id);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({ status: "success", message: `User #${id} has been deleted` }),
-          },
-        ],
-        isError: false,
-      };
+      try {
+        const id = asNumber(args.id);
+        await client.users.deleteUser(id);
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatUserDeleted(id),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
     },
   };
 }

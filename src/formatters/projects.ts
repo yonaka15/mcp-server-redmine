@@ -1,144 +1,107 @@
 import type { RedmineApiResponse, RedmineProject } from "../lib/types/index.js";
 
 /**
- * プロジェクトのステータスを文字列に変換
+ * Convert project status to string
  */
 function formatStatus(status: number): string {
   switch (status) {
     case 1:
-      return "Active";
+      return "active";
     case 5:
-      return "Archived";
+      return "archived";
     case 9:
-      return "Closed";
+      return "closed";
     default:
-      return "Unknown";
+      return "unknown";
   }
 }
 
 /**
- * 単一のプロジェクト情報をフォーマット
+ * Format a single project
  */
 export function formatProject(project: RedmineProject): string {
-  const sections = [
-    // 基本情報
-    `${project.name} (${project.identifier})`,
-    [
-      `Status: ${formatStatus(project.status)}`,
-      `Public: ${project.is_public ? "Yes" : "No"}`,
-      project.parent ? `Parent: ${project.parent.name}` : null,
-      `Created: ${project.created_on}`,
-      project.homepage ? `Homepage: ${project.homepage}` : null,
-    ].filter(Boolean).join(" | "),
-  ];
-
-  // 説明
-  if (project.description) {
-    sections.push(
-      "",
-      "Description:",
-      project.description
-    );
-  }
-
-  // 有効なモジュール
-  if (project.enabled_modules?.length) {
-    sections.push(
-      "",
-      "Enabled modules:",
-      project.enabled_modules.join(", ")
-    );
-  }
-
-  // トラッカー一覧
-  if (project.trackers?.length) {
-    sections.push(
-      "",
-      "Trackers:",
-      project.trackers.map((t: { name: string }) => t.name).join(", ")
-    );
-  }
-
-  // カテゴリ一覧
-  if (project.issue_categories?.length) {
-    sections.push(
-      "",
-      "Categories:",
-      project.issue_categories.map((c: { name: string }) => c.name).join(", ")
-    );
-  }
-
-  // 作業分類
-  if (project.time_entry_activities?.length) {
-    sections.push(
-      "",
-      "Time entry activities:",
-      project.time_entry_activities
-        .map((a: { name: string; is_default?: boolean; active?: boolean }) => 
-          `${a.name}${a.is_default ? " (Default)" : ""}${!a.active ? " (Inactive)" : ""}`)
-        .join(", ")
-    );
-  }
-
-  // カスタムフィールド
-  if (project.custom_fields?.length) {
-    sections.push(
-      "",
-      "Custom fields:",
-      ...project.custom_fields.map((field: { name: string; value: string | string[] }) => 
-        `${field.name}: ${Array.isArray(field.value) ? field.value.join(", ") : field.value}`
-      )
-    );
-  }
-
-  return sections.join("\n");
+  return `<project>
+  <id>${project.id}</id>
+  <name>${project.name}</name>
+  <identifier>${project.identifier}</identifier>
+  <status>${formatStatus(project.status)}</status>
+  <is_public>${project.is_public ? "yes" : "no"}</is_public>
+  ${project.parent ? `<parent>${project.parent.name}</parent>` : ''}
+  <created_on>${project.created_on}</created_on>
+  ${project.homepage ? `<homepage>${project.homepage}</homepage>` : ''}
+  ${project.description ? `<description>${project.description}</description>` : ''}
+  ${project.enabled_modules?.length ? `
+  <enabled_modules>
+    ${project.enabled_modules.map(module => `<module>${module}</module>`).join('\n    ')}
+  </enabled_modules>` : ''}
+  ${project.trackers?.length ? `
+  <trackers>
+    ${project.trackers.map(tracker => `<tracker>${tracker.name}</tracker>`).join('\n    ')}
+  </trackers>` : ''}
+  ${project.issue_categories?.length ? `
+  <categories>
+    ${project.issue_categories.map(category => `<category>${category.name}</category>`).join('\n    ')}
+  </categories>` : ''}
+  ${project.time_entry_activities?.length ? `
+  <time_entry_activities>
+    ${project.time_entry_activities.map(activity => 
+      `<activity${activity.is_default ? ' default="true"' : ''}${!activity.active ? ' active="false"' : ''}>${activity.name}</activity>`
+    ).join('\n    ')}
+  </time_entry_activities>` : ''}
+  ${project.custom_fields?.length ? `
+  <custom_fields>
+    ${project.custom_fields.map(field => `
+    <field>
+      <name>${field.name}</name>
+      <value>${Array.isArray(field.value) ? field.value.join(", ") : field.value}</value>
+    </field>`).join('')}
+  </custom_fields>` : ''}
+</project>`;
 }
 
 /**
- * プロジェクト一覧をフォーマット
+ * Format list of projects
  */
 export function formatProjects(response: RedmineApiResponse<RedmineProject>): string {
   if (!Array.isArray(response.projects) || response.projects.length === 0) {
-    return "No projects found.";
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<projects />";
   }
 
-  const sections = [
-    `Found ${response.total_count} projects:`,
-    "",
-    ...response.projects.map(formatProject)
-  ];
-
-  if (response.offset && response.limit && response.total_count) {
-    sections.push(
-      "",
-      `Showing ${response.offset + 1}-${Math.min(response.offset + response.limit, response.total_count)} of ${response.total_count} projects`
-    );
-  }
-
-  return sections.join("\n");
+  const projects = response.projects.map(formatProject).join('\n');
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<projects total_count="${response.total_count}" offset="${response.offset}" limit="${response.limit}">
+${projects}
+</projects>`;
 }
 
 /**
- * プロジェクト作成/更新結果をフォーマット
+ * Format project create/update result
  */
 export function formatProjectResult(project: RedmineProject, action: "created" | "updated"): string {
-  return [
-    `Project "${project.name}" was successfully ${action}.`,
-    "",
-    formatProject(project)
-  ].join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <message>Project "${project.name}" was successfully ${action}.</message>
+  ${formatProject(project)}
+</response>`;
 }
 
 /**
- * プロジェクト削除結果をフォーマット
+ * Format project deletion result
  */
 export function formatProjectDeleted(id: string | number): string {
-  return `Project "${id}" was successfully deleted.`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <message>Project "${id}" was successfully deleted.</message>
+</response>`;
 }
 
 /**
- * プロジェクトのアーカイブ/アンアーカイブ結果をフォーマット
+ * Format project archive status change result
  */
 export function formatProjectArchiveStatus(id: string | number, archived: boolean): string {
-  return `Project "${id}" was successfully ${archived ? "archived" : "unarchived"}.`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <message>Project "${id}" was successfully ${archived ? "archived" : "unarchived"}.</message>
+</response>`;
 }
