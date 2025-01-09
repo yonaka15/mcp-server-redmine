@@ -5,6 +5,7 @@ This is a Model Context Protocol (MCP) server implementation for Redmine. It int
 ## Features
 
 Supports stable resources from Redmine REST API:
+
 - Issues (1.0~)
 - Projects (1.0~)
 - Users (1.1~)
@@ -50,8 +51,6 @@ Supports stable resources from Redmine REST API:
 
 ## Usage with Claude
 
-⚠️ **Note**: Currently, the server may crash in the Claude app due to high load. Improvements are under consideration.
-
 To use this server with Claude, configure it as follows:
 
 ```json
@@ -75,7 +74,7 @@ To use this server with Claude, configure it as follows:
 ### Configuration Options
 
 - `command`: Command to execute the npm package
-- `args`: 
+- `args`:
   - `-y`: Auto-respond "yes" to prompts
   - `--prefix`: Specify installation directory
   - Last argument specifies the package name
@@ -128,6 +127,7 @@ npx @modelcontextprotocol/inspector dist/index.js
 Some features require administrator privileges:
 
 ### User-Related Operations
+
 - `list_users`: Admin required
 - `create_user`: Admin required
 - `update_user`: Admin required
@@ -202,3 +202,4 @@ MIT
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Redmine](https://www.redmine.org/)
+
