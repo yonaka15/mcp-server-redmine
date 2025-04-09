@@ -4,6 +4,11 @@ import type { RedmineUser, RedmineUserList } from "../lib/types/users/index.js";
  * Escape XML special characters
  */
 function escapeXml(unsafe: string): string {
+  if(typeof unsafe !== 'string') {
+    console.debug('Invalid input to escapeXml:', unsafe, new Error().stack);
+    return '';
+  }
+
   return unsafe
     .replace(/[&]/g, '&amp;')
     .replace(/[<]/g, '&lt;')
