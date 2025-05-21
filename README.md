@@ -1,4 +1,5 @@
 # Redmine MCP Server
+[![smithery badge](https://smithery.ai/badge/@yonaka15/mcp-server-redmine)](https://smithery.ai/server/@yonaka15/mcp-server-redmine)
 
 This is a Model Context Protocol (MCP) server implementation for Redmine. It integrates with Redmine's REST API to provide ticket and project information to LLMs.
 
