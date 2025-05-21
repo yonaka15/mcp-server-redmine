@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/yonaka15-mcp-server-redmine-badge.png)](https://mseep.ai/app/yonaka15-mcp-server-redmine)
+
 # Redmine MCP Server
 
 This is a Model Context Protocol (MCP) server implementation for Redmine. It integrates with Redmine's REST API to provide ticket and project information to LLMs.
