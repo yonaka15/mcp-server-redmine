@@ -59,6 +59,7 @@ export function createIssuesHandlers(context: HandlerContext) {
         if ('issue_id' in argsObj) params.issue_id = asNumber(argsObj.issue_id);
         if ('subproject_id' in argsObj) params.subproject_id = String(argsObj.subproject_id);
         if ('tracker_id' in argsObj) params.tracker_id = asNumber(argsObj.tracker_id);
+        if ('parent_id' in argsObj) params.parent_id = asNumber(argsObj.parent_id);
 
         // Handle status_id special values
         if ('status_id' in argsObj) {
