@@ -3,7 +3,10 @@ import type { RedmineApiResponse, RedmineIssue } from "../lib/types/index.js";
 /**
  * Escape XML special characters
  */
-function escapeXml(unsafe: string): string {
+function escapeXml(unsafe: string | null | undefined): string {
+  if (unsafe === null || typeof unsafe === 'undefined') {
+    return '';
+  }
   return unsafe
     .replace(/[&]/g, '&amp;')
     .replace(/[<]/g, '&lt;')
