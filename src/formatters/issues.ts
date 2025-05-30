@@ -4,6 +4,12 @@ import type { RedmineApiResponse, RedmineIssue } from "../lib/types/index.js";
  * Escape XML special characters
  */
 function escapeXml(unsafe: string): string {
+  if(typeof unsafe !== 'string') {
+    console.error('Invalid input to escapeXml:', unsafe);
+    console.error(new Error().stack);
+    return '';
+  }
+
   return unsafe
     .replace(/[&]/g, '&amp;')
     .replace(/[<]/g, '&lt;')
