@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/yonaka15-mcp-server-redmine-badge.png)](https://mseep.ai/app/yonaka15-mcp-server-redmine)
+
 # Redmine MCP Server
 [![smithery badge](https://smithery.ai/badge/@yonaka15/mcp-server-redmine)](https://smithery.ai/server/@yonaka15/mcp-server-redmine)
 
