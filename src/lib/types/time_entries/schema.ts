@@ -31,7 +31,7 @@ export const RedmineTimeEntrySchema = z.object({
     id: z.number(),
     name: z.string(),
   }),
-  hours: z.number(),
+  hours: z.number().positive(),
   comments: z.string().optional(),
   spent_on: z.string(),
   created_on: z.string(),
