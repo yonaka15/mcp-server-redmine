@@ -9,10 +9,12 @@ import { IssuesClient } from '../../../client/issues.js';
 // import { parseUrl } from '../../helpers/url.js'; // Unused
 
 describe("Issues API (POST)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let client: IssuesClient; // client is assigned but never used
   let mockFetch: Mock;
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     client = new IssuesClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
@@ -21,18 +23,18 @@ describe("Issues API (POST)", () => {
   describe("POST /issues.json (createIssue)", () => {
     // POST操作のテストは安全のためスキップ
     it.skip("all POST operation tests are skipped for safety", () => {
-      // POST操作のテストは、実際のAPIへの影響を避けるため、通常はモックサーバーを使用するか、
-      // または特定のテスト環境でのみ実行するように制御します。
-      // Redmine APIの仕様では、POSTリクエストは成功すると201 Createdを返し、作成されたリソースをボディに含みます。
-      // 検証ポイント：
-      // - リクエストボディの正しいフォーマット
-      // - 必須フィールド（例：project_id, subject）の存在
-      // - オプションフィールドの処理
-      // - レスポンスボディ（作成された課題情報）の検証
-      // - エラーハンドリング（例：バリデーションエラー、権限不足）
+      // POST操作のテストはAPIに影響を与えるため、実際の実行は避けるべき。
+      // もしテストを書く場合は、モックサーバーを使用するか、
+      // Redmine APIの仕様に基づきPOSTリクエストが201 Createdを返し、
+      // 作成されたリソースがレスポンスボディに含まれることを確認する。
+      // - ステータスコード
+      // - ヘッダー内容（例：Locationヘッダーなど）
+      // - ボディの内容（作成されたリソースの詳細）
+      // - 必須フィールドのバリデーションテスト
+      // - エラーハンドリング（例：不正なデータ、権限不足など）
       //
-      // 下記にテストのスケルトンを示します。
-      // 実際にテストを行う場合は、モック戦略を検討してください。
+      // 以下にテストの雛形を示すが、実行は推奨しない。
+      // 実際のテストではモックサーバーで挙動を定義し、APIコール結果を確認することが望ましい。
     });
   });
 });
