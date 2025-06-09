@@ -1,53 +1,57 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { IssuesClient } from "../../../client/issues.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { RedmineIssueCreate } from "../../../types/index.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { IssuesClient } from "../../../client/issues.js"; // client is unused
+// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // mockResponse, mockErrorResponse are unused
+// import * as fixtures from "../../helpers/fixtures.js"; // fixtures is unused
+// import config from "../../../config.js"; // config is unused
+// import { RedmineApiError } from "../../../client/base.js"; // RedmineApiError is unused
+// import { RedmineIssueCreate } from "../../../types/index.js"; // RedmineIssueCreate is unused
+// import { parseUrl } from "../../helpers/url.js"; // parseUrl is unused
 
 describe("Issues API (POST)", () => {
-  let client: IssuesClient;
+  // let client: IssuesClient; // client is unused
   let mockFetch: Mock;
 
   beforeEach(() => {
-    client = new IssuesClient();
+    // client = new IssuesClient(); // client is unused
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("POST /issues.json (createIssue)", () => {
-    // POST操作は常にデータ作成を伴うため、全てスキップ
+    // POST操作のテストは安全のためスキップ
     it.skip("all POST operation tests are skipped for safety", () => {
-      // POST操作は常にデータ作成を伴うため、テストをスキップします
-      // Redmine APIの仕様で、POSTリクエストは以下のパラメータを受け付け、
-      // 新規データを作成します：
+      // POST操作のテストケースは実装されていません。
+      // Redmine APIの仕様として、POSTリクエストは実際のデータを作成するため、
+      // テスト環境以外での実行は推奨されません。
+      // - テスト用の独立した環境で実行
+      // - モックサーバーを使用してAPIレスポンスをシミュレート
+      // - CI環境でのみ実行するなどの対策が必要
       //
-      // 必須パラメータ:
-      // - project_id: プロジェクトの指定
-      // - subject: チケットの題名
+      // 本テストスイートでは、POST操作のテストはスキップしています。
+      // 必要に応じて、安全な方法でテストを実装してください。
       //
-      // オプションパラメータ:
-      // - tracker_id: トラッカーの指定
-      // - status_id: ステータスの指定
-      // - priority_id: 優先度の指定
+      // 必須フィールド:
+      // - project_id: プロジェクトのID
+      // - subject: チケットの件名
+      //
+      // オプションフィールド:
+      // - tracker_id: トラッカーのID
+      // - status_id: ステータスのID
+      // - priority_id: 優先度のID
       // - description: 説明
-      // - category_id: カテゴリの指定
-      // - fixed_version_id: 対象バージョンの指定
-      // - assigned_to_id: 担当者の指定
-      // - parent_issue_id: 親チケットの指定
-      // - custom_fields: カスタムフィールドの値
-      // - watcher_user_ids: ウォッチャーの指定
-      // - is_private: プライベートフラグ
+      // - category_id: カテゴリのID
+      // - fixed_version_id: 対象バージョンのID
+      // - assigned_to_id: 担当者のID
+      // - parent_issue_id: 親チケットのID
+      // - custom_fields: カスタムフィールドの配列
+      // - watcher_user_ids: ウォッチャーのID配列
+      // - is_private: プライベートチケットかどうか
       // - estimated_hours: 予定工数
       //
-      // これらの操作は全てデータの作成を伴うため、
-      // テスト環境でも実行すべきではありません。
-      //
-      // また、添付ファイルの追加も可能ですが、
-      // これも実データの作成を伴うため、テストから除外します。
+      // テストケースの例:
+      // - 必須フィールドのみでチケットを作成
+      // - 全オプションフィールドを指定してチケットを作成
     });
   });
 });
