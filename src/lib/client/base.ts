@@ -2,7 +2,7 @@ import { RedmineErrorResponse } from "../types/common.js";
 import config from "../config.js";
 
 /**
- * Redmine API クライアントエラー
+ * Redmine API エラーを表すカスタムエラー
  */
 export class RedmineApiError extends Error {
   constructor(
@@ -16,11 +16,11 @@ export class RedmineApiError extends Error {
 }
 
 /**
- * Redmine API クライアント
+ * Redmine API クライアントの基底クラス
  */
 export class BaseClient {
   /**
-   * Redmine APIにリクエストを送信
+   * Redmine APIへのリクエストを実行
    */
   protected async performRequest<T>(
     path: string,
@@ -28,7 +28,7 @@ export class BaseClient {
   ): Promise<T> {
     const url = new URL(path, config.redmine.host);
     
-    // デフォルトのリクエストオプション
+    // デフォルトオプションの設定
     const defaultOptions: RequestInit = {
       method: 'GET',
       headers: {
@@ -36,11 +36,11 @@ export class BaseClient {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      // タイムアウトの設定
+      // タイムアウト設定
       signal: AbortSignal.timeout(30000), // 30秒
     };
 
-    // オプションのマージ（ヘッダーは個別にマージ）
+    // オプションのマージ（指定があれば上書き）
     const requestOptions: RequestInit = {
       ...defaultOptions,
       ...options,
@@ -53,27 +53,27 @@ export class BaseClient {
     try {
       const response = await fetch(url.toString(), requestOptions);
 
-      // エラーレスポンスの詳細なハンドリング
+      // エラーレスポンスのハンドリング
       if (!response.ok) {
-        let errorMessage: string[];
+        let errorMessages: string[];
         const contentType = response.headers.get("content-type");
 
         if (contentType?.includes("application/json")) {
           try {
             const errorResponse = await response.json() as RedmineErrorResponse;
-            errorMessage = errorResponse.errors || ["Unknown error"];
+            errorMessages = errorResponse.errors || ["Unknown error"];
           } catch {
-            errorMessage = [`Failed to parse error response: ${await response.text() || "Empty response"}`];
+            errorMessages = [`Failed to parse error response: ${await response.text() || "Empty response"}`];
           }
         } else {
-          // JSONでない場合はテキストとして読み取り
-          errorMessage = [await response.text() || "Unknown error"];
+          // JSONでない場合はレスポンステキストをそのまま使用
+          errorMessages = [await response.text() || "Unknown error"];
         }
 
         throw new RedmineApiError(
           response.status,
           response.statusText,
-          errorMessage
+          errorMessages
         );
       }
 
@@ -93,7 +93,7 @@ export class BaseClient {
         );
       }
     } catch (error) {
-      // ネットワークエラーやタイムアウトの処理
+      // ネットワークエラーなどのハンドリング
       if (error instanceof RedmineApiError) {
         throw error;
       }
@@ -108,23 +108,23 @@ export class BaseClient {
   /**
    * クエリパラメータのエンコード
    */
-  protected encodeQueryParams(params: Record<string, any>): string {
+  protected encodeQueryParams(params: Record<string, string | number | boolean | ReadonlyArray<string | number | boolean> | Date | Record<string, unknown> | null | undefined>): string {
     const searchParams = new URLSearchParams();
 
     // nullやundefinedの値は除外
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
-          // 配列の場合はカンマ区切りの文字列として設定
+          // 配列の場合はカンマ区切りの文字列に変換
           searchParams.set(key, value.join(','));
         } else if (value instanceof Date) {
-          // 日付型の場合はYYYY-MM-DD形式に変換
+          // Dateの場合はYYYY-MM-DD形式に変換
           searchParams.set(key, value.toISOString().split('T')[0]);
-        } else if (typeof value === 'object') {
-          // オブジェクトの場合は文字列化
+        } else if (typeof value === 'object' && value !== null && !(value instanceof Date) && !Array.isArray(value)) { 
+          // オブジェクトの場合はJSON文字列に変換 (DateとArrayは既に処理済み)
           searchParams.set(key, JSON.stringify(value));
         } else {
-          searchParams.set(key, value.toString());
+          searchParams.set(key, String(value));
         }
       }
     });
