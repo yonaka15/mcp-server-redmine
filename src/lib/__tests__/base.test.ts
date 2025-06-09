@@ -3,13 +3,13 @@ import { BaseClient } from '../client/base.js';
 import { mockResponse, mockErrorResponse } from './helpers/mocks.js';
 import type { Mock } from 'jest-mock';
 
-// テスト用にprotectedメソッドを公開したクラス
+// テスト用のprotectedメソッドにアクセスするためのクラス
 class TestClient extends BaseClient {
   public async testRequest<T>(path: string, options?: RequestInit): Promise<T> {
     return this.performRequest<T>(path, options);
   }
 
-  public testEncodeParams(params: Record<string, any>): string {
+  public testEncodeParams(params: Record<string, string | number | string[] | null | undefined>): string {
     return this.encodeQueryParams(params);
   }
 }
