@@ -1,12 +1,12 @@
 import { jest, expect, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { UsersClient } from "../../../client/users.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
+import { UsersClient } from "../../../../client/users.js";
+import { mockResponse, mockErrorResponse } from "../../../helpers/mocks.js";
+import * as fixtures from "../../../helpers/fixtures.js";
+import config from "../../../../config.js";
 import { RedmineApiError } from "../../../client/base.js";
-import { UserListParams } from "../../../types/index.js";
-import { parseUrl } from "../../helpers/url.js";
+import { UserListParams } from "../../../../types/index.js";
+import { parseUrl } from "../../../helpers/url.js";
 
 describe("Users API (GET)", () => {
   let client: UsersClient;
@@ -57,7 +57,7 @@ describe("Users API (GET)", () => {
       );
 
       // Act
-      const result = await client.getUsers(params);
+      await client.getUsers(params);
 
       // Assert
       const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -121,7 +121,7 @@ describe("Users API (GET)", () => {
       );
 
       // Act
-      const result = await client.getUser("current");
+      await client.getUser("current");
 
       // Assert
       const expectedUrl = new URL(
