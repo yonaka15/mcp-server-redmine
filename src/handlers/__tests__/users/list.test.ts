@@ -3,11 +3,11 @@ import type { Mock } from 'jest-mock';
 import { RedmineClient } from "../../../lib/client/index.js";
 import { 
   mockResponse, 
-  mockErrorResponse,
-  mockNetworkError
+  mockErrorResponse
+  // mockNetworkError // Removed
 } from "../../../lib/__tests__/helpers/mocks.js";
 import * as fixtures from "../../../lib/__tests__/helpers/fixtures.js";
-import { parseUrl } from "../../../lib/__tests__/helpers/url.js";
+// import { parseUrl } from "../../../lib/__tests__/helpers/url.js"; // Removed
 import { createUsersHandlers } from "../../users.js";
 import { assertMcpToolResponse } from "../../../lib/__tests__/helpers/mcp.js";
 import config from "../../../lib/config.js";
