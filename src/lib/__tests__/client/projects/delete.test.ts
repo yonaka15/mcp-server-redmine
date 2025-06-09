@@ -1,57 +1,59 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { ProjectsClient } from "../../../client/projects.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { ProjectsClient } from "../../../../client/projects.js"; // Removed
+// import { mockResponse, mockErrorResponse } from "../../../helpers/mocks.js"; // Removed
+// import * as fixtures from "../../../helpers/fixtures.js"; // Removed
+// import config from "../../../../config.js"; // Removed
+// import { RedmineApiError } from "../../../client/base.js"; // Removed
+// import { parseUrl } from "../../../helpers/url.js"; // Removed
 
 describe("Projects API (DELETE)", () => {
-  let client: ProjectsClient;
+  // let client: ProjectsClient; // Removed
   let mockFetch: Mock;
 
   beforeEach(() => {
-    client = new ProjectsClient();
+    // client = new ProjectsClient(); // Removed
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("DELETE /projects/:id.json (deleteProject)", () => {
-    // DELETE操作は常にデータ削除を伴うため、全てスキップ
+    // DELETEリクエストのテストは安全のためスキップ
     it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE操作は常にデータの削除を伴うため、テストをスキップします
-      // Redmine APIの仕様で、DELETEリクエストは以下の影響を及ぼします：
+      // DELETEリクエストのテストコードはここに記述
+      // Redmine APIの仕様により、DELETEリクエストは実際のデータ変更を伴うため、
+      // テスト実行時には注意が必要です。
       //
-      // 1. プロジェクトの完全な削除
-      //    - プロジェクトの基本情報
-      //    - プロジェクトの設定情報
+      // 1. プロジェクトの削除オプション
+      //    - プロジェクトの完全削除
+      //    - プロジェクトのアーカイブ（アーカイブは別のAPIエンドポイント）
       //    - カスタムフィールドの値
       //
-      // 2. 関連データの削除
+      // 2. 関連データの扱い
       //    - プロジェクトのチケット
       //    - プロジェクトのWiki
-      //    - プロジェクトのフォーラム
-      //    - プロジェクトのニュース
-      //    - プロジェクトの文書
       //    - プロジェクトのファイル
-      //    - プロジェクトのリポジトリ設定
+      //    - プロジェクトのニュース
+      //    - プロジェクトのフォーラム
+      //    - プロジェクトの作業時間
       //
-      // 3. メンバーシップの削除
-      //    - プロジェクトメンバーの割り当て解除
-      //    - プロジェクト固有のロール設定
-      //    - ウォッチャーの設定
+      // 3. 権限とエラーケース
+      //    - プロジェクト管理者の権限でのみ削除可能
+      //    - 存在しないプロジェクトIDを指定した場合
+      //    - アーカイブ済みプロジェクトの削除
       //
-      // 4. サブプロジェクトへの影響
-      //    - 親プロジェクトが削除される場合、サブプロジェクトは事前に
-      //      削除しておく必要があります
-      //    - それ以外の場合、サブプロジェクトの存在下での削除は失敗します
+      // 4. APIのレスポンス
+      //    - 正常に削除された場合は空のレスポンス (204 No Content)
+      //    - 権限がない場合や存在しない場合はエラーレスポンス
       //
-      // 5. メール通知
-      //    - 削除通知がプロジェクトメンバーに送信される可能性
+      // 5. 注意点
+      //    - 削除操作は元に戻せないため、テスト環境でのみ実行することを強く推奨
       //
-      // これらの操作は重要なデータの完全な削除を伴うため、
-      // テスト環境でも実行すべきではありません。
+      // 具体的なテストケースとしては、
+      // - 正常に削除できること
+      // - 存在しないIDを指定した場合にエラーが返ること
+      // - 権限がない場合にエラーが返ること
+      // などを検証します。
     });
   });
 });
