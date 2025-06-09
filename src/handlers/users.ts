@@ -2,7 +2,7 @@ import {
   HandlerContext, 
   ToolResponse, 
   asNumber, 
-  asNumberOrSpecial,
+  asNumberOrSpecial, 
   extractPaginationParams,
   ValidationError
 } from "./types.js";
@@ -104,7 +104,7 @@ function toUserList(response: RedmineUsersResponse): RedmineUserList {
   };
 }
 
-export function createUsersHandlers(context: HandlerContext) {
+export function createUserHandlers(context: HandlerContext) {
   const { client } = context;
 
   return {
@@ -216,7 +216,7 @@ export function createUsersHandlers(context: HandlerContext) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id: _, ...updateData } = args; // Mark id as unused
 
-        const response = await client.users.updateUser(id, updateData as RedmineUserUpdate);
+        await client.users.updateUser(id, updateData as RedmineUserUpdate);
         // Assuming updateUser doesn't return the full user object in the same way as create
         // If it does, and you need to format it, adjust accordingly.
         // For now, a simple success message based on the operation succeeding.
