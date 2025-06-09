@@ -35,7 +35,7 @@ describe("Issues API (GET)", () => {
       const result = await client.getIssues();
 
       // Assert
-      const expectedUrl = new URL("/issues.json", config.redmine.host);
+      // const expectedUrl = new URL("/issues.json", config.redmine.host); // Removed as unused
       const [actualUrl, options] = mockFetch.mock.calls[0] as [string, RequestInit];
       const { params } = parseUrl(actualUrl);
       expect(params).toEqual(DEFAULT_PAGINATION);
@@ -62,7 +62,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // result variable removed as it was unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -86,7 +86,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // result variable removed
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -109,7 +109,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // result variable removed
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -132,7 +132,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // result variable removed
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
