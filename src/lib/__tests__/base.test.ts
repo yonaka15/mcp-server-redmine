@@ -3,7 +3,7 @@ import { BaseClient } from '../client/base.js';
 import { mockResponse, mockErrorResponse } from './helpers/mocks.js';
 import type { Mock } from 'jest-mock';
 
-// テスト用にprotectedメソッドを呼び出すための拡張クラス
+// テスト用のprotectedメソッドにアクセス可能な派生クラス
 class TestClient extends BaseClient {
   public async testRequest<T>(path: string, options?: RequestInit): Promise<T> {
     return this.performRequest<T>(path, options);
