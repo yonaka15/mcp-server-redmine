@@ -9,7 +9,7 @@ import {
 import { redmineClient } from "../lib/client/index.js";
 import config from "../lib/config.js";
 import * as tools from "../tools/index.js";
-import { HandlerContext, ToolResponse } from "./types.js";
+import { HandlerContext /*, ToolResponse*/ } from "./types.js"; // ToolResponse is removed
 import { createIssuesHandlers } from "./issues.js";
 import { createProjectsHandlers } from "./projects.js";
 import { createTimeEntriesHandlers } from "./time_entries.js";
