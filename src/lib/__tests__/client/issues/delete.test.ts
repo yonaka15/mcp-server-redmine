@@ -8,11 +8,14 @@ import { IssuesClient } from '../../../client/issues.js';
 // import { parseUrl } from '../../helpers/url.js'; // Unused
 
 describe("Issues API (DELETE)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let client: IssuesClient;
   let mockFetch: Mock;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // const issueId = fixtures.singleIssueResponse.issue.id; // Unused
 
   beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     client = new IssuesClient(); // client is assigned but never used in the current test structure
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
@@ -21,16 +24,16 @@ describe("Issues API (DELETE)", () => {
   describe("DELETE /issues/:id.json (deleteIssue)", () => {
     // DELETE操作のテストは安全のためスキップ
     it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE操作のテストは、実際のAPIへの影響を避けるため、通常はモックサーバーを使用するか、
-      // または特定のテスト環境でのみ実行するように制御します。
-      // Redmine APIの仕様では、DELETEリクエストは成功すると204 No Contentを返します。
-      // - レスポンスボディの検証
-      // - エラーハンドリング（例：存在しないID、権限不足）
-      // - ネットワークエラー
-      // - パラメータ検証（もしあれば）
-      //
-      // 下記にテストのスケルトンを示します。
-      // 実際にテストを行う場合は、モック戦略を検討してください。
+      // DELETE操作のテストはAPIに影響を与えるため、実際の実行は避けるべき。
+      // もしテストを書く場合は、モックサーバーを使用するか、
+      // Redmine APIの仕様に基づきDELETEリクエストが204 No Contentを返すことを確認する。
+      // - ステータスコード
+      // - ヘッダー内容（例：X-Request-Idなど特定のIDが返るか）
+      // - ボディが空であること
+      // - エラーハンドリング（例：存在しないIDを削除しようとした場合など）
+      // 
+      // 以下にテストの雛形を示すが、実行は推奨しない。
+      // 実際のテストではモックサーバーで挙動を定義し、APIコール結果を確認することが望ましい。
     });
   });
 });
