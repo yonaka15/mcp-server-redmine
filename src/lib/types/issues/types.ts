@@ -33,7 +33,8 @@ export interface IssueListParams {
 }
 
 export interface IssueShowParams {
-  include?: string; 
+  include?: string;
+  [key: string]: string | undefined; // Index signature for compatibility
 }
 
 // Resource types

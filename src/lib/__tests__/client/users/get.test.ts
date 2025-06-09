@@ -125,20 +125,20 @@ describe("Users API (GET)", () => {
 
       // Assert
       const expectedUrl = new URL(
-        "/users/current.json",
-        config.redmine.host
+      "/users/current.json",
+      config.redmine.host
       );
       expect(mockFetch).toHaveBeenCalledWith(
-        expectedUrl.toString(),
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            Accept: "application/json",
-            "X-Redmine-API-Key": config.redmine.apiKey,
-          }),
-        })
+      expectedUrl.toString(),
+      expect.objectContaining({
+      method: "GET",
+      headers: expect.objectContaining({
+      Accept: "application/json",
+      "X-Redmine-API-Key": config.redmine.apiKey,
+      }),
+      })
       );
-      // Note: The assertion for `result` would depend on the actual response fixture for current user
+      expect(result).toEqual(fixtures.singleUserResponse);
     });
 
     describe("including associated data", () => {

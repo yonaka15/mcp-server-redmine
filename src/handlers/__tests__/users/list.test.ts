@@ -8,20 +8,20 @@ import {
 } from "../../../lib/__tests__/helpers/mocks.js";
 import * as fixtures from "../../../lib/__tests__/helpers/fixtures.js";
 // import { parseUrl } from "../../../lib/__tests__/helpers/url.js"; // Removed
-import { createUsersHandlers } from "../../users.js";
+import { createUserHandlers } from "../../users.js";
 import { assertMcpToolResponse } from "../../../lib/__tests__/helpers/mcp.js";
 import config from "../../../lib/config.js";
 
 describe('list_users', () => {
   let client: RedmineClient;
   let mockFetch: Mock;
-  let handlers: ReturnType<typeof createUsersHandlers>;
+  let handlers: ReturnType<typeof createUserHandlers>;
 
   beforeEach(() => {
     client = new RedmineClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
-    handlers = createUsersHandlers({ client, config });
+    handlers = createUserHandlers({ client, config });
   });
 
   describe('MCP Response Format', () => {

@@ -14,7 +14,7 @@ describe("Issues API (POST)", () => {
   let mockFetch: Mock;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     client = new IssuesClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();

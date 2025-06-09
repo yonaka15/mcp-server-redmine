@@ -5,7 +5,7 @@ import { mockResponse, mockErrorResponse } from '../../helpers/mocks.js';
 import * as fixtures from '../../helpers/fixtures.js';
 import config from '../../../config.js';
 import { RedmineApiError } from '../../../client/base.js';
-import { TimeEntryQueryRqs } from '../../../types/time_entries/schema.js'; // Corrected import path and type name
+import { TimeEntryQueryParams } from '../../../types/time_entries/schema.js'; // Corrected import path and type name
 import { parseUrl } from '../../helpers/url.js';
 
 describe("Time Entries API (GET)", () => {
@@ -46,7 +46,7 @@ describe("Time Entries API (GET)", () => {
     describe("filtering", () => {
       it("filters by project and user", async () => {
         // Arrange
-        const params: TimeEntryQueryRqs = {
+        const params: TimeEntryQueryParams = {
           project_id: 1,
           user_id: 1
         };
@@ -68,7 +68,7 @@ describe("Time Entries API (GET)", () => {
 
       it("filters by date range", async () => {
         // Arrange
-        const params: TimeEntryQueryRqs = {
+        const params: TimeEntryQueryParams = {
           from: "2025-01-01",
           to: "2025-01-31"
         };
@@ -90,7 +90,7 @@ describe("Time Entries API (GET)", () => {
 
       it("applies pagination", async () => {
         // Arrange
-        const params: TimeEntryQueryRqs = {
+        const params: TimeEntryQueryParams = {
           offset: 25,
           limit: 50
         };
@@ -118,7 +118,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act & Assert
-      await expect(client.getTimeEntries({ invalid_param: "value" } as unknown as TimeEntryQueryRqs)) // Use unknown to bypass type checking for test
+      await expect(client.getTimeEntries({ invalid_param: "value" } as unknown as TimeEntryQueryParams)) // Use unknown to bypass type checking for test
         .rejects.toThrow(RedmineApiError);
     });
   });

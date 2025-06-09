@@ -10,7 +10,6 @@ import type {
   RedmineIssueCreate,
   RedmineIssueUpdate,
   IssueListParams,
-  CustomField, // Assuming CustomField type is defined elsewhere or create a basic one
 } from "../lib/types/index.js";
 // import {
 //   ISSUE_LIST_TOOL, 
@@ -151,7 +150,7 @@ export function createIssuesHandlers(context: HandlerContext) {
         if ('fixed_version_id' in argsObj) params.fixed_version_id = asNumber(argsObj.fixed_version_id);
         if ('assigned_to_id' in argsObj) params.assigned_to_id = asNumber(argsObj.assigned_to_id);
         if ('parent_issue_id' in argsObj) params.parent_issue_id = asNumber(argsObj.parent_issue_id);
-        if ('custom_fields' in argsObj) params.custom_fields = argsObj.custom_fields as CustomField[];
+        if ('custom_fields' in argsObj) params.custom_fields = argsObj.custom_fields as { id: number; value: string | string[]; }[];
         if ('watcher_user_ids' in argsObj) params.watcher_user_ids = (argsObj.watcher_user_ids as number[]);
         if ('is_private' in argsObj) params.is_private = Boolean(argsObj.is_private);
         if ('estimated_hours' in argsObj) params.estimated_hours = asNumber(argsObj.estimated_hours);
@@ -215,7 +214,7 @@ export function createIssuesHandlers(context: HandlerContext) {
         if ('fixed_version_id' in argsObj) updateParams.fixed_version_id = asNumber(argsObj.fixed_version_id);
         if ('assigned_to_id' in argsObj) updateParams.assigned_to_id = asNumber(argsObj.assigned_to_id);
         if ('parent_issue_id' in argsObj) updateParams.parent_issue_id = asNumber(argsObj.parent_issue_id);
-        if ('custom_fields' in argsObj) updateParams.custom_fields = argsObj.custom_fields as CustomField[];
+        if ('custom_fields' in argsObj) updateParams.custom_fields = argsObj.custom_fields as { id: number; value: string | string[]; }[];
         if ('notes' in argsObj) updateParams.notes = String(argsObj.notes);
         if ('private_notes' in argsObj) updateParams.private_notes = Boolean(argsObj.private_notes);
         if ('is_private' in argsObj) updateParams.is_private = Boolean(argsObj.is_private);

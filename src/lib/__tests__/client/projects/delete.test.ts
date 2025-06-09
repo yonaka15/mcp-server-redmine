@@ -13,48 +13,13 @@ describe("Projects API (DELETE)", () => {
   let mockFetch: Mock;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     client = new ProjectsClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("DELETE /projects/:id.json (deleteProject)", () => {
-<<<<<<< HEAD
-    // DELETE処理のテストは安全のためスキップされている
-    it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE処理のテストは、実際のAPIを叩かないように、またはテスト環境でのみ実行するように注意が必要です。
-      // Redmine APIの仕様では、DELETEリクエストの成功時は 204 No Content が返ります。
-      //
-      // 1. プロジェクトの削除の制約
-      //    - プロジェクトが存在しない
-      //    - プロジェクトの削除権限がない
-      //    - ステータスがアーカイブ済み
-      //
-      // 2. 正常なプロジェクト削除
-      //    - プロジェクトID
-      //    - プロジェクトwiki
-      //    - プロジェクトメンバー
-      //    - プロジェクトバージョン
-      //    - チケットカテゴリ
-      //    - プロジェクトリポジトリ
-      //    - プロジェクトの活動
-      //
-      // 3. 権限なしで削除
-      //    - プロジェクトに削除権限がない場合
-      //    - プロジェクト管理者のみ
-      //    - カスタムロール
-      //
-      // 4. 親プロジェクトと子プロジェクトの関係
-      //    - 子プロジェクトを持つ親プロジェクトを削除しようとするとエラー（Redmineではバージョンやチケットと同様に内部的に依存関係がある）
-      //    - 削除できるのは子プロジェクトがない場合のみ
-      //
-      // 5. ファイルの添付
-      //    - プロジェクト削除時に添付ファイル（チケットやWikiなどに関連付けられている）がどうなるか
-      //
-      // clientのメソッド呼び出し部分でエラーになるため、テスト自体をコメントアウトするか、
-      // jest.fn() などでモック化する必要があるでしょう。
-=======
     // DELETE操作のテストは安全のためスキップ
     it.skip("all DELETE operation tests are skipped for safety", () => {
       // DELETE操作のテストは、実際のAPIへの影響を避けるため、通常はモックサーバーを使用するか、
@@ -88,7 +53,6 @@ describe("Projects API (DELETE)", () => {
       //
       // 下記にテストのスケルトンを示します。
       // 実際にテストを行う場合は、これらの点を考慮したモック戦略とアサーションが必要です。
->>>>>>> origin/fix/eslint-errors
     });
   });
 });

@@ -15,33 +15,13 @@ describe("Issues API (PUT)", () => {
   // const issueId = fixtures.singleIssueResponse.issue.id; // Unused
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     client = new IssuesClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("PUT /issues/:id.json (updateIssue)", () => {
-<<<<<<< HEAD
-    it.skip("all PUT operation tests are skipped for safety", () => {
-      // PUT処理のテストは、実際のAPIを叩かないように、またはテスト環境でのみ実行するように注意が必要です。
-      // Redmine APIの仕様では、PUTリクエストの成功時は 204 No Content が返ります。
-      // - project_id: プロジェクトのID（変更不可）
-      // - tracker_id: トラッカーのID
-      // - status_id: ステータスのID
-      // - subject: チケットの件名
-      // - description: 説明
-      // - priority_id: 優先度のID
-      // - assigned_to_id: 担当者のID
-      // - category_id: カテゴリのID
-      // - fixed_version_id: 対象バージョンのID
-      // - notes: 注記の追加
-      // - private_notes: プライベート注記の追加
-      //
-      // clientのメソッド呼び出し部分でエラーになるため、テスト自体をコメントアウトするか、
-      // jest.fn() などでモック化する必要があるでしょう。
-      // client.updateIssue(issueId, { subject: 'Updated Subject' }) のように呼び出します。
-=======
     // PUT操作のテストは安全のためスキップ
     it.skip("all PUT operation tests are skipped for safety", () => {
       // PUT操作のテストは、実際のAPIへの影響を避けるため、通常はモックサーバーを使用するか、
@@ -64,7 +44,6 @@ describe("Issues API (PUT)", () => {
       // - エラーハンドリング（例：バリデーションエラー、存在しないID、権限不足）
       //
       // 下記にテストのスケルトンを示します。
->>>>>>> origin/fix/eslint-errors
     });
   });
 });

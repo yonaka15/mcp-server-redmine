@@ -1,5 +1,5 @@
 import { RedmineErrorResponse } from "../types/common.js";
-import config from "../../config.js";
+import config from "../config.js";
 
 /**
  * Redmine APIエラークラス
@@ -16,7 +16,7 @@ export class RedmineApiError extends Error {
 }
 
 // Define a more specific type for query parameter values
-type QueryParamValue = string | number | boolean | (string | number | boolean)[] | undefined | null;
+type QueryParamValue = string | number | boolean | Date | (string | number | boolean)[] | undefined | null;
 
 /**
  * Redmine API クライアントベース
@@ -40,7 +40,7 @@ export class BaseClient {
         Accept: "application/json",
       },
       // タイムアウトの設定
-      signal: AbortSignal.timeout(30000), // 30秒
+      // signal: AbortSignal.timeout(30000), // 30秒 - Temporarily commented out for compatibility
     };
 
     // オプションのマージ（引数のoptionsで上書き）

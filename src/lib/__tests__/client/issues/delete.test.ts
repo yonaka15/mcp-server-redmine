@@ -11,11 +11,11 @@ describe("Issues API (DELETE)", () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let client: IssuesClient;
   let mockFetch: Mock;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   // const issueId = fixtures.singleIssueResponse.issue.id; // Unused
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     client = new IssuesClient(); // client is assigned but never used in the current test structure
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
