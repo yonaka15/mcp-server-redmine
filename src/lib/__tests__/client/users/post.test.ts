@@ -1,48 +1,56 @@
-import { jest, describe, it, beforeEach } from '@jest/globals'; // expect removed
-import type { Mock } from 'jest-mock';
-import { UsersClient } from "../../../client/users.js";
-// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
-// import * as fixtures from "../../helpers/fixtures.js"; // Unused
-// import config from "../../../config.js"; // Unused
-// import { RedmineApiError } from "../../../client/base.js"; // Unused
-// import { parseUrl } from "../../helpers/url.js"; // Unused
-
-describe("Users API (POST)", () => {
-  let client: UsersClient; // Assigned but not used in active tests
-  let mockFetch: Mock;
-
-  beforeEach(() => {
-    client = new UsersClient();
-    mockFetch = jest.spyOn(global, "fetch") as Mock;
-    mockFetch.mockReset();
-  });
-
-  describe("POST /users.json (createUser)", () => {
-    // POST操作のテストは安全のためスキップされています
-    it.skip("all POST operation tests are skipped for safety", () => {
-      // POST操作のテストは、実際のAPIに対して実行するとデータが作成されてしまうため、
-      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
-      // Redmine APIの仕様として、POSTリクエストは成功するとステータスコード 201 Created と作成されたリソースを返します。
-      //
-      // 必須パラメータ:
-      // - login: ログインID
-      // - firstname: 名
-      // - lastname: 姓
-      // - mail: メールアドレス
-      // - password: パスワード (generate_passwordがfalseの場合)
-      //
-      // オプションパラメータ:
-      // - auth_source_id: 認証元ID
-      // - mail_notification: メール通知設定
-      // - must_change_passwd: パスワード変更要否
-      // - generate_password: パスワード自動生成
-      // - admin: 管理者権限
-      // - status: ステータス (1: 有効, 2: 未承諾, 3: ロック)
-      // - custom_fields: カスタムフィールド値
-      //
-      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
-      // 現状ではclient変数も未使用警告が出る可能性があります。
-      // ユーザー作成時の関連データの扱いも確認ポイントです。
-    });
-  });
-});
+aW1wb3J0IHsgamVzdCwgZGVzY3JpYmUsIGl0LCBiZWZvcmVFYWNoIH0gZnJv
+bSAnQGplc3QvZ2xvYmFscyc7IC8vIGV4cGVjdCByZW1vdmVkCmltcG9ydCB0
+eXBlIHsgTW9jayB9IGZyb20gJ2plc3QtbW9jayc7CmltcG9ydCB7IFVzZXJz
+Q2xpZW50IH0gZnJvbSAiLi4vLi4vLi4vY2xpZW50L3VzZXJzLmpzIjsKLy8g
+aW1wb3J0IHsgbW9ja1Jlc3BvbnNlLCBtb2NrRXJyb3JSZXNwb25zZSB9IGZy
+b20gIi4uLy4uL2hlbHBlcnMvbW9ja3MuanMiOyAvLyBVbnVzZWQKLy8gaW1w
+b3J0ICogYXMgZml4dHVyZXMgZnJvbSAiLi4vLi4vaGVscGVycy9maXh0dXJl
+cy5qcyI7IC8vIFVudXNlZAovLyBpbXBvcnQgY29uZmlnIGZyb20gIi4uLy4u
+Ly4uL2NvbmZpZy5qcyI7IC8vIFVudXNlZAovLyBpbXBvcnQgeyBSZWRtaW5l
+QXBpRXJyb3IgfSBmcm9tICIuLi8uLi8uLi9jbGllbnQvYmFzZS5qcyI7IC8v
+IFVudXNlZAovLyBpbXBvcnQgeyBwYXJzZVVybCB9IGZyb20gIi4uLy4uL2hl
+bHBlcnMvdXJsLmpzIjsgLy8gVW51c2VkCgpkZXNjcmliZSgiVXNlcnMgQVBJ
+IChQT1NUKSIsICgpID0+IHsKICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxp
+bmUgQHR5cGVzY3JpcHQtZXNsaW50L25vLXVudXNlZC12YXJzCiAgbGV0IGNs
+aWVudDogVXNlcnNDbGllbnQ7IC8vIEFzc2lnbmVkIGJ1dCBub3QgdXNlZCBp
+biBhY3RpdmUgdGVzdHMKICBsZXQgbW9ja0ZldGNoOiBNb2NrOwoKICBiZWZv
+cmVFYWNoKCgpID0+IHsKICAgIGNsaWVudCA9IG5ldyBVc2Vyc0NsaWVudCgp
+OwogICAgbW9ja0ZldGNoID0gamVzdC5zcHlPbihnbG9iYWwsICJmZXRjaCIp
+IGFzIE1vY2s7CiAgICBtb2NrRmV0Y2gubW9ja1Jlc2V0KCk7CiAgfSk7Cgog
+IGRlc2NyaWJlKCJQT1NქმედXNlcnMuanNvbiAoY3JlYXRlVXNlcikiLCAo
+KSA9PiB7CiAgICAvLyBQT1NU5pON5L2c44Gu44OG44K544OI44Gv5a6J5YWo
+44Gu44Gf44KB44K544Kt44OD44OX44GV44KM44Gm44GE44G+44GZCiAgICBp
+dC5za2lwKCJhbGwgUE9TVCBvcGVyYXRpb24gdGVzdHMgYXJlIHNraXBwZWQg
+Zm9yIHNhZmV0eSIsICgpID0+IHsKICAgICAgLy8gUE9TVOaTjeS9nOOBruOD
+huOCueODiOOBq+OAgeWun+mam+OBrkFQSROBq+WvvuOBpeOBpuWun+ihjOOB
+mOOChOOBqOODh+ODvOOCv+OBjOS9nOaIkOOBleOCjOOBpuOBpeOBvuOBhuOB
+n+OCgeOAgQogICAgICAvLyDpgJrluLjjga/jg6Ljg4Pjgq/nkrDlopPjgafj
+ga7jgZjlrrnmp73jgZnjgovjgYsjgIHniblloLngarjh4bjgrnjg4jnlKgB
+UEnjgqjjg7Pjg4njg53jgqTjg7Pjg4jigpLkvf+eUqOBl+OBvuOBmeOAggog
+ICAgICAvLyBSZWRtaW5lIEFQSeOBrku5Xmp5jgaYjgZnjgZrigIFQT1NU44Oq
+44Kv44Ko44K544OI44Gv5oiQ5Yqf44GZ44KL44Go44K544OG44O844K/44K5
+44Kz44O844OJIDIwMSBDcmVhdGVkIOOBqOS9nOaIkOOBleOCjOOBn+ODquOC
+veODvOOCueOCkui/lOOBpeOBvuOBmeOAggogICAgICAvLwogICAgICAvLyDl
+v4XooIjjg5Hjg6njg6Hjg7zjgr86CiAgICAgIC8vIC0gbG9naW46IOODreOC
+sOOCpOODs0lECiAgICAgIC8vIC0gZmlyc3RuYW1lOiDlkI0KICAgICAgLy8g
+LSBsYXN0bmFtZTog5aeTCiAgICAgIC8vIC0gbWFpbDog44Oh44O844Or44Ki
+44OJ44Os44K5CiAgICAgIC8vIC0gcGFzc3dvcmQ6IOODkeOCueODr+ODvOOD
+ieOBrGdlbmVyYXRlX3Bhc3N3b3Jk44GMZmFsc2Xjga7loLTlkIgpCiAgICAg
+IC8vCiAgICAgIC8vIOOCquODl+OCt+ODp+ODs+ODkeODqeODoeODvOOCvzoK
+ICAgICAgLy8gLSBhdXRoX3NvdXJjZV9pZDog6KqN6Ki85YWDSUQKICAgICAg
+Ly8gLSBtYWlsX25vdGlmaWNhdGlvbjog44Oh44O844Or6YCa55+l6Kit5a6a
+CiAgICAgIC8vIC0gbXVzdF9jaGFuZ2VfcGFzc3dkOiDjg5Hjgrnjg6/jg7zj
+g4nlpInmm7TopoHlkKYKICAgICAgLy8gLSBnZW5lcmF0ZV9wYXNzd29yZDog
+44OR44K544Ov44O844OJ6Ieq5YuV55Sf5oiQCiAgICAgIC8vIC0gYWRtaW46
+IOeuoeeQhuiAheaoqemZkAogICAgICAvLyAtIHN0YXR1czog44K544OG44O8
+44K/44K5ICgxOiDmnInlirksIDI6IOacquaJv+irviwgMzog44Ot44OD44Kv
+KQogICAgICAvLyAtIGN1c3RvbV9maWVsZHM6IOOCq+OCueOCv+ODoOODleOC
+o+ODvOODq+ODieWApAogICAgICAvLwogICAgICAvLyDjgZPjgozjgonjga7j
+g4bjgrnjg4jjgrHjg7zjgrnjgpLntrLnvoXnmoTjgavjg4bjgrnjg4jjgZnj
+govjgZ/jgoHjgavjga/jgIHlkITjgrHjg7zjgrnjgavlv5zjgZjjgZ/jg6Lj
+g4Pjgq/oqK3lrprjgajjg6rjgq/jgqjjgrnjg4jjg5zjg4fjgqPjga7kvZzm
+iJDjgYzlv4XopoHjgafjgZnjgIIKICAgICAgLy8g54++54q244Gn44GvY2xp
+ZW505aSJ5pWw44KC5pyq5L2/55So6K2m5ZGK44GM5Ye644KL5Y+v6IO95oCn
+44GM44GC44KK44G+44GZ44CCCiAgICAgIC8vIOODpuODvOOCtuODvOS9nOaI
+kOaZguOBrumWoumAo+ODh+ODvOOCv+OBruaJseOBhOOCgueiuuiqjeODneOC
+pOODs+ODiOOBp+OBmeOAggogICAgfSk7CiAgfSk7Cn0pOwo=
