@@ -1,6 +1,6 @@
 import { jest, describe, it, beforeEach } from '@jest/globals'; // expect removed
 import type { Mock } from 'jest-mock';
-import { ProjectsClient } from "../../../client/projects.js";
+// import { ProjectsClient } from "../../../client/projects.js"; // Removed
 // import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
 // import * as fixtures from "../../helpers/fixtures.js"; // Unused
 // import config from "../../../config.js"; // Unused
@@ -9,36 +9,35 @@ import { ProjectsClient } from "../../../client/projects.js";
 // import { parseUrl } from "../../helpers/url.js"; // Unused
 
 describe("Projects API (POST)", () => {
-  let client: ProjectsClient; // Assigned but not used in active tests
+  // let client: ProjectsClient; // Removed
   let mockFetch: Mock;
 
   beforeEach(() => {
-    client = new ProjectsClient();
+    // client = new ProjectsClient(); // Removed
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("POST /projects.json (createProject)", () => {
-    // POST操作のテストは安全のためスキップされています
+    // POST処理のテストは安全のためスキップされている
     it.skip("all POST operation tests are skipped for safety", () => {
-      // POST操作のテストは、実際のAPIに対して実行するとデータが作成されてしまうため、
-      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
-      // Redmine APIの仕様として、POSTリクエストは成功するとステータスコード 201 Created と作成されたリソースを返します。
+      // POST処理のテストは、実際のAPIを叩かないように、またはテスト環境でのみ実行するように注意が必要です。
+      // Redmine APIの仕様では、POSTリクエストの成功時は 201 Created が返り、作成されたリソースがレスポンスボディに含まれます。
       //
-      // 必須パラメータ:
+      // 必須フィールド:
       // - name: プロジェクト名
-      // - identifier: プロジェクト識別子（小文字英数字、ダッシュ、アンダースコアのみ）
+      // - identifier: プロジェクト識別子（半角英数字、ハイフン、アンダースコアのみ）
       //
-      // オプションパラメータ:
+      // オプショナルフィールド:
       // - description: プロジェクトの説明
       // - homepage: ホームページURL
-      // - is_public: 公開/非公開フラグ (true/false)
+      // - is_public: 公開/非公開 (true/false)
       // - parent_id: 親プロジェクトのID
-      // - inherit_members: メンバーの継承フラグ (true/false)
+      // - inherit_members: メンバーの継承 (true/false)
       // - default_assigned_to_id: デフォルト担当者ID
       //   - プロジェクトメンバーのユーザーID
       // - default_version_id: デフォルトバージョンID
-      //   - 共有バージョンのID
+      //   - 対象バージョンのID
       // - tracker_ids: トラッカーのID配列
       // - enabled_module_names: 有効モジュール名配列
       //   - 例: boards, calendar, documents, files, gantt,
@@ -46,13 +45,13 @@ describe("Projects API (POST)", () => {
       // - issue_custom_field_ids: カスタムフィールドID配列
       // - custom_field_values: カスタムフィールド値 (id => value)
       //
-      // 作成成功時のレスポンス:
-      // - プロジェクトオブジェクト（IDなどを含む）
-      // - ステータスコード 201 Created
+      // 作成と成功レスポンスの例:
+      // - プロジェクトとWikiの作成（IDが異なる場合）
+      // - ステータス 201 Created
       // - Location ヘッダに作成されたプロジェクトのURL
       //
-      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
-      // 現状ではclient変数も未使用警告が出る可能性があります。
+      // clientのメソッド呼び出し部分でエラーになるため、テスト自体をコメントアウトするか、
+      // jest.fn() などでモック化する必要があるでしょう。
     });
   });
 });
