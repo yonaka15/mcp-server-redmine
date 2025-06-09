@@ -1,6 +1,6 @@
 import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { IssuesClient } from "../../../client/issues.js";
+// import { IssuesClient } from "../../../client/issues.js"; // Removed
 // import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
 // import * as fixtures from "../../helpers/fixtures.js";
 // import config from "../../../config.js";
@@ -9,21 +9,20 @@ import { IssuesClient } from "../../../client/issues.js";
 // import { parseUrl } from "../../helpers/url.js";
 
 describe("Issues API (PUT)", () => {
-  let client: IssuesClient;
+  // let client: IssuesClient; // Removed
   let mockFetch: Mock;
   // const issueId = fixtures.singleIssueResponse.issue.id; // Now fixtures is also unused
 
   beforeEach(() => {
-    client = new IssuesClient();
+    // client = new IssuesClient(); // Removed
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("PUT /issues/:id.json (updateIssue)", () => {
     it.skip("all PUT operation tests are skipped for safety", () => {
-      // PUT操作のテストは、実際のAPIに対して実行するとデータが更新されてしまうため、
-      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
-      // Redmine APIの仕様として、PUTリクエストは成功するとステータスコード 204 No Content を返します。
+      // PUT処理のテストは、実際のAPIを叩かないように、またはテスト環境でのみ実行するように注意が必要です。
+      // Redmine APIの仕様では、PUTリクエストの成功時は 204 No Content が返ります。
       // - project_id: プロジェクトのID（変更不可）
       // - tracker_id: トラッカーのID
       // - status_id: ステータスのID
@@ -36,8 +35,9 @@ describe("Issues API (PUT)", () => {
       // - notes: 注記の追加
       // - private_notes: プライベート注記の追加
       //
-      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
-      // 現状ではclient変数やissueId変数も未使用警告が出る可能性があります。
+      // clientのメソッド呼び出し部分でエラーになるため、テスト自体をコメントアウトするか、
+      // jest.fn() などでモック化する必要があるでしょう。
+      // client.updateIssue(issueId, { subject: 'Updated Subject' }) のように呼び出します。
     });
   });
 });
