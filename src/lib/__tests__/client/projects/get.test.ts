@@ -54,7 +54,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -74,7 +78,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -94,7 +102,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -117,7 +129,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -140,7 +156,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -160,7 +180,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -181,7 +205,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -203,7 +231,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProjects(params); // result not used
+=======
+        /*const result =*/ await client.getProjects(params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -224,7 +256,11 @@ describe("Projects API (GET)", () => {
 
         // Act & Assert
         await expect(
+<<<<<<< HEAD
           client.getProjects({ status: 999 } as unknown as ProjectQueryParams) // Corrected any
+=======
+          client.getProjects({ status: 999 } as unknown as ProjectQueryParams)
+>>>>>>> origin/fix/eslint-errors
         ).rejects.toThrow(RedmineApiError);
       });
 
@@ -332,7 +368,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProject(projectId, params); // result not used
+=======
+        /*const result =*/ await client.getProject(projectId, params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -352,7 +392,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProject(projectId, params); // result not used
+=======
+        /*const result =*/ await client.getProject(projectId, params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -373,7 +417,11 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
+<<<<<<< HEAD
         await client.getProject(projectId, params); // result not used
+=======
+        /*const result =*/ await client.getProject(projectId, params);
+>>>>>>> origin/fix/eslint-errors
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];

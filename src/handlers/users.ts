@@ -3,7 +3,7 @@ import {
   ToolResponse, 
   asNumber, 
   asNumberOrSpecial, 
-  extractPaginationParams,
+  extractPaginationParams, 
   ValidationError
 } from "./types.js";
 import type { 

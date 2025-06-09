@@ -6,7 +6,7 @@ import type { Mock } from 'jest-mock';
 // Define a more specific type for query parameter values
 type QueryParamValue = string | number | boolean | (string | number | boolean)[] | undefined | null;
 
-// テスト用のprotectedメソッドを公開するためのクラス
+// テスト用のprotectedメソッドにアクセス可能な派生クラス
 class TestClient extends BaseClient {
   public async testRequest<T>(path: string, options?: RequestInit): Promise<T> {
     return this.performRequest<T>(path, options);
