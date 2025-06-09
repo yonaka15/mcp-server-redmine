@@ -1,58 +1,59 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { ProjectsClient } from "../../../client/projects.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { RedmineProjectCreate } from "../../../types/index.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { ProjectsClient } from "../../../client/projects.js"; // client is unused
+// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // mockResponse, mockErrorResponse are unused
+// import * as fixtures from "../../helpers/fixtures.js"; // fixtures is unused
+// import config from "../../../config.js"; // config is unused
+// import { RedmineApiError } from "../../../client/base.js"; // RedmineApiError is unused
+// import { RedmineProjectCreate } from "../../../types/index.js"; // RedmineProjectCreate is unused
+// import { parseUrl } from "../../helpers/url.js"; // parseUrl is unused
 
 describe("Projects API (POST)", () => {
-  let client: ProjectsClient;
+  // let client: ProjectsClient; // client is unused
   let mockFetch: Mock;
 
   beforeEach(() => {
-    client = new ProjectsClient();
+    // client = new ProjectsClient(); // client is unused
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("POST /projects.json (createProject)", () => {
-    // POST操作は常にデータ作成を伴うため、全てスキップ
+    // POST操作のテストは安全のためスキップ
     it.skip("all POST operation tests are skipped for safety", () => {
-      // POST操作は常にデータの作成を伴うため、テストをスキップします
-      // Redmine APIの仕様で、POSTリクエストは以下のパラメータを受け付けます：
+      // POST操作のテストケースは実装されていません。
+      // Redmine APIの仕様として、POSTリクエストは実際のデータを作成するため、
+      // テスト環境以外での実行は推奨されません。
       //
-      // 必須パラメータ:
+      // 必須フィールド:
       // - name: プロジェクト名
-      // - identifier: プロジェクト識別子（英数字、ハイフン、アンダースコア）
+      // - identifier: プロジェクト識別子（例: "project-slug", "my_project"）
       //
-      // オプションパラメータ:
+      // オプションフィールド:
       // - description: プロジェクトの説明
       // - homepage: ホームページURL
-      // - is_public: 公開/非公開設定 (true/false)
-      // - parent_id: 親プロジェクトのID
-      // - inherit_members: メンバーの継承設定 (true/false)
+      // - is_public: 公開/非公開プロジェクト (true/false)
+      // - parent_id: 親プロジェクトID
+      // - inherit_members: メンバーの継承 (true/false)
       // - default_assigned_to_id: デフォルトの担当者ID
-      //   - サブプロジェクトでメンバー継承時のみ有効
+      //   - プロジェクトメンバーの誰かのID
       // - default_version_id: デフォルトのバージョンID
-      //   - 既存の共有バージョンのみ指定可能
+      //   - 開かれているバージョンのIDである必要あり
       // - tracker_ids: トラッカーのID配列
-      // - enabled_module_names: モジュール名配列
-      //   - 有効値: boards, calendar, documents, files, gantt,
+      // - enabled_module_names: 有効モジュール名配列
+      //   - 例: boards, calendar, documents, files, gantt,
       //     issue_tracking, news, repository, time_tracking, wiki
       // - issue_custom_field_ids: カスタムフィールドのID配列
       // - custom_field_values: カスタムフィールドの値 (id => value)
       //
-      // 作成時の副作用:
-      // - プロジェクト固有のモジュールの初期化
-      // - メンバーシップの継承（inherit_membersがtrueの場合）
-      // - カスタムフィールドの初期化
-      // - 権限の設定
+      // 作成後のレスポンス:
+      // - プロジェクトメンバーのデフォルトロール
+      // - メンバーの継承（inherit_membersがtrueの場合）
+      // - カスタムフィールドの継承
+      // - 適切な継承
       //
-      // これらの操作は全てデータの作成を伴うため、
-      // テスト環境でも実行すべきではありません。
+      // 本テストスイートでは、POST操作のテストはスキップしています。
+      // 必要に応じて、安全な方法でテストを実装してください。
     });
   });
 });
