@@ -180,7 +180,7 @@ export function createUsersHandlers(context: HandlerContext) {
       try {
         if (!isRedmineUserCreate(args)) {
           // isRedmineUserCreate throws specific validation errors
-           throw new ValidationError("Invalid user creation parameters"); // Fallback, should be caught by guard
+          throw new ValidationError("Invalid user creation parameters"); // Fallback, should be caught by guard
         }
 
         const response = await client.users.createUser(args as RedmineUserCreate);

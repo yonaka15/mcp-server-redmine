@@ -26,7 +26,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act
-      const result = await client.getTimeEntries();
+      const result = await client.getTimeEntries(); // Keep result, it is asserted
 
       // Assert
       const expectedUrl = new URL("/time_entries.json", config.redmine.host);
@@ -55,7 +55,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        await client.getTimeEntries(params); // result removed
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -77,7 +77,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        await client.getTimeEntries(params); // result removed
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -99,7 +99,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        await client.getTimeEntries(params); // result removed
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -118,7 +118,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act & Assert
-      await expect(client.getTimeEntries({ invalid_param: "value" } as any))
+      await expect(client.getTimeEntries({ invalid_param: "value" } as unknown as TimeEntryQueryParams)) // any corrected
         .rejects.toThrow(RedmineApiError);
     });
   });
@@ -133,7 +133,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act
-      const result = await client.getTimeEntry(timeEntryId);
+      const result = await client.getTimeEntry(timeEntryId); // Keep result, it is asserted
 
       // Assert
       const expectedUrl = new URL(

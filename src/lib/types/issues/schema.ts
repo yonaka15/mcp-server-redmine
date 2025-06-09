@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-// バリデーション関数
+// インクルード可能な値のリスト（GET /issues.json）
 export function validateListIssueIncludes(include: string): boolean {
   const LIST_ISSUE_INCLUDES = ['attachments', 'relations'] as const;
   const includes = include.split(',');
-  return includes.every(inc => LIST_ISSUE_INCLUDES.includes(inc as any));
+  return includes.every(inc => LIST_ISSUE_INCLUDES.includes(inc as typeof LIST_ISSUE_INCLUDES[number]));
 }
 
+// インクルード可能な値のリスト（GET /issues/:id.json）
 export function validateShowIssueIncludes(include: string): boolean {
   const SHOW_ISSUE_INCLUDES = [
     'children',
@@ -18,40 +19,40 @@ export function validateShowIssueIncludes(include: string): boolean {
     'allowed_statuses'
   ] as const;
   const includes = include.split(',');
-  return includes.every(inc => SHOW_ISSUE_INCLUDES.includes(inc as any));
+  return includes.every(inc => SHOW_ISSUE_INCLUDES.includes(inc as typeof SHOW_ISSUE_INCLUDES[number]));
 }
 
-// 基本的なクエリパラメータのスキーマ
+// 基本的なクエリパラメータスキーマ
 const baseQuerySchema = z.object({
   offset: z.number().int().min(0).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   sort: z.string().optional(),
-  include: z.string().transform(str => str.split(",").filter(Boolean)).optional(),
+  include: z.string().transform(str => str.split(",").filter(Boolean)).optional(), // カンマ区切り文字列を配列に変換
   issue_id: z.union([z.number().int(), z.string()]).optional(),
   project_id: z.union([z.number().int(), z.string()]).optional(),
-  subproject_id: z.string().optional(),
+  subproject_id: z.string().optional(), // e.g., '!*' or project_identifier
   tracker_id: z.number().int().optional(),
   status_id: z.union([
     z.literal("open"),
     z.literal("closed"),
-    z.literal("*"),
+    z.literal("*"), // all
     z.number().int()
   ]).optional(),
   assigned_to_id: z.union([z.number().int(), z.literal("me")]).optional(),
-  parent_id: z.number().int().optional(),
-  created_on: z.string().optional(),
+  parent_id: z.number().int().optional(), // Redmine 4.2.0以降 parent_issue_id
+  created_on: z.string().optional(), // e.g., ">=2023-01-01", "<=2023-01-31", "><2023-01-01|2023-01-31"
   updated_on: z.string().optional(),
 });
 
-// カスタムフィールドを含むクエリパラメータのスキーマ
+// カスタムフィールドを含む可能性のあるクエリパラメータスキーマ
 export const IssueQuerySchema = baseQuerySchema.catchall(z.union([z.string(), z.number()]));
 
 const RedmineRelationSchema = z.object({
   id: z.number(),
   issue_id: z.number(),
   issue_to_id: z.number(),
-  relation_type: z.string(),
-  delay: z.number().nullable(),
+  relation_type: z.string(), // e.g., "relates", "duplicates", "blocks"
+  delay: z.number().nullable(), // 遅延日数
 });
 
 export const RedmineIssueSchema = z.object({
@@ -67,7 +68,7 @@ export const RedmineIssueSchema = z.object({
   status: z.object({
     id: z.number(),
     name: z.string(),
-    is_closed: z.boolean().optional(),
+    is_closed: z.boolean().optional(), // Added based on typical Redmine response
   }),
   priority: z.object({
     id: z.number(),
@@ -81,31 +82,35 @@ export const RedmineIssueSchema = z.object({
     id: z.number(),
     name: z.string(),
   }).optional(),
+  // category: z.object({ id: z.number(), name: z.string() }).optional(),
   subject: z.string(),
   description: z.string().optional(),
-  start_date: z.string().optional(),
-  due_date: z.string().nullable(),
+  start_date: z.string().optional(), // YYYY-MM-DD
+  due_date: z.string().nullable(), // YYYY-MM-DD or null
   done_ratio: z.number(),
+  // is_private: z.boolean().optional(),
   estimated_hours: z.number().nullable(),
-  spent_hours: z.number().optional(),
-  total_estimated_hours: z.number().nullable(),
-  total_spent_hours: z.number().optional(),
+  spent_hours: z.number().optional(), // Redmine 3. Spent time for issue
+  total_estimated_hours: z.number().nullable(), // Redmine 3. Total estimated hours for issue (including subtasks)
+  total_spent_hours: z.number().optional(), // Redmine 3. Total spent hours for issue (including subtasks)
   custom_fields: z.array(
     z.object({
       id: z.number(),
       name: z.string(),
-      value: z.union([z.string(), z.array(z.string())]),
+      value: z.union([z.string(), z.array(z.string())]), // Can be string or array of strings
     })
   ).optional(),
-  created_on: z.string(),
-  updated_on: z.string(),
-  closed_on: z.string().nullable(),
-  notes: z.string().optional(),
-  private_notes: z.boolean().optional(),
+  created_on: z.string(), // datetime
+  updated_on: z.string(), // datetime
+  closed_on: z.string().nullable(), // datetime or null
+  // Optional fields based on 'include' parameter
+  notes: z.string().optional(), // for journals
+  private_notes: z.boolean().optional(), // for journals if the user has permission
   is_private: z.boolean().optional(),
   watcher_user_ids: z.array(z.number()).optional(),
   relations: z.array(RedmineRelationSchema).optional(),
-  parent: z.object({
+  parent: z.object({ // parent issue id
     id: z.number(),
   }).optional(),
+  // children: z.array(RedmineIssueSchema).optional(), // Recursive, handle carefully or omit if not directly nesting
 });

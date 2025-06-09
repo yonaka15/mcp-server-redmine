@@ -5,7 +5,7 @@ import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
 import * as fixtures from "../../helpers/fixtures.js";
 import config from "../../../config.js";
 import { RedmineApiError } from "../../../client/base.js";
-import { ProjectQueryParams } from "../../../types/index.js";
+import { ProjectQueryParams } from "../../../types/index.js"; // Corrected import
 import { parseUrl } from "../../helpers/url.js";
 
 describe("Projects API (GET)", () => {
@@ -26,7 +26,7 @@ describe("Projects API (GET)", () => {
       );
 
       // Act
-      const result = await client.getProjects();
+      const result = await client.getProjects(); // Keep result here as it's asserted
 
       // Assert
       const expectedUrl = new URL("/projects.json", config.redmine.host);
@@ -54,7 +54,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -74,7 +74,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -94,7 +94,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -117,7 +117,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -140,7 +140,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -160,7 +160,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -181,7 +181,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -203,7 +203,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProjects(params);
+        await client.getProjects(params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -224,7 +224,7 @@ describe("Projects API (GET)", () => {
 
         // Act & Assert
         await expect(
-          client.getProjects({ status: 999 } as any)
+          client.getProjects({ status: 999 } as unknown as ProjectQueryParams) // Corrected any
         ).rejects.toThrow(RedmineApiError);
       });
 
@@ -276,7 +276,7 @@ describe("Projects API (GET)", () => {
       );
 
       // Act
-      const result = await client.getProject(projectId);
+      const result = await client.getProject(projectId); // Keep result as it's asserted
 
       // Assert
       const expectedUrl = new URL(
@@ -303,7 +303,7 @@ describe("Projects API (GET)", () => {
       );
 
       // Act
-      const result = await client.getProject(projectIdentifier);
+      const result = await client.getProject(projectIdentifier); // Keep result as it's asserted
 
       // Assert
       const expectedUrl = new URL(
@@ -332,7 +332,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProject(projectId, params);
+        await client.getProject(projectId, params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -352,7 +352,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProject(projectId, params);
+        await client.getProject(projectId, params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -373,7 +373,7 @@ describe("Projects API (GET)", () => {
         );
 
         // Act
-        const result = await client.getProject(projectId, params);
+        await client.getProject(projectId, params); // result not used
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -434,4 +434,3 @@ describe("Projects API (GET)", () => {
     });
   });
 });
-

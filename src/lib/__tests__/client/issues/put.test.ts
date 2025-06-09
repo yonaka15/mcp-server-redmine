@@ -1,17 +1,17 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
 import { IssuesClient } from "../../../client/issues.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { RedmineIssueUpdate } from "../../../types/index.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
+// import * as fixtures from "../../helpers/fixtures.js";
+// import config from "../../../config.js";
+// import { RedmineApiError } from "../../../client/base.js";
+// import { RedmineIssueUpdate } from "../../../types/index.js";
+// import { parseUrl } from "../../helpers/url.js";
 
 describe("Issues API (PUT)", () => {
   let client: IssuesClient;
   let mockFetch: Mock;
-  const issueId = fixtures.singleIssueResponse.issue.id;
+  // const issueId = fixtures.singleIssueResponse.issue.id; // Now fixtures is also unused
 
   beforeEach(() => {
     client = new IssuesClient();
@@ -20,24 +20,24 @@ describe("Issues API (PUT)", () => {
   });
 
   describe("PUT /issues/:id.json (updateIssue)", () => {
-    // PUT操作は常にデータ変更の可能性があるため、全てスキップ
     it.skip("all PUT operation tests are skipped for safety", () => {
-      // PUT操作は常にデータ変更の可能性があるため、テストをスキップします
-      // Redmine APIの仕様で、PUTリクエストは以下のパラメータを受け付けます：
-      // - project_id: プロジェクトの変更
-      // - tracker_id: トラッカーの変更
-      // - status_id: ステータスの変更
-      // - subject: 題名の変更
-      // - description: 説明の変更
-      // - priority_id: 優先度の変更
-      // - assigned_to_id: 担当者の変更
-      // - category_id: カテゴリの変更
-      // - fixed_version_id: 対象バージョンの変更
-      // - notes: コメントの追加
-      // - private_notes: プライベートノートフラグ
+      // PUT操作のテストは、実際のAPIに対して実行するとデータが更新されてしまうため、
+      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
+      // Redmine APIの仕様として、PUTリクエストは成功するとステータスコード 204 No Content を返します。
+      // - project_id: プロジェクトのID（変更不可）
+      // - tracker_id: トラッカーのID
+      // - status_id: ステータスのID
+      // - subject: チケットの件名
+      // - description: 説明
+      // - priority_id: 優先度のID
+      // - assigned_to_id: 担当者のID
+      // - category_id: カテゴリのID
+      // - fixed_version_id: 対象バージョンのID
+      // - notes: 注記の追加
+      // - private_notes: プライベート注記の追加
       //
-      // これらの操作は全てデータの変更を伴うため、テスト環境でも
-      // 実行すべきではありません。
+      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
+      // 現状ではclient変数やissueId変数も未使用警告が出る可能性があります。
     });
   });
 });
