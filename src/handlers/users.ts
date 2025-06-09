@@ -2,8 +2,8 @@ import {
   HandlerContext, 
   ToolResponse, 
   asNumber, 
-  asNumberOrSpecial,
-  extractPaginationParams,
+  asNumberOrSpecial, 
+  extractPaginationParams, 
   ValidationError
 } from "./types.js";
 import type { 
@@ -180,7 +180,7 @@ export function createUsersHandlers(context: HandlerContext) {
       try {
         if (!isRedmineUserCreate(args)) {
           // isRedmineUserCreate throws specific validation errors
-           throw new ValidationError("Invalid user creation parameters"); // Fallback, should be caught by guard
+          throw new ValidationError("Invalid user creation parameters"); // Fallback, should be caught by guard
         }
 
         const response = await client.users.createUser(args as RedmineUserCreate);
@@ -216,7 +216,7 @@ export function createUsersHandlers(context: HandlerContext) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id: _, ...updateData } = args; // Mark id as unused
 
-        const response = await client.users.updateUser(id, updateData as RedmineUserUpdate);
+        await client.users.updateUser(id, updateData as RedmineUserUpdate);
         // Assuming updateUser doesn't return the full user object in the same way as create
         // If it does, and you need to format it, adjust accordingly.
         // For now, a simple success message based on the operation succeeding.
