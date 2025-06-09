@@ -62,7 +62,8 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        /*const result =*/ await client.getIssues(params); // result is unused
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const result = await client.getIssues(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -86,7 +87,8 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        /*const result =*/ await client.getIssues(params); // result is unused
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const result = await client.getIssues(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -109,7 +111,8 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        /*const result =*/ await client.getIssues(params); // result is unused
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const result = await client.getIssues(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -132,7 +135,8 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        /*const result =*/ await client.getIssues(params); // result is unused
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const result = await client.getIssues(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -151,7 +155,7 @@ describe("Issues API (GET)", () => {
       );
 
       // Act & Assert
-      await expect(client.getIssues({ invalid_param: "value" } as unknown as IssueListParams)) // Used unknown to bypass type checking for test
+      await expect(client.getIssues({ invalid_param: "value" } as Record<string, unknown> as IssueListParams)) // Used unknown to bypass type checking for test
         .rejects.toThrow(RedmineApiError);
     });
   });
