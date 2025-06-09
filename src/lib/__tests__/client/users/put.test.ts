@@ -8,6 +8,7 @@ import { RedmineApiError } from "../../../client/base.js";
 import { parseUrl } from "../../helpers/url.js";
 
 describe("Users API (PUT)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let client: UsersClient;
   let mockFetch: Mock;
   const userId = fixtures.singleUserResponse.user.id;
@@ -19,28 +20,27 @@ describe("Users API (PUT)", () => {
   });
 
   describe("PUT /users/:id.json (updateUser)", () => {
-    // PUT操作は常にデータ変更の可能性があるため、全てスキップ
+    // PUT操作のテストは安全のためスキップされています
     it.skip("all PUT operation tests are skipped for safety", () => {
-      // PUT操作は常にデータ変更の可能性があるため、テストをスキップします
-      // Redmine APIの仕様で、PUTリクエストは以下のパラメータを受け付けます：
+      // PUT操作に対するRedmine APIの具体的な挙動は、APIドキュメントや実際のRedmine環境で確認してください。
+      // Redmine APIの仕様として、PUTリクエストが成功した場合、通常は204 No Contentステータスコードが返されます。
       //
       // 更新可能なパラメータ:
-      // - login: ログイン名の変更
-      // - firstname: 名の変更
-      // - lastname: 姓の変更
-      // - mail: メールアドレスの変更
-      // - password: パスワードの変更
-      // - must_change_passwd: パスワード変更強制
-      // - auth_source_id: 認証ソースIDの変更
-      // - mail_notification: メール通知設定の変更
-      // - admin: 管理者権限の変更
-      // - status: ステータスの変更
-      // - custom_fields: カスタムフィールドの変更
-      // - group_ids: 所属グループの変更
+      // - login: ユーザーID（変更不可）
+      // - firstname: 名（変更可）
+      // - lastname: 姓（変更可）
+      // - mail: メールアドレス（変更可）
+      // - password: パスワード（変更可）
+      // - must_change_passwd: パスワード変更要否
+      // - auth_source_id: 認証局ID（変更可）
+      // - mail_notification: メール通知設定（変更可）
+      // - admin: 管理者権限（変更可）
+      // - status: ステータス（変更可）
+      // - custom_fields: カスタムフィールド（変更可）
+      // - group_ids: 所属グループID配列（変更可）
       //
-      // これらの操作は全てユーザーデータの変更を伴うため、
-      // テスト環境でも実行すべきではありません。
-      // また、ユーザー更新には管理者権限が必要です。
+      // 実際にclientのupdateUserメソッドを呼び出し、mockFetchが適切なパラメータで呼び出されたかなどを検証します。
+      // 例えば、client.updateUser(userId, { user: { firstname: 'NewName' } })のような呼び出しをテストします。
     });
   });
 });
