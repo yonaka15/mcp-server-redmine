@@ -1,16 +1,16 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals'; // expect removed
 import type { Mock } from 'jest-mock';
 import { UsersClient } from "../../../client/users.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
+// import * as fixtures from "../../helpers/fixtures.js"; // Unused due to userId being unused
+// import config from "../../../config.js"; // Unused
+// import { RedmineApiError } from "../../../client/base.js"; // Unused
+// import { parseUrl } from "../../helpers/url.js"; // Unused
 
 describe("Users API (DELETE)", () => {
-  let client: UsersClient;
+  let client: UsersClient; // Assigned but not used in active tests
   let mockFetch: Mock;
-  const userId = fixtures.singleUserResponse.user.id;
+  // const userId = fixtures.singleUserResponse.user.id; // Unused
 
   beforeEach(() => {
     client = new UsersClient();
@@ -19,27 +19,28 @@ describe("Users API (DELETE)", () => {
   });
 
   describe("DELETE /users/:id.json (deleteUser)", () => {
-    // DELETE操作は常にデータ変更の可能性があるため、全てスキップ
+    // DELETE操作のテストは安全のためスキップされています
     it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE操作は常にデータの削除を伴うため、テストをスキップします
-      // Redmine APIの仕様で、DELETEリクエストは以下の影響を及ぼします：
+      // DELETE操作のテストは、実際のAPIに対して実行するとデータが削除されてしまうため、
+      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
+      // Redmine APIの仕様として、DELETEリクエストは成功するとステータスコード 204 No Content を返します。
       //
-      // データへの影響:
-      // - ユーザーアカウントの完全な削除
-      // - ユーザーの活動履歴の削除
-      // - プロジェクトメンバーシップの削除
-      // - カスタムフィールド値の削除
-      // - グループメンバーシップの削除
+      // 削除の成功例:
+      // - 一般ユーザーの削除
+      // - 管理者ユーザーの削除（実行ユーザーの権限による）
+      // - プロジェクトメンバーシップを持つユーザーの削除
+      // - カスタムフィールド値を持つユーザーの削除
+      // - APIキーを持つユーザーの削除
       //
-      // 関連データへの影響:
-      // - ウォッチャー設定の削除
-      // - 担当チケットの担当者解除
-      // - 作成したWikiページの作者情報の更新
-      // - 作成したニュースの作者情報の更新
+      // 削除の失敗例:
+      // - 存在しないユーザーID
+      // - 自分自身を削除しようとする場合
+      // - Wikiページを作成したユーザーの削除とページの扱い
+      // - チケットを作成したユーザーの削除とチケットの扱い
       //
-      // これらの操作は全てデータの削除や変更を伴うため、
-      // テスト環境でも実行すべきではありません。
-      // また、ユーザー削除には管理者権限が必要です。
+      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とシナリオが必要です。
+      // 現状ではclient変数やuserId変数も未使用警告が出る可能性があります。
+      // ユーザー削除時の関連データの扱い（匿名化など）も確認ポイントです。
     });
   });
 });
