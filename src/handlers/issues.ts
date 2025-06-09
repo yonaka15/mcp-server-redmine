@@ -1,5 +1,3 @@
-import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   HandlerContext,
   ToolResponse,
@@ -13,15 +11,6 @@ import type {
   RedmineIssueUpdate,
   IssueListParams,
 } from "../lib/types/index.js";
-import { 
-  ISSUE_LIST_TOOL, 
-  ISSUE_CREATE_TOOL, 
-  ISSUE_UPDATE_TOOL, 
-  ISSUE_DELETE_TOOL, 
-  ISSUE_ADD_WATCHER_TOOL, 
-  ISSUE_REMOVE_WATCHER_TOOL 
-} from '../tools/issues.js';
-import { IssueQuerySchema } from '../lib/types/issues/schema.js';
 
 /**
  * Creates handlers for issue-related operations
@@ -104,7 +93,6 @@ export function createIssuesHandlers(context: HandlerContext) {
         };
       } catch (error) {
         // Handle validation errors specifically
-        const isValidationError = error instanceof ValidationError;
         return {
           content: [
             {
