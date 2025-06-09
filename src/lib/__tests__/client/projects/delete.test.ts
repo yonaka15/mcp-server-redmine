@@ -1,57 +1,56 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { ProjectsClient } from "../../../client/projects.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { ProjectsClient } from "../../../client/projects.js"; // client is unused
+// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // mockResponse, mockErrorResponse are unused
+// import * as fixtures from "../../helpers/fixtures.js"; // fixtures is unused
+// import config from "../../../config.js"; // config is unused
+// import { RedmineApiError } from "../../../client/base.js"; // RedmineApiError is unused
+// import { parseUrl } from "../../helpers/url.js"; // parseUrl is unused
 
 describe("Projects API (DELETE)", () => {
-  let client: ProjectsClient;
+  // let client: ProjectsClient; // client is unused
   let mockFetch: Mock;
 
   beforeEach(() => {
-    client = new ProjectsClient();
+    // client = new ProjectsClient(); // client is unused
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("DELETE /projects/:id.json (deleteProject)", () => {
-    // DELETE操作は常にデータ削除を伴うため、全てスキップ
+    // DELETE操作のテストは安全のためスキップ
     it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE操作は常にデータの削除を伴うため、テストをスキップします
-      // Redmine APIの仕様で、DELETEリクエストは以下の影響を及ぼします：
+      // DELETE操作のテストケースは実装されていません。
+      // Redmine APIの仕様として、DELETEリクエストは実際のデータを削除するため、
+      // テスト環境以外での実行は推奨されません。
       //
-      // 1. プロジェクトの完全な削除
-      //    - プロジェクトの基本情報
-      //    - プロジェクトの設定情報
+      // 1. プロジェクトの依存関係の確認
+      //    - プロジェクトのサブプロジェクト
+      //    - プロジェクトの課題
       //    - カスタムフィールドの値
       //
-      // 2. 関連データの削除
-      //    - プロジェクトのチケット
+      // 2. 関連データの削除または変更
       //    - プロジェクトのWiki
-      //    - プロジェクトのフォーラム
       //    - プロジェクトのニュース
-      //    - プロジェクトの文書
       //    - プロジェクトのファイル
-      //    - プロジェクトのリポジトリ設定
+      //    - プロジェクトのメッセージ
+      //    - プロジェクトの作業時間
+      //    - プロジェクトのバージョン
       //
-      // 3. メンバーシップの削除
-      //    - プロジェクトメンバーの割り当て解除
-      //    - プロジェクト固有のロール設定
-      //    - ウォッチャーの設定
+      // 3. プロジェクトメンバーの扱い
+      //    - プロジェクトメンバーの関連付け解除
+      //    - ユーザーのプロジェクト関連情報
+      //    - グループのプロジェクト関連情報
       //
-      // 4. サブプロジェクトへの影響
-      //    - 親プロジェクトが削除される場合、サブプロジェクトは事前に
-      //      削除しておく必要があります
-      //    - それ以外の場合、サブプロジェクトの存在下での削除は失敗します
+      // 4. 削除不可能なプロジェクトの考慮
+      //    - 親プロジェクトが存在する場合、子プロジェクトは削除できない場合がある
+      //    - 削除権限がない場合
       //
-      // 5. メール通知
-      //    - 削除通知がプロジェクトメンバーに送信される可能性
+      // 5. テスト戦略
+      //    - 実際のプロジェクト削除ではなく、モックサーバー等でレスポンスをシミュレートする
       //
-      // これらの操作は重要なデータの完全な削除を伴うため、
-      // テスト環境でも実行すべきではありません。
+      // 本テストスイートでは、DELETE操作のテストはスキップしています。
+      // 必要に応じて、安全な方法でテストを実装してください。
     });
   });
 });
