@@ -2,7 +2,7 @@ import { RedmineErrorResponse } from "../types/common.js";
 import config from "../config.js";
 
 /**
- * Redmine API クライアントエラー
+ * Redmine APIエラークラス
  */
 export class RedmineApiError extends Error {
   constructor(
@@ -15,12 +15,15 @@ export class RedmineApiError extends Error {
   }
 }
 
+// Define a more specific type for query parameter values
+type QueryParamValue = string | number | boolean | Date | (string | number | boolean)[] | undefined | null;
+
 /**
- * Redmine API クライアント
+ * Redmine API クライアントベース
  */
 export class BaseClient {
   /**
-   * Redmine APIにリクエストを送信
+   * Redmine APIへのリクエストを実行
    */
   protected async performRequest<T>(
     path: string,
@@ -28,7 +31,7 @@ export class BaseClient {
   ): Promise<T> {
     const url = new URL(path, config.redmine.host);
     
-    // デフォルトのリクエストオプション
+    // デフォルトリクエストオプション
     const defaultOptions: RequestInit = {
       method: 'GET',
       headers: {
@@ -37,10 +40,10 @@ export class BaseClient {
         Accept: "application/json",
       },
       // タイムアウトの設定
-      signal: AbortSignal.timeout(30000), // 30秒
+      // signal: AbortSignal.timeout(30000), // 30秒 - Temporarily commented out for compatibility
     };
 
-    // オプションのマージ（ヘッダーは個別にマージ）
+    // オプションのマージ（引数のoptionsで上書き）
     const requestOptions: RequestInit = {
       ...defaultOptions,
       ...options,
@@ -53,27 +56,27 @@ export class BaseClient {
     try {
       const response = await fetch(url.toString(), requestOptions);
 
-      // エラーレスポンスの詳細なハンドリング
+      // レスポンスステータスがエラーの場合
       if (!response.ok) {
-        let errorMessage: string[];
+        let errorMessages: string[];
         const contentType = response.headers.get("content-type");
 
         if (contentType?.includes("application/json")) {
           try {
             const errorResponse = await response.json() as RedmineErrorResponse;
-            errorMessage = errorResponse.errors || ["Unknown error"];
+            errorMessages = errorResponse.errors || ["Unknown error"];
           } catch {
-            errorMessage = [`Failed to parse error response: ${await response.text() || "Empty response"}`];
+            errorMessages = [`Failed to parse error response: ${await response.text() || "Empty response"}`];
           }
         } else {
-          // JSONでない場合はテキストとして読み取り
-          errorMessage = [await response.text() || "Unknown error"];
+          // JSONでない場合はテキストとしてエラーメッセージを取得
+          errorMessages = [await response.text() || "Unknown error"];
         }
 
         throw new RedmineApiError(
           response.status,
           response.statusText,
-          errorMessage
+          errorMessages
         );
       }
 
@@ -82,7 +85,7 @@ export class BaseClient {
         return {} as T;
       }
 
-      // レスポンスのパース
+      // レスポンスのJSONをパース
       try {
         return await response.json() as T;
       } catch (error) {
@@ -93,7 +96,7 @@ export class BaseClient {
         );
       }
     } catch (error) {
-      // ネットワークエラーやタイムアウトの処理
+      // ネットワークエラーやその他のfetchエラー
       if (error instanceof RedmineApiError) {
         throw error;
       }
@@ -108,20 +111,20 @@ export class BaseClient {
   /**
    * クエリパラメータのエンコード
    */
-  protected encodeQueryParams(params: Record<string, any>): string {
+  protected encodeQueryParams(params: Record<string, QueryParamValue>): string { // Changed 'any' to 'QueryParamValue'
     const searchParams = new URLSearchParams();
 
-    // nullやundefinedの値は除外
+    // nullやundefinedのキーは除外
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
           // 配列の場合はカンマ区切りの文字列として設定
           searchParams.set(key, value.join(','));
         } else if (value instanceof Date) {
-          // 日付型の場合はYYYY-MM-DD形式に変換
+          // Date型の場合はYYYY-MM-DD形式に変換
           searchParams.set(key, value.toISOString().split('T')[0]);
         } else if (typeof value === 'object') {
-          // オブジェクトの場合は文字列化
+          // オブジェクトの場合はJSON文字列化
           searchParams.set(key, JSON.stringify(value));
         } else {
           searchParams.set(key, value.toString());

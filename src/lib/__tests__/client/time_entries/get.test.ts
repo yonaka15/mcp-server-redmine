@@ -1,12 +1,12 @@
 import { jest, expect, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { TimeEntriesClient } from "../../../client/time_entries.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { TimeEntryQueryParams } from "../../../types/time_entries/schema.js";
-import { parseUrl } from "../../helpers/url.js";
+import { TimeEntriesClient } from '../../../client/time_entries.js';
+import { mockResponse, mockErrorResponse } from '../../helpers/mocks.js';
+import * as fixtures from '../../helpers/fixtures.js';
+import config from '../../../config.js';
+import { RedmineApiError } from '../../../client/base.js';
+import { TimeEntryQueryParams } from '../../../types/time_entries/schema.js'; // Corrected import path and type name
+import { parseUrl } from '../../helpers/url.js';
 
 describe("Time Entries API (GET)", () => {
   let client: TimeEntriesClient;
@@ -26,7 +26,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act
-      const result = await client.getTimeEntries();
+      const result = await client.getTimeEntries(); // Keep result, it is asserted
 
       // Assert
       const expectedUrl = new URL("/time_entries.json", config.redmine.host);
@@ -55,7 +55,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        /*const result =*/ await client.getTimeEntries(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -77,7 +77,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        /*const result =*/ await client.getTimeEntries(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -99,7 +99,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        /*const result =*/ await client.getTimeEntries(params); // result is unused
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -118,7 +118,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act & Assert
-      await expect(client.getTimeEntries({ invalid_param: "value" } as any))
+      await expect(client.getTimeEntries({ invalid_param: "value" } as unknown as TimeEntryQueryParams)) // Use unknown to bypass type checking for test
         .rejects.toThrow(RedmineApiError);
     });
   });
@@ -133,7 +133,7 @@ describe("Time Entries API (GET)", () => {
       );
 
       // Act
-      const result = await client.getTimeEntry(timeEntryId);
+      const result = await client.getTimeEntry(timeEntryId); // Keep result, it is asserted
 
       // Assert
       const expectedUrl = new URL(

@@ -76,13 +76,13 @@ export const ISSUE_LIST_TOOL: Tool = {
       created_on: {
         type: "string",
         description: "Filter by creation date like >=2024-01-01",
-        pattern: "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(\\|\\d{4}-\\d{2}-\\d{2})?$",
+        pattern: "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(\\\\|\\d{4}-\\d{2}-\\d{2})?$",
       },
       updated_on: {
         type: "string",
         description: "Filter by update date like >=2024-01-01T00:00:00Z",
         pattern:
-          "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?(\\|\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?)?$",
+          "^(>=|<=|><)?\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?(\\\\|\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?)?$",
       },
       // Custom fields
       additionalProperties: {
@@ -359,5 +359,29 @@ export const ISSUE_REMOVE_WATCHER_TOOL: Tool = {
       },
     },
     required: ["issue_id", "user_id"],
+  },
+};
+
+// Get issue tool
+export const ISSUE_GET_TOOL: Tool = {
+  name: "get_issue",
+  description:
+    "Get a specific issue by its ID. " +
+    "Returns detailed information about the issue. " +
+    "Available since Redmine 1.0",
+  inputSchema: {
+    type: "object",
+    properties: {
+      id: {
+        type: "number",
+        description: "ID of the issue to retrieve",
+      },
+      include: {
+        type: "string",
+        description:
+          "Comma-separated list of associations to include (e.g., children, attachments, relations, journals, watchers)",
+      },
+    },
+    required: ["id"],
   },
 };
