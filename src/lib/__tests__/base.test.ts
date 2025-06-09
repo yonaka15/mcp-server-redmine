@@ -3,13 +3,16 @@ import { BaseClient } from '../client/base.js';
 import { mockResponse, mockErrorResponse } from './helpers/mocks.js';
 import type { Mock } from 'jest-mock';
 
-// テスト用にprotectedメソッドを公開したクラス
+// Define a more specific type for query parameter values
+type QueryParamValue = string | number | boolean | (string | number | boolean)[] | undefined | null;
+
+// テスト用のprotectedメソッドにアクセス可能な派生クラス
 class TestClient extends BaseClient {
   public async testRequest<T>(path: string, options?: RequestInit): Promise<T> {
     return this.performRequest<T>(path, options);
   }
 
-  public testEncodeParams(params: Record<string, any>): string {
+  public testEncodeParams(params: Record<string, QueryParamValue>): string {
     return this.encodeQueryParams(params);
   }
 }
@@ -63,7 +66,7 @@ describe('BaseClient', () => {
   describe('encodeQueryParams', () => {
     it('encodes query parameters correctly', () => {
       // Arrange
-      const params = {
+      const params: Record<string, QueryParamValue> = { // Ensure params type matches
         status_id: 'open',
         assigned_to_id: 1,
         include: ['attachments', 'journals']
@@ -87,7 +90,7 @@ describe('BaseClient', () => {
 
     it('handles null and undefined values', () => {
       // Arrange
-      const params = {
+      const params: Record<string, QueryParamValue> = { // Ensure params type matches
         status_id: 'open',
         assigned_to_id: undefined,
         project_id: null

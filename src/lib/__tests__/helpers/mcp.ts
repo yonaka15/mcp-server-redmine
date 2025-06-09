@@ -1,27 +1,27 @@
-import { 
-  CallToolResult, 
-  TextContent, 
-  ImageContent, 
+import {
+  CallToolResult,
+  TextContent,
+  ImageContent,
   EmbeddedResource,
-  TextResourceContents,
-  BlobResourceContents
+  TextResourceContents
+  // BlobResourceContents // Removed as it's unused
 } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Asserts that a response conforms to the MCP CallToolResult schema
  */
 export function assertMcpToolResponse(response: unknown): void {
-  // 構造の検証
+  // 全体構造の検証
   expect(response).toHaveProperty('content');
   expect(response).toHaveProperty('isError');
   
   const typedResponse = response as CallToolResult;
   
-  // コンテンツ配列の検証
+  // content配列の検証
   expect(Array.isArray(typedResponse.content)).toBe(true);
   expect(typedResponse.content.length).toBeGreaterThan(0);
   
-  // 各コンテンツアイテムの検証
+  // 各contentアイテムの検証
   typedResponse.content.forEach(item => {
     expect(item).toHaveProperty('type');
     
@@ -39,15 +39,19 @@ export function assertMcpToolResponse(response: unknown): void {
         expect(typeof (item as ImageContent).mimeType).toBe('string');
         break;
         
-      case 'resource':
+      case 'resource': { // Added block scope for lexical declaration
         expect(item).toHaveProperty('resource');
-        const resourceItem = item as EmbeddedResource;
+        const resourceItem = item as EmbeddedResource; // Lexical declaration
         expect(resourceItem.resource).toHaveProperty('uri');
         if ('text' in resourceItem.resource) {
           expect(typeof resourceItem.resource.text).toBe('string');
         } else {
-          expect(typeof resourceItem.resource.blob).toBe('string');
+          expect(typeof (resourceItem.resource as { blob: string }).blob).toBe('string'); // Added type assertion for blob
         }
+        break;
+      }
+      default:
+        // Optionally handle unknown types or let it pass if other types are allowed
         break;
     }
   });
@@ -75,8 +79,8 @@ function createImageContent(content: string): ImageContent {
 }
 
 function createResourceContent(content: string): EmbeddedResource {
-  const resource: TextResourceContents = {
-    uri: content,
+  const resource: TextResourceContents = { // Explicitly type resource
+    uri: content, // Assuming content is URI for resource for this helper
     mimeType: "text/plain",
     text: content
   };

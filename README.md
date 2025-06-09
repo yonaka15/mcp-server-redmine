@@ -1,12 +1,9 @@
-[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/yonaka15-mcp-server-redmine-badge.png)](https://mseep.ai/app/yonaka15-mcp-server-redmine)
-
 # Redmine MCP Server
 [![smithery badge](https://smithery.ai/badge/@yonaka15/mcp-server-redmine)](https://smithery.ai/server/@yonaka15/mcp-server-redmine)
 
 This is a Model Context Protocol (MCP) server implementation for Redmine. It integrates with Redmine's REST API to provide ticket and project information to LLMs.
 
 <a href="https://glama.ai/mcp/servers/55eg9u36cg"><img width="380" height="200" src="https://glama.ai/mcp/servers/55eg9u36cg/badge" alt="Redmine Server MCP server" /></a>
-[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/yonaka15-mcp-server-redmine-badge.png)](https://mseep.ai/app/yonaka15-mcp-server-redmine)
 
 ## Features
 
@@ -169,17 +166,17 @@ Available information varies based on user permission levels. For details, see [
 │   │   ├── projects.ts
 │   │   ├── time_entries.ts
 │   │   └── index.ts
-│   ├── lib/             # Common libraries
+│   ├── lib/              # Common libraries
 │   │   ├── client.ts     # Redmine API client
 │   │   ├── config.ts     # Configuration management
 │   │   └── types.ts      # Type definitions
 │   ├── handlers.ts       # Request handlers
-│   └── index.ts         # Entry point
+│   └── index.ts          # Entry point
 ├── docs/
-│   └── adr/             # Architecture Decision Records
-├── package.json         # Project configuration
-├── tsconfig.json        # TypeScript configuration
-└── README.md           # Documentation
+│   └── adr/              # Architecture Decision Records
+├── package.json          # Project configuration
+├── tsconfig.json         # TypeScript configuration
+└── README.md             # Documentation
 ```
 
 ### Building

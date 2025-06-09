@@ -6,7 +6,7 @@ import {
   extractPaginationParams,
   ValidationError,
 } from "./types.js";
-import type { RedmineTimeEntryCreate } from "../lib/types/index.js";
+import type { RedmineTimeEntryCreate, RedmineTimeEntryUpdate } from "../lib/types/index.js"; // Added RedmineTimeEntryUpdate
 import * as formatters from "../formatters/index.js";
 
 /**
@@ -28,7 +28,7 @@ function extractTimeEntryParams(args: Record<string, unknown>): Record<string, u
   // Handle project_id as string
   if ("project_id" in args) {
     const projectId = asNumberOrSpecial(args.project_id);
-    params.project_id = parseInt(projectId, 10);
+    params.project_id = parseInt(projectId as string, 10); // Ensure projectId is treated as string for parseInt
   }
 
   // Handle date filters
@@ -164,15 +164,17 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         let updatedArgs = { ...args };
         if ('project_id' in args) {
           const projectIdStr = asNumberOrSpecial(args.project_id);
-          updatedArgs = { ...updatedArgs, project_id: parseInt(projectIdStr, 10) };
+          updatedArgs = { ...updatedArgs, project_id: parseInt(projectIdStr as string, 10) };
         }
 
         // Validate the modified arguments
         if (!isRedmineTimeEntryCreate(updatedArgs)) {
-          throw new ValidationError("Invalid time entry create parameters");
+          // ValidationError is thrown within isRedmineTimeEntryCreate if invalid
+          // This line is for safety, actual error comes from the type guard
+          throw new ValidationError("Invalid time entry create parameters"); 
         }
 
-        const { time_entry } = await client.timeEntries.createTimeEntry(updatedArgs);
+        const { time_entry } = await client.timeEntries.createTimeEntry(updatedArgs as RedmineTimeEntryCreate);
         return {
           content: [
             {
@@ -198,7 +200,8 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
     update_time_entry: async (args: Record<string, unknown>): Promise<ToolResponse> => {
       try {
         const id = asNumber(args.id);
-        const { id: _, ...updateData } = args;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _, ...updateData } = args; // Mark id as unused in destructuring
 
         // Validate update data
         if ("hours" in updateData && (typeof updateData.hours !== "number" || updateData.hours <= 0)) {
@@ -215,7 +218,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
           throw new ValidationError("comments must not exceed 255 characters");
         }
 
-        const { time_entry } = await client.timeEntries.updateTimeEntry(id, updateData);
+        const { time_entry } = await client.timeEntries.updateTimeEntry(id, updateData as RedmineTimeEntryUpdate);
         return {
           content: [
             {

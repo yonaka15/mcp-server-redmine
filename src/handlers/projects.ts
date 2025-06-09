@@ -3,6 +3,7 @@ import {
   RedmineProjectCreate,
   ProjectSearchParams,
   ProjectStatus,
+  // RedmineProjectUpdate // Assuming this type exists or needs to be defined
 } from "../lib/types/index.js";
 import { PROJECT_STATUS } from "../lib/types/projects/types.js";
 import * as formatters from "../formatters/index.js";
@@ -174,8 +175,9 @@ export function createProjectsHandlers(context: HandlerContext) {
     ): Promise<ToolResponse> => {
       try {
         const id = asNumberOrSpecial(args.id);
-        const { id: _, ...updateData } = args;
-        const { project } = await client.projects.updateProject(id, updateData);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _, ...updateData } = args; // Use 'id: _' to mark id as intentionally unused in destructuring
+        const { project } = await client.projects.updateProject(id, updateData as Partial<RedmineProjectCreate>); // Cast to a more appropriate update type if available
         return {
           content: [
             {
