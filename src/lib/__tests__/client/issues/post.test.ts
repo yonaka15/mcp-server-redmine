@@ -1,6 +1,6 @@
 import { jest, describe, it, beforeEach } from '@jest/globals'; // expect removed as it's unused
 import type { Mock } from 'jest-mock';
-import { IssuesClient } from "../../../client/issues.js";
+// import { IssuesClient } from "../../../client/issues.js"; // Removed
 // import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
 // import * as fixtures from "../../helpers/fixtures.js"; // Unused
 // import config from "../../../config.js"; // Unused
@@ -9,27 +9,26 @@ import { IssuesClient } from "../../../client/issues.js";
 // import { parseUrl } from "../../helpers/url.js"; // Unused
 
 describe("Issues API (POST)", () => {
-  let client: IssuesClient; // This will be marked as unused if no tests use it.
+  // let client: IssuesClient; // Removed
   let mockFetch: Mock;
 
   beforeEach(() => {
-    client = new IssuesClient(); // client is assigned but potentially not used if tests remain skipped.
+    // client = new IssuesClient(); // Removed
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("POST /issues.json (createIssue)", () => {
-    // POST操作のテストは安全のためスキップされています
+    // POST処理のテストは安全のためスキップされている
     it.skip("all POST operation tests are skipped for safety", () => {
-      // POST操作のテストは、実際のAPIに対して実行するとデータが作成されてしまうため、
-      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
-      // Redmine APIの仕様として、POSTリクエストは成功するとステータスコード 201 Created と作成されたリソースを返します。
+      // POST処理のテストは、実際のAPIを叩かないように、またはテスト環境でのみ実行するように注意が必要です。
+      // Redmine APIの仕様では、POSTリクエストの成功時は 201 Created が返り、作成されたリソースがレスポンスボディに含まれます。
       //
-      // 必須パラメータ:
+      // 必須フィールド:
       // - project_id: プロジェクトのID
       // - subject: チケットの件名
       //
-      // オプションパラメータ多数:
+      // オプショナルフィールド例:
       // - tracker_id: トラッカーのID
       // - status_id: ステータスのID
       // - priority_id: 優先度のID
@@ -38,15 +37,15 @@ describe("Issues API (POST)", () => {
       // - fixed_version_id: 対象バージョンのID
       // - assigned_to_id: 担当者のID
       // - parent_issue_id: 親チケットのID
-      // - custom_fields: カスタムフィールドの配列
-      // - watcher_user_ids: ウォッチャーのID配列
+      // - custom_fields: カスタムフィールド配列
+      // - watcher_user_ids:ウォッチャーのID配列
       // - is_private: プライベートチケットかどうか
       // - estimated_hours:予定工数
       //
-      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
-      // 現状ではclient変数も未使用警告が出る可能性があります。
+      // clientのメソッド呼び出し部分でエラーになるため、テスト自体をコメントアウトするか、
+      // jest.fn() などでモック化する必要があるでしょう。
       //
-      // 成功時、失敗時（バリデーションエラー、認証エラーなど）のテストも必要です。
+      // 作成例とレスポンス例、バリデーションエラー例などもテストケースとして追加すると良いでしょう。
     });
   });
 });
