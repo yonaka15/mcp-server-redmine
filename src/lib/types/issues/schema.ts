@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-// バリデーション関数
+// チケット一覧取得時のincludeパラメータのバリデーション
 export function validateListIssueIncludes(include: string): boolean {
   const LIST_ISSUE_INCLUDES = ['attachments', 'relations'] as const;
+  type ListIssueInclude = typeof LIST_ISSUE_INCLUDES[number]; // 'attachments' | 'relations'
   const includes = include.split(',');
-  return includes.every(inc => LIST_ISSUE_INCLUDES.includes(inc as any));
+  return includes.every(inc => LIST_ISSUE_INCLUDES.includes(inc as ListIssueInclude));
 }
 
 export function validateShowIssueIncludes(include: string): boolean {
@@ -17,11 +18,12 @@ export function validateShowIssueIncludes(include: string): boolean {
     'watchers',
     'allowed_statuses'
   ] as const;
+  type ShowIssueInclude = typeof SHOW_ISSUE_INCLUDES[number];
   const includes = include.split(',');
-  return includes.every(inc => SHOW_ISSUE_INCLUDES.includes(inc as any));
+  return includes.every(inc => SHOW_ISSUE_INCLUDES.includes(inc as ShowIssueInclude));
 }
 
-// 基本的なクエリパラメータのスキーマ
+// 基本クエリスキーマ
 const baseQuerySchema = z.object({
   offset: z.number().int().min(0).optional(),
   limit: z.number().int().min(1).max(100).optional(),
@@ -43,7 +45,7 @@ const baseQuerySchema = z.object({
   updated_on: z.string().optional(),
 });
 
-// カスタムフィールドを含むクエリパラメータのスキーマ
+// カスタムフィールドを含むクエリスキーマの拡張
 export const IssueQuerySchema = baseQuerySchema.catchall(z.union([z.string(), z.number()]));
 
 const RedmineRelationSchema = z.object({
