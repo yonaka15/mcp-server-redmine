@@ -198,7 +198,8 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
     update_time_entry: async (args: Record<string, unknown>): Promise<ToolResponse> => {
       try {
         const id = asNumber(args.id);
-        const { id: _, ...updateData } = args;
+        const updateData = { ...args };
+        delete updateData.id;
 
         // Validate update data
         if ("hours" in updateData && (typeof updateData.hours !== "number" || updateData.hours <= 0)) {
