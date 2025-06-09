@@ -1,12 +1,12 @@
 import { jest, expect, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { IssuesClient } from "../../../client/issues.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
+import { IssuesClient } from "../../../../client/issues.js";
+import { mockResponse, mockErrorResponse } from "../../../helpers/mocks.js";
+import * as fixtures from "../../../helpers/fixtures.js";
+import config from "../../../../config.js";
 import { RedmineApiError } from "../../../client/base.js";
-import { IssueListParams } from "../../../types/index.js";
-import { parseUrl } from "../../helpers/url.js";
+import { IssueListParams } from "../../../../types/index.js";
+import { parseUrl } from "../../../helpers/url.js";
 
 // Default pagination parameters
 const DEFAULT_PAGINATION = {
@@ -35,7 +35,7 @@ describe("Issues API (GET)", () => {
       const result = await client.getIssues();
 
       // Assert
-      const expectedUrl = new URL("/issues.json", config.redmine.host);
+      // const expectedUrl = new URL("/issues.json", config.redmine.host); // Removed
       const [actualUrl, options] = mockFetch.mock.calls[0] as [string, RequestInit];
       const { params } = parseUrl(actualUrl);
       expect(params).toEqual(DEFAULT_PAGINATION);
@@ -62,7 +62,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // Removed 'const result ='
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -86,7 +86,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // Removed 'const result ='
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -109,7 +109,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // Removed 'const result ='
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -132,7 +132,7 @@ describe("Issues API (GET)", () => {
         );
 
         // Act
-        const result = await client.getIssues(params);
+        await client.getIssues(params); // Removed 'const result ='
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -151,6 +151,7 @@ describe("Issues API (GET)", () => {
       );
 
       // Act & Assert
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(client.getIssues({ invalid_param: "value" } as any))
         .rejects.toThrow(RedmineApiError);
     });
