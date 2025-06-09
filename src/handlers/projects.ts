@@ -174,7 +174,8 @@ export function createProjectsHandlers(context: HandlerContext) {
     ): Promise<ToolResponse> => {
       try {
         const id = asNumberOrSpecial(args.id);
-        const { id: _, ...updateData } = args;
+        const updateData = { ...args };
+        delete updateData.id;
         const { project } = await client.projects.updateProject(id, updateData);
         return {
           content: [
