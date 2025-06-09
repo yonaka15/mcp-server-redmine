@@ -55,7 +55,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        await client.getTimeEntries(params);
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -77,7 +77,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        await client.getTimeEntries(params);
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
@@ -99,7 +99,7 @@ describe("Time Entries API (GET)", () => {
         );
 
         // Act
-        const result = await client.getTimeEntries(params);
+        await client.getTimeEntries(params);
 
         // Assert
         const [url] = mockFetch.mock.calls[0] as [string, ...unknown[]];
