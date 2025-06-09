@@ -1,6 +1,6 @@
 import { jest, describe, it, beforeEach } from '@jest/globals'; // expect removed
 import type { Mock } from 'jest-mock';
-import { UsersClient } from "../../../client/users.js";
+// import { UsersClient } from "../../../client/users.js"; // Removed
 // import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
 // import * as fixtures from "../../helpers/fixtures.js"; // Unused due to userId being unused
 // import config from "../../../config.js"; // Unused
@@ -8,39 +8,38 @@ import { UsersClient } from "../../../client/users.js";
 // import { parseUrl } from "../../helpers/url.js"; // Unused
 
 describe("Users API (DELETE)", () => {
-  let client: UsersClient; // Assigned but not used in active tests
+  // let client: UsersClient; // Removed
   let mockFetch: Mock;
   // const userId = fixtures.singleUserResponse.user.id; // Unused
 
   beforeEach(() => {
-    client = new UsersClient();
+    // client = new UsersClient(); // Removed
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("DELETE /users/:id.json (deleteUser)", () => {
-    // DELETE操作のテストは安全のためスキップされています
+    // DELETE処理のテストは安全のためスキップされている
     it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE操作のテストは、実際のAPIに対して実行するとデータが削除されてしまうため、
-      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
-      // Redmine APIの仕様として、DELETEリクエストは成功するとステータスコード 204 No Content を返します。
+      // DELETE処理のテストは、実際のAPIを叩かないように、またはテスト環境でのみ実行するように注意が必要です。
+      // Redmine APIの仕様では、DELETEリクエストの成功時は 204 No Content が返ります。
+      //
+      // 削除の制約:
+      // - 自分自身を削除できない
+      // - 管理者権限がないと削除できない（通常は管理権限が必要）
+      // - プロジェクトメンバーシップやチケット担当者になっているユーザーを削除する際の挙動
+      // - APIキーで認証しているユーザーを削除する際の挙動
       //
       // 削除の成功例:
-      // - 一般ユーザーの削除
-      // - 管理者ユーザーの削除（実行ユーザーの権限による）
-      // - プロジェクトメンバーシップを持つユーザーの削除
-      // - カスタムフィールド値を持つユーザーの削除
-      // - APIキーを持つユーザーの削除
+      // - 存在するユーザーID
+      // - 関連情報（チケットやWikiなど）がないユーザーを削除した場合の挙動
+      // - Wikiページを作成したユーザーを削除した場合、Wikiページの作者情報
+      // - チケットを作成したユーザーを削除した場合、チケットの作者情報
       //
-      // 削除の失敗例:
-      // - 存在しないユーザーID
-      // - 自分自身を削除しようとする場合
-      // - Wikiページを作成したユーザーの削除とページの扱い
-      // - チケットを作成したユーザーの削除とチケットの扱い
-      //
-      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とシナリオが必要です。
-      // 現状ではclient変数やuserId変数も未使用警告が出る可能性があります。
-      // ユーザー削除時の関連データの扱い（匿名化など）も確認ポイントです。
+      // clientのメソッド呼び出し部分でエラーになるため、テスト自体をコメントアウトするか、
+      // jest.fn() などでモック化する必要があるでしょう。
+      // client.deleteUser(userId) のように呼び出します。
+      // ユーザー削除の場合、関連する情報（例：作成したチケットの作成者）が匿名ユーザーになるなどの仕様も確認すると良いでしょう。
     });
   });
 });
