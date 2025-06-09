@@ -4,24 +4,24 @@ import {
   ImageContent, 
   EmbeddedResource,
   TextResourceContents,
-  BlobResourceContents
+  // BlobResourceContents // Removed
 } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Asserts that a response conforms to the MCP CallToolResult schema
  */
 export function assertMcpToolResponse(response: unknown): void {
-  // 構造の検証
+  // 総合的な検証
   expect(response).toHaveProperty('content');
   expect(response).toHaveProperty('isError');
   
   const typedResponse = response as CallToolResult;
   
-  // コンテンツ配列の検証
+  // コンテント配列の検証
   expect(Array.isArray(typedResponse.content)).toBe(true);
   expect(typedResponse.content.length).toBeGreaterThan(0);
   
-  // 各コンテンツアイテムの検証
+  // 各コンテントアイテムの検証
   typedResponse.content.forEach(item => {
     expect(item).toHaveProperty('type');
     
@@ -39,7 +39,7 @@ export function assertMcpToolResponse(response: unknown): void {
         expect(typeof (item as ImageContent).mimeType).toBe('string');
         break;
         
-      case 'resource':
+      case 'resource': {
         expect(item).toHaveProperty('resource');
         const resourceItem = item as EmbeddedResource;
         expect(resourceItem.resource).toHaveProperty('uri');
@@ -49,6 +49,7 @@ export function assertMcpToolResponse(response: unknown): void {
           expect(typeof resourceItem.resource.blob).toBe('string');
         }
         break;
+      }
     }
   });
 }
@@ -90,7 +91,9 @@ function createResourceContent(content: string): EmbeddedResource {
 /**
  * Creates a valid MCP tool response fixture for testing
  */
-export function createMcpToolResponseFixture<T extends keyof MakeContentItem>(
+export function createMcpToolResponseFixture<
+  T extends keyof MakeContentItem
+>(
   content: string,
   type: T = 'text' as T,
   isError = false
