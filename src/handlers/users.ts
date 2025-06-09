@@ -2,7 +2,7 @@ import {
   HandlerContext, 
   ToolResponse, 
   asNumber, 
-  asNumberOrSpecial,
+  asNumberOrSpecial, 
   extractPaginationParams,
   ValidationError
 } from "./types.js";
@@ -12,7 +12,7 @@ import type {
   RedmineUserCreate,
   RedmineUsersResponse,
   RedmineUserList,
-  RedmineUserResponse
+  // RedmineUserResponse // Removed unused import
 } from "../lib/types/index.js";
 import * as formatters from "../formatters/index.js";
 
@@ -95,7 +95,7 @@ function toUserList(response: RedmineUsersResponse): RedmineUserList {
   return {
     users: response.users.map(user => ({
       ...user,
-      id: user.id!,  // Ensure id is present
+      id: user.id!, // Ensure id is present
     })),
     total_count: response.total_count,
     offset: response.offset,
@@ -211,7 +211,8 @@ export function createUsersHandlers(context: HandlerContext) {
     update_user: async (args: Record<string, unknown>): Promise<ToolResponse> => {
       try {
         const id = asNumber(args.id);
-        const { id: _, ...updateData } = args;
+        const updateData = { ...args };
+        delete updateData.id;
 
         const response = await client.users.updateUser(id, updateData);
         if (!response.user.id) {
