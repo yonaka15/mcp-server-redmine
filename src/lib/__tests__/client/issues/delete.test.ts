@@ -1,35 +1,39 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
-import { IssuesClient } from "../../../client/issues.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { IssuesClient } from "../../../../client/issues.js"; // Removed
+// import { mockResponse, mockErrorResponse } from "../../../helpers/mocks.js"; // Removed
+// import * as fixtures from "../../../helpers/fixtures.js"; // Removed
+// import config from "../../../../config.js"; // Removed
+// import { RedmineApiError } from "../../../client/base.js"; // Removed
+// import { parseUrl } from "../../../helpers/url.js"; // Removed
 
 describe("Issues API (DELETE)", () => {
-  let client: IssuesClient;
+  // let client: IssuesClient; // Removed
   let mockFetch: Mock;
-  const issueId = fixtures.singleIssueResponse.issue.id;
+  // const issueId = fixtures.singleIssueResponse.issue.id; // Removed
 
   beforeEach(() => {
-    client = new IssuesClient();
+    // client = new IssuesClient(); // Removed
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("DELETE /issues/:id.json (deleteIssue)", () => {
-    // DELETE操作は常にデータ変更の可能性があるため、全てスキップ
+    // DELETEリクエストのテストは安全のためスキップ
     it.skip("all DELETE operation tests are skipped for safety", () => {
-      // DELETE操作は常にデータの削除を伴うため、テストをスキップします
-      // Redmine APIの仕様で、DELETEリクエストは以下の影響を及ぼします：
-      // - チケットの完全な削除
-      // - 関連する情報（添付ファイル、関係等）の削除
-      // - ジャーナル（履歴）の削除
-      // - ウォッチャーの削除
+      // DELETEリクエストのテストコードはここに記述
+      // Redmine APIの仕様により、DELETEリクエストは実際のデータ変更を伴うため、
+      // テスト実行時には注意が必要です。
+      // - テスト用のRedmineインスタンスを用意する
+      // - CI環境でのみ実行する
+      // - モックサーバーを使用する
+      // - バックアップとリストア戦略を確立する
       //
-      // これらの操作は全てデータの削除を伴うため、テスト環境でも
-      // 実行すべきではありません。
+      // 具体的なテストケースとしては、
+      // - 正常に削除できること
+      // - 存在しないIDを指定した場合にエラーが返ること
+      // - 権限がない場合にエラーが返ること
+      // などを検証します。
     });
   });
 });
