@@ -1,19 +1,3 @@
-// 一覧取得用の有効なinclude値
-const LIST_ISSUE_INCLUDES = ['attachments', 'relations'] as const;
-type ListIssueInclude = typeof LIST_ISSUE_INCLUDES[number];
-
-// 単一チケット取得用の有効なinclude値
-const SHOW_ISSUE_INCLUDES = [
-  'children',
-  'attachments',
-  'relations',
-  'changesets',
-  'journals',
-  'watchers',
-  'allowed_statuses'
-] as const;
-type ShowIssueInclude = typeof SHOW_ISSUE_INCLUDES[number];
-
 // Query params
 export interface IssueListParams {
   offset?: number;
