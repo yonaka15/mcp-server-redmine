@@ -1,16 +1,16 @@
-import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import { jest, describe, it, beforeEach } from '@jest/globals'; // expect removed
 import type { Mock } from 'jest-mock';
 import { UsersClient } from "../../../client/users.js";
-import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js";
-import * as fixtures from "../../helpers/fixtures.js";
-import config from "../../../config.js";
-import { RedmineApiError } from "../../../client/base.js";
-import { parseUrl } from "../../helpers/url.js";
+// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
+// import * as fixtures from "../../helpers/fixtures.js"; // Unused due to userId being unused
+// import config from "../../../config.js"; // Unused
+// import { RedmineApiError } from "../../../client/base.js"; // Unused
+// import { parseUrl } from "../../helpers/url.js"; // Unused
 
 describe("Users API (PUT)", () => {
-  let client: UsersClient;
+  let client: UsersClient; // Assigned but not used in active tests
   let mockFetch: Mock;
-  const userId = fixtures.singleUserResponse.user.id;
+  // const userId = fixtures.singleUserResponse.user.id; // Unused
 
   beforeEach(() => {
     client = new UsersClient();
@@ -19,28 +19,29 @@ describe("Users API (PUT)", () => {
   });
 
   describe("PUT /users/:id.json (updateUser)", () => {
-    // PUT操作は常にデータ変更の可能性があるため、全てスキップ
+    // PUT操作のテストは安全のためスキップされています
     it.skip("all PUT operation tests are skipped for safety", () => {
-      // PUT操作は常にデータ変更の可能性があるため、テストをスキップします
-      // Redmine APIの仕様で、PUTリクエストは以下のパラメータを受け付けます：
+      // PUT操作のテストは、実際のAPIに対して実行するとデータが更新されてしまうため、
+      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
+      // Redmine APIの仕様として、PUTリクエストは成功するとステータスコード 204 No Content を返します。
       //
       // 更新可能なパラメータ:
-      // - login: ログイン名の変更
-      // - firstname: 名の変更
-      // - lastname: 姓の変更
-      // - mail: メールアドレスの変更
-      // - password: パスワードの変更
-      // - must_change_passwd: パスワード変更強制
-      // - auth_source_id: 認証ソースIDの変更
-      // - mail_notification: メール通知設定の変更
-      // - admin: 管理者権限の変更
-      // - status: ステータスの変更
-      // - custom_fields: カスタムフィールドの変更
-      // - group_ids: 所属グループの変更
+      // - login: ログインID（変更不可の場合あり）
+      // - firstname: 名
+      // - lastname: 姓
+      // - mail: メールアドレス
+      // - password: パスワード（変更する場合）
+      // - must_change_passwd: パスワード変更要否
+      // - auth_source_id: 認証元ID
+      // - mail_notification: メール通知設定
+      // - admin: 管理者権限
+      // - status: ステータス
+      // - custom_fields: カスタムフィールド値
+      // - group_ids: 所属グループID配列
       //
-      // これらの操作は全てユーザーデータの変更を伴うため、
-      // テスト環境でも実行すべきではありません。
-      // また、ユーザー更新には管理者権限が必要です。
+      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
+      // 現状ではclient変数やuserId変数も未使用警告が出る可能性があります。
+      // ユーザー更新時の関連データの扱いも確認ポイントです。
     });
   });
 });
