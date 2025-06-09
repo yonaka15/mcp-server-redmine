@@ -20,8 +20,9 @@ const validIncludeValues = [
   "time_entry_activities",
   "issue_custom_fields",
 ] as const;
+type ValidIncludeValue = typeof validIncludeValues[number]; // For stricter type checking
 
-type ModuleName = (typeof validModuleNames)[number];
+// type ModuleName = (typeof validModuleNames)[number]; // Removed unused type
 
 export const ProjectQuerySchema = z.object({
   offset: z.number().int().min(0).optional(),
@@ -35,7 +36,7 @@ export const ProjectQuerySchema = z.object({
       (value) =>
         value
           .split(",")
-          .every((item) => validIncludeValues.includes(item as any)),
+          .every((item) => validIncludeValues.includes(item as ValidIncludeValue)), // Changed from 'as any'
       "Invalid include value. Must be comma-separated list of: trackers, issue_categories, enabled_modules, time_entry_activities, issue_custom_fields"
     )
     .optional(),
@@ -113,4 +114,3 @@ export type ProjectQueryParams = z.infer<typeof ProjectQuerySchema>;
 export type ModuleNames = z.infer<
   typeof RedmineProjectSchema
 >["enabled_module_names"];
-
