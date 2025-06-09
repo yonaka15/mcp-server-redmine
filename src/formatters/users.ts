@@ -5,7 +5,8 @@ import type { RedmineUser, RedmineUserList } from "../lib/types/users/index.js";
  */
 function escapeXml(unsafe: string): string {
   if(typeof unsafe !== 'string') {
-    console.debug('Invalid input to escapeXml:', unsafe, new Error().stack);
+    console.error('Invalid input to escapeXml:', unsafe);
+    console.error(new Error().stack);
     return '';
   }
 
@@ -41,7 +42,7 @@ function formatRoles(roles?: { id: number; name: string; }[]): string {
   if (!roles?.length) return '';
   
   return `
-      <roles type="array">
+      <roles type=\"array\">
         ${roles.map(role => `
         <role>
           <id>${role.id}</id>
@@ -86,7 +87,7 @@ export function formatUser(user: RedmineUser): string {
 
   // Add custom fields if present
   if (user.custom_fields?.length) {
-    xml += '  <custom_fields type="array">\n';
+    xml += '  <custom_fields type=\"array\">\n';
     for (const field of user.custom_fields) {
       xml += '    <field>\n';
       xml += `      <id>${field.id}</id>\n`;
@@ -99,7 +100,7 @@ export function formatUser(user: RedmineUser): string {
 
   // Add memberships if present
   if (user.memberships?.length) {
-    xml += '  <memberships type="array">\n';
+    xml += '  <memberships type=\"array\">\n';
     for (const membership of user.memberships) {
       xml += '    <membership>\n';
       if (membership.id) {
@@ -117,7 +118,7 @@ export function formatUser(user: RedmineUser): string {
 
   // Add groups if present
   if (user.groups?.length) {
-    xml += '  <groups type="array">\n';
+    xml += '  <groups type=\"array\">\n';
     for (const group of user.groups) {
       xml += '    <group>\n';
       xml += `      <id>${group.id}</id>\n`;

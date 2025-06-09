@@ -5,7 +5,8 @@ import type { RedmineApiResponse, RedmineIssue } from "../lib/types/index.js";
  */
 function escapeXml(unsafe: string): string {
   if(typeof unsafe !== 'string') {
-    console.debug('Invalid input to escapeXml:', unsafe, new Error().stack);
+    console.error('Invalid input to escapeXml:', unsafe);
+    console.error(new Error().stack);
     return '';
   }
 
