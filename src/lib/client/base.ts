@@ -2,7 +2,7 @@ import { RedmineErrorResponse } from "../types/common.js";
 import config from "../config.js";
 
 /**
- * Redmine APIエラークラス
+ * Redmine API エラークラス
  */
 export class RedmineApiError extends Error {
   constructor(
@@ -10,7 +10,8 @@ export class RedmineApiError extends Error {
     public readonly statusText: string,
     public readonly errors: string[]
   ) {
-    super(`Redmine API error: ${status} ${statusText}\n${errors ? errors.join(", ") : "Unknown error"}`);
+    super(`Redmine API error: ${status} ${statusText}
+${errors ? errors.join(", ") : "Unknown error"}`);
     this.name = "RedmineApiError";
   }
 }
@@ -19,7 +20,7 @@ export class RedmineApiError extends Error {
 type QueryParamValue = string | number | boolean | Date | (string | number | boolean)[] | undefined | null;
 
 /**
- * Redmine API クライアントベース
+ * Redmine API クライアントベースクラス
  */
 export class BaseClient {
   /**
@@ -30,20 +31,20 @@ export class BaseClient {
     options?: RequestInit
   ): Promise<T> {
     const url = new URL(path, config.redmine.host);
-    
-    // デフォルトリクエストオプション
+
+    // デフォルトオプション
     const defaultOptions: RequestInit = {
       method: 'GET',
       headers: {
-        "X-Redmine-API-Key": config.redmine.apiKey,
-        "Content-Type": "application/json",
+        'X-Redmine-API-Key': config.redmine.apiKey,
+        'Content-Type': "application/json",
         Accept: "application/json",
       },
-      // タイムアウトの設定
+      // タイムアウト設定
       // signal: AbortSignal.timeout(30000), // 30秒 - Temporarily commented out for compatibility
     };
 
-    // オプションのマージ（引数のoptionsで上書き）
+    // リクエストオプションのマージ（引数のoptionsを優先）
     const requestOptions: RequestInit = {
       ...defaultOptions,
       ...options,
@@ -56,21 +57,25 @@ export class BaseClient {
     try {
       const response = await fetch(url.toString(), requestOptions);
 
-      // レスポンスステータスがエラーの場合
+      // エラーレスポンスの場合の処理
       if (!response.ok) {
         let errorMessages: string[];
         const contentType = response.headers.get("content-type");
+        // まずレスポンスボディをテキストとして一度だけ読み込む
+        const responseText = await response.text(); // ★ 変更点: 先にtext()で読む
 
         if (contentType?.includes("application/json")) {
           try {
-            const errorResponse = await response.json() as RedmineErrorResponse;
+            // 読み込んだテキストをJSONとしてパース試行
+            const errorResponse = JSON.parse(responseText) as RedmineErrorResponse; // ★ 変更点: response.json()ではなくresponseTextをパース
             errorMessages = errorResponse.errors || ["Unknown error"];
-          } catch {
-            errorMessages = [`Failed to parse error response: ${await response.text() || "Empty response"}`];
+          } catch (e) {
+            // JSONパースに失敗した場合、テキストをそのままエラーメッセージとする
+            errorMessages = [`Failed to parse error response as JSON: ${responseText || "Empty response"}`];
           }
         } else {
-          // JSONでない場合はテキストとしてエラーメッセージを取得
-          errorMessages = [await response.text() || "Unknown error"];
+          // JSONでない場合はテキストをそのままエラーメッセージとする
+          errorMessages = [responseText || "Unknown error"];
         }
 
         throw new RedmineApiError(
@@ -85,8 +90,9 @@ export class BaseClient {
         return {} as T;
       }
 
-      // レスポンスのJSONをパース
+      // レスポンスのJSONをパース (成功時)
       try {
+        // 成功時は、レスポンスボディはまだ消費されていないので response.json() を呼べる
         return await response.json() as T;
       } catch (error) {
         throw new RedmineApiError(
@@ -96,7 +102,7 @@ export class BaseClient {
         );
       }
     } catch (error) {
-      // ネットワークエラーやその他のfetchエラー
+      // ネットワークエラー等のfetch自体のエラー
       if (error instanceof RedmineApiError) {
         throw error;
       }
@@ -109,12 +115,12 @@ export class BaseClient {
   }
 
   /**
-   * クエリパラメータのエンコード
+   * クエリパラメータをエンコードする
    */
   protected encodeQueryParams(params: Record<string, QueryParamValue>): string { // Changed 'any' to 'QueryParamValue'
     const searchParams = new URLSearchParams();
 
-    // nullやundefinedのキーは除外
+    // nullやundefinedのパラメータを除外
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
