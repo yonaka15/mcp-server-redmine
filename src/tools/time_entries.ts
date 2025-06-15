@@ -97,7 +97,7 @@ export const TIME_ENTRY_CREATE_TOOL: Tool = {
         type: "number",
         description: "Number of hours spent. Can use decimals",
         minimum: 0,
-        exclusiveMinimum: true
+        exclusiveMinimum: 0
       },
       activity_id: {
         type: "number",
@@ -149,7 +149,7 @@ export const TIME_ENTRY_UPDATE_TOOL: Tool = {
         type: "number",
         description: "New number of hours. Can use decimals",
         minimum: 0,
-        exclusiveMinimum: true
+        exclusiveMinimum: 0
       },
       activity_id: {
         type: "number",
