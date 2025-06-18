@@ -112,7 +112,9 @@ For data safety, only GET operations are included in tests.
 
 ### Inspector Testing
 
-Use [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) to verify functionality:
+Use [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) to verify functionality.
+
+#### GUI Mode
 
 ```bash
 # Build
@@ -124,6 +126,43 @@ chmod +x dist/index.js
 # Launch inspector
 npx @modelcontextprotocol/inspector dist/index.js
 ```
+
+#### CLI Mode
+
+The `@modelcontextprotocol/inspector` also offers a CLI mode for more direct interaction and scripting.
+
+**Key CLI Features:**
+
+*   **Connect to MCP Server:**
+    *   Local build: `npx @modelcontextprotocol/inspector --cli node build/index.js`
+    *   Remote URL: `npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com`
+    *   Using a config file: `npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver`
+*   **Get Server Information:**
+    *   List available tools: `--method tools/list`
+    *   List available resources: `--method resources/list`
+    *   List available prompts: `--method prompts/list`
+*   **Execute Tools:**
+    *   Call a specific tool with arguments: `--method tools/call --tool-name <tool_name> --tool-arg <key>=<value>`
+*   **Environment Variables and Arguments:**
+    *   Pass environment variables to the server: `-e <key>=<value>`
+    *   Separate Inspector flags from server arguments with `--`.
+
+**Basic CLI Command Examples:**
+
+*   Connect to a local server and list available tools:
+    ```bash
+    npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/list
+    ```
+*   Connect to a remote server:
+    ```bash
+    npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com
+    ```
+*   Connect using a configuration file and execute a specific tool:
+    ```bash
+    npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver --method tools/call --tool-name mytool --tool-arg key=value
+    ```
+
+For more detailed information, refer to the [MCP Inspector README](https://github.com/modelcontextprotocol/inspector/blob/main/README.md).
 
 ## Permissions
 
