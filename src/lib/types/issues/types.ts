@@ -77,8 +77,8 @@ export interface RedmineIssue {
     id: number;
   };
   subject: string;
-  description?: string;
-  start_date?: string; // YYYY-MM-DD
+  description?: string | null;
+  start_date?: string | null; // YYYY-MM-DD or null
   due_date?: string | null; // YYYY-MM-DD or null
   done_ratio: number;
   estimated_hours?: number | null;
@@ -88,7 +88,7 @@ export interface RedmineIssue {
   custom_fields?: {
     id: number;
     name: string;
-    value: string | string[]; // Value can be a string or an array of strings for some custom field types
+    value: string | string[] | null; // Value can be a string, an array of strings, or null for some custom field types
   }[];
   created_on: string; // datetime
   updated_on: string; // datetime
@@ -106,6 +106,13 @@ export interface RedmineIssue {
     delay: number | null, // Delay in days for "precedes" and "follows" relations
   }[];
   // children?: RedmineIssue[]; // If 'children' is included. Be careful with recursion.
+
+  // Added based on the reference document for list_project_statuses
+  allowed_statuses?: {
+    id: number;
+    name: string;
+    is_closed?: boolean;
+  }[];
 }
 
 export interface RedmineIssueCreate {
@@ -121,7 +128,7 @@ export interface RedmineIssueCreate {
   parent_issue_id?: number;
   custom_fields?: {
     id: number;
-    value: string | string[];
+    value: string | string[] | null;
   }[];
   watcher_user_ids?: number[];
   is_private?: boolean;

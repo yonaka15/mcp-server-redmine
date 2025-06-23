@@ -1,4 +1,5 @@
 export {
+  formatIssue,
   formatIssues,
   formatIssueResult,
   formatIssueDeleted,
@@ -10,6 +11,7 @@ export {
   formatProjectResult,
   formatProjectArchiveStatus,
   formatProjectDeleted,
+  formatAllowedStatuses,
 } from "./projects.js";
 
 export {

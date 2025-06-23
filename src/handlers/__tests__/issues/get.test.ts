@@ -49,7 +49,16 @@ describe("Issues Handler (GET) - MCP Response", () => {
     client = new RedmineClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
-    handlers = createIssuesHandlers({ client, config });
+    handlers = createIssuesHandlers({ 
+      client, 
+      config,
+      logger: {
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+      },
+    });
   });
 
   describe("GET /issues.json (list_issues)", () => {

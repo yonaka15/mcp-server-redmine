@@ -1,4 +1,4 @@
-import type { RedmineApiResponse, RedmineProject } from "../lib/types/index.js";
+import type { RedmineApiResponse, RedmineProject, RedmineIssue } from "../lib/types/index.js";
 
 /**
  * Convert project status to string
@@ -104,4 +104,17 @@ export function formatProjectArchiveStatus(id: string | number, archived: boolea
 <response>
   <message>Project "${id}" was successfully ${archived ? "archived" : "unarchived"}.</message>
 </response>`;
+}
+
+/**
+ * Format allowed statuses for an issue
+ */
+export function formatAllowedStatuses(statuses: NonNullable<RedmineIssue['allowed_statuses']> ): string {
+  if (!statuses || statuses.length === 0) {
+    return "No allowed statuses found or provided.";
+  }
+  const formattedStatuses = statuses.map(status => 
+    `- ${status.name} (ID: ${status.id}${status.is_closed ? ", Closed" : ""})`
+  ).join("\n");
+  return `Available Issue Statuses:\n${formattedStatuses}`;
 }

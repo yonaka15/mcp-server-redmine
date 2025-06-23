@@ -9,21 +9,29 @@ import {
 import { redmineClient } from "../lib/client/index.js";
 import config from "../lib/config.js";
 import * as tools from "../tools/index.js";
-import { HandlerContext /*, ToolResponse*/ } from "./types.js"; // ToolResponse is removed
+import { HandlerContext } from "./types.js"; 
 import { createIssuesHandlers } from "./issues.js";
 import { createProjectsHandlers } from "./projects.js";
 import { createTimeEntriesHandlers } from "./time_entries.js";
 import { createUserHandlers } from "./users.js";
+import { formatAllowedStatuses } from "../formatters/projects.js"; // Import the new formatter
 
 // Create handler context
 const context: HandlerContext = {
   client: redmineClient,
   config: config,
+  logger: {
+    info: console.log,
+    error: console.error,
+    warn: console.warn,
+    debug: console.debug,
+  },
 };
 
 // Create resource handlers
 const issuesHandlers = createIssuesHandlers(context);
-const projectsHandlers = createProjectsHandlers(context);
+// Pass the formatter function to createProjectsHandlers
+const projectsHandlers = createProjectsHandlers(context, formatAllowedStatuses);
 const timeEntriesHandlers = createTimeEntriesHandlers(context);
 const usersHandlers = createUserHandlers(context);
 
@@ -36,9 +44,11 @@ const handlers = {
 };
 
 // Available tools list
+// The PROJECT_LIST_STATUSES_TOOL will be added in the tools/index.ts modification step
 const TOOLS: Tool[] = [
   // Issue-related tools
   tools.ISSUE_LIST_TOOL,
+  tools.ISSUE_GET_TOOL,
   tools.ISSUE_CREATE_TOOL,
   tools.ISSUE_UPDATE_TOOL,
   tools.ISSUE_DELETE_TOOL,
@@ -53,6 +63,7 @@ const TOOLS: Tool[] = [
   tools.PROJECT_ARCHIVE_TOOL,
   tools.PROJECT_UNARCHIVE_TOOL,
   tools.PROJECT_DELETE_TOOL,
+  tools.PROJECT_LIST_STATUSES_TOOL, // New tool for listing project statuses
 
   // Time entry tools
   tools.TIME_ENTRY_LIST_TOOL,
@@ -84,7 +95,9 @@ const server = new Server(
 
 // Tools list handler
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: TOOLS,
+  // Dynamically build the list of tools from the tools module at runtime
+  // This ensures that any tool added to tools/index.ts is automatically included.
+  tools: Object.values(tools).filter(t => typeof t === 'object' && t !== null && 'name' in t && 'description' in t && 'inputSchema' in t) as Tool[],
 }));
 
 // Tool execution handler
@@ -93,12 +106,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
     if (!args || typeof args !== "object") {
-      throw new Error("No arguments provided");
+      // Even if args is null or undefined, pass it as an empty object for handlers that might not expect args.
+      // Specific handlers should validate their own arguments.
     }
 
     // Execute handler
+    // Ensure args is always an object, even if empty.
+    const handlerArgs = args || {};
     if (name in handlers) {
-      return await handlers[name as keyof typeof handlers](args);
+      return await handlers[name as keyof typeof handlers](handlerArgs);
     }
 
     // Unknown tool

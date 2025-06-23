@@ -140,7 +140,7 @@ export const PROJECT_CREATE_TOOL: Tool = {
             "issue_tracking",
             "news",
             "repository",
-            "time_tracking", 
+            "time_tracking",
             "wiki"
           ]
         }
@@ -209,7 +209,7 @@ export const PROJECT_UPDATE_TOOL: Tool = {
           enum: [
             "boards",
             "calendar",
-            "documents", 
+            "documents",
             "files",
             "gantt",
             "issue_tracking",
@@ -225,10 +225,10 @@ export const PROJECT_UPDATE_TOOL: Tool = {
   }
 };
 
-// Archive project tool 
+// Archive project tool
 export const PROJECT_ARCHIVE_TOOL: Tool = {
   name: "archive_project",
-  description: 
+  description:
     "Archive a project. " +
     "Project becomes read only. " +
     "Available since Redmine 5.0",
@@ -280,5 +280,19 @@ export const PROJECT_DELETE_TOOL: Tool = {
       }
     },
     required: ["id"]
+  }
+};
+
+// Add the new tool definition here
+export const PROJECT_LIST_STATUSES_TOOL: Tool = {
+  name: "list_project_statuses",
+  description: "指定されたRedmineプロジェクトの特定のトラッカーで利用可能なIssueステータスの一覧を取得",
+  inputSchema: {
+    type: "object",
+    properties: {
+      project_id: { type: "number" },
+      tracker_id: { type: "number" }
+    },
+    required: ["project_id", "tracker_id"]
   }
 };

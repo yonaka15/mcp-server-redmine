@@ -1,6 +1,7 @@
 // Issue-related tools
 export {
   ISSUE_LIST_TOOL,
+  ISSUE_GET_TOOL,
   ISSUE_CREATE_TOOL,
   ISSUE_UPDATE_TOOL,
   ISSUE_DELETE_TOOL,
@@ -17,6 +18,7 @@ export {
   PROJECT_ARCHIVE_TOOL,
   PROJECT_UNARCHIVE_TOOL,
   PROJECT_DELETE_TOOL,
+  PROJECT_LIST_STATUSES_TOOL, // Added new tool
 } from "./projects.js";
 
 // Time entry tools
@@ -36,4 +38,3 @@ export {
   USER_UPDATE_TOOL,
   USER_DELETE_TOOL,
 } from "./users.js";
-

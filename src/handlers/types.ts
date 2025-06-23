@@ -2,6 +2,16 @@ import type { RedmineClient } from "../lib/client/index.js";
 import type { Config } from "../lib/config.js";
 
 /**
+ * Simple logger interface for testing
+ */
+export interface Logger {
+  info(message: string, ...args: unknown[]): void;
+  error(message: string, ...args: unknown[]): void;
+  warn(message: string, ...args: unknown[]): void;
+  debug(message: string, ...args: unknown[]): void;
+}
+
+/**
  * Response content type for each tool
  */
 export type ToolResponse = {
@@ -18,6 +28,7 @@ export type ToolResponse = {
 export interface HandlerContext {
   client: RedmineClient;
   config: Config;
+  logger: Logger; // loggerプロパティを追加
 }
 
 /**
