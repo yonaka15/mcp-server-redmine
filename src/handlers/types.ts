@@ -1,5 +1,6 @@
 import type { RedmineClient } from "../lib/client/index.js";
 import type { Config } from "../lib/config.js";
+import type { Logger } from "@mcp-sdk/core"; // MCP SDKのLoggerをインポート (仮のパス)
 
 /**
  * Response content type for each tool
@@ -18,6 +19,7 @@ export type ToolResponse = {
 export interface HandlerContext {
   client: RedmineClient;
   config: Config;
+  logger: Logger; // loggerプロパティを追加
 }
 
 /**
