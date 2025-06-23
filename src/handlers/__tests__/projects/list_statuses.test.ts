@@ -1,10 +1,10 @@
-import { RedmineClient } from '../../../lib/redmine';
-import { createProjectsHandlers } from '../../projects';
-import { HandlerContext, ToolResponse, ValidationError } from '../../types';
-import { RedmineIssue } from '../../../lib/types/issues/types';
+import { RedmineClient } from '../../../lib/client/index.js';
+import { createProjectsHandlers } from '../../projects.js';
+import { HandlerContext, ToolResponse, ValidationError } from '../../types.js';
+import { RedmineIssue } from '../../../lib/types/issues/types.js';
 
 // Mock the entire RedmineClient
-jest.mock('../../../lib/redmine');
+jest.mock('../../../lib/client/index.js');
 
 const mockRedmineClient = RedmineClient as jest.MockedClass<typeof RedmineClient>;
 
