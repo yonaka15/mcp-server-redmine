@@ -1,31 +1,49 @@
-import { RedmineClient } from '../../../lib/client/index.js';
+import { jest, expect, describe, it, beforeEach } from '@jest/globals';
+import type { Mock } from 'jest-mock';
 import { createProjectsHandlers } from '../../projects.js';
-import { HandlerContext, ToolResponse, ValidationError } from '../../types.js';
+import { HandlerContext } from '../../types.js';
 import { RedmineIssue } from '../../../lib/types/issues/types.js';
-
-// Mock the entire RedmineClient
-jest.mock('../../../lib/client/index.js');
-
-const mockRedmineClient = RedmineClient as jest.MockedClass<typeof RedmineClient>;
 
 describe('list_project_statuses', () => {
   let projectsHandlers: ReturnType<typeof createProjectsHandlers>;
   let mockHandlerContext: HandlerContext;
   const mockFormatAllowedStatusesImplementation = jest.fn(
-    (statuses: NonNullable<RedmineIssue['allowed_statuses']>) =>
-      `MockedStatusesOutput: ${JSON.stringify(statuses)}`
+    (statuses: NonNullable<RedmineIssue['allowed_statuses']>) => {
+      return `MockedStatusesOutput: ${JSON.stringify(statuses)}`;
+    }
   );
 
   beforeEach(() => {
     // Reset mocks before each test
     jest.clearAllMocks();
+    mockFormatAllowedStatusesImplementation.mockClear();
 
-    // Mock RedmineClient instance methods
-    mockRedmineClient.prototype.getIssues = jest.fn();
-    mockRedmineClient.prototype.getIssue = jest.fn();
+    // Ensure the mock has a proper implementation
+    mockFormatAllowedStatusesImplementation.mockImplementation(
+      (statuses: NonNullable<RedmineIssue['allowed_statuses']>) => {
+        return `MockedStatusesOutput: ${JSON.stringify(statuses)}`;
+      }
+    );
+
+    // Mock RedmineClient instance and its nested client methods
+    const mockIssuesClient = {
+      getIssues: jest.fn() as Mock<any>,
+      getIssue: jest.fn() as Mock<any>,
+    };
+    
+    const mockClientInstance = {
+      issues: mockIssuesClient,
+      projects: {},
+      timeEntries: {},
+      users: {},
+    };
 
     mockHandlerContext = {
-      client: new RedmineClient({ apiKey: 'test-key', host: 'http://localhost' }),
+      client: mockClientInstance as any,
+      config: { 
+        redmine: { apiKey: 'test-key', host: 'http://localhost' },
+        server: { name: 'test', version: '1.0.0' }
+      },
       logger: {
         info: jest.fn(),
         error: jest.fn(),
@@ -53,27 +71,27 @@ describe('list_project_statuses', () => {
       allowed_statuses: mockAllowedStatuses,
     } as RedmineIssue;
 
-    (mockRedmineClient.prototype.getIssues as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssues as Mock<any>).mockResolvedValueOnce({
       issues: [mockRepresentativeIssue],
       total_count: 1,
       offset: 0,
       limit: 1,
     });
-    (mockRedmineClient.prototype.getIssue as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssue as Mock<any>).mockResolvedValueOnce({
       issue: mockDetailedIssue,
     });
 
     const result = await projectsHandlers.list_project_statuses(mockArgs);
 
-    expect(mockRedmineClient.prototype.getIssues).toHaveBeenCalledWith({
+    expect(mockHandlerContext.client.issues.getIssues).toHaveBeenCalledWith({
       project_id: 1,
       tracker_id: 2,
       limit: 1,
       status_id: '*'
     });
-    expect(mockRedmineClient.prototype.getIssue).toHaveBeenCalledWith(100, { include: 'allowed_statuses' });
+    expect(mockHandlerContext.client.issues.getIssue).toHaveBeenCalledWith(100, { include: 'allowed_statuses' });
     expect(mockFormatAllowedStatusesImplementation).toHaveBeenCalledWith(mockAllowedStatuses);
-    expect(result).toEqual<ToolResponse>({
+    expect(result).toEqual({
       content: [{ type: 'text', text: `MockedStatusesOutput: ${JSON.stringify(mockAllowedStatuses)}` }],
       isError: false,
     });
@@ -82,7 +100,7 @@ describe('list_project_statuses', () => {
   // --- Semi-Normal Cases ---
   it('should return a message if no issues are found for the project and tracker', async () => {
     const mockArgs = { project_id: 1, tracker_id: 3 };
-    (mockRedmineClient.prototype.getIssues as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssues as Mock<any>).mockResolvedValueOnce({
       issues: [],
       total_count: 0,
       offset: 0,
@@ -91,14 +109,14 @@ describe('list_project_statuses', () => {
 
     const result = await projectsHandlers.list_project_statuses(mockArgs);
 
-    expect(mockRedmineClient.prototype.getIssues).toHaveBeenCalledWith({
+    expect(mockHandlerContext.client.issues.getIssues).toHaveBeenCalledWith({
       project_id: 1,
       tracker_id: 3,
       limit: 1,
       status_id: '*'
     });
-    expect(mockRedmineClient.prototype.getIssue).not.toHaveBeenCalled();
-    expect(result).toEqual<ToolResponse>({
+    expect(mockHandlerContext.client.issues.getIssue).not.toHaveBeenCalled();
+    expect(result).toEqual({
       content: [{ type: 'text', text: 'No issues found for project_id 1 and tracker_id 3. Cannot determine allowed statuses.' }],
       isError: false,
     });
@@ -112,18 +130,18 @@ describe('list_project_statuses', () => {
       allowed_statuses: [], // Empty allowed statuses
     } as RedmineIssue;
 
-    (mockRedmineClient.prototype.getIssues as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssues as Mock<any>).mockResolvedValueOnce({
       issues: [mockRepresentativeIssue],
       total_count: 1,
       offset: 0,
       limit: 1,
     });
-    (mockRedmineClient.prototype.getIssue as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssue as Mock<any>).mockResolvedValueOnce({
       issue: mockDetailedIssue,
     });
 
     const result = await projectsHandlers.list_project_statuses(mockArgs);
-    expect(result).toEqual<ToolResponse>({
+    expect(result).toEqual({
       content: [{ type: 'text', text: 'No allowed statuses found for tracker_id 4 in project_id 1. It might be that the workflow is not configured or the representative issue has no available transitions.' }],
       isError: false,
     });
@@ -136,18 +154,18 @@ describe('list_project_statuses', () => {
       ...mockRepresentativeIssue,
     } as RedmineIssue;
 
-    (mockRedmineClient.prototype.getIssues as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssues as Mock<any>).mockResolvedValueOnce({
       issues: [mockRepresentativeIssue],
       total_count: 1,
       offset: 0,
       limit: 1,
     });
-    (mockRedmineClient.prototype.getIssue as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssue as Mock<any>).mockResolvedValueOnce({
       issue: mockDetailedIssue,
     });
 
     const result = await projectsHandlers.list_project_statuses(mockArgs);
-    expect(result).toEqual<ToolResponse>({
+    expect(result).toEqual({
       content: [{ type: 'text', text: 'No allowed statuses found for tracker_id 5 in project_id 1. It might be that the workflow is not configured or the representative issue has no available transitions.' }],
       isError: false,
     });
@@ -187,11 +205,11 @@ describe('list_project_statuses', () => {
   it('should return API Error if getIssues fails', async () => {
     const mockArgs = { project_id: 1, tracker_id: 2 };
     const apiError = new Error('Redmine API getIssues failed');
-    (mockRedmineClient.prototype.getIssues as jest.Mock).mockRejectedValueOnce(apiError);
+    (mockHandlerContext.client.issues.getIssues as Mock<any>).mockRejectedValueOnce(apiError);
 
     const result = await projectsHandlers.list_project_statuses(mockArgs);
 
-    expect(result).toEqual<ToolResponse>({
+    expect(result).toEqual({
       content: [{ type: 'text', text: `API Error: ${apiError.message}` }],
       isError: true,
     });
@@ -202,17 +220,17 @@ describe('list_project_statuses', () => {
     const mockRepresentativeIssue = { id: 100 } as RedmineIssue;
     const apiError = new Error('Redmine API getIssue failed');
 
-    (mockRedmineClient.prototype.getIssues as jest.Mock).mockResolvedValueOnce({
+    (mockHandlerContext.client.issues.getIssues as Mock<any>).mockResolvedValueOnce({
       issues: [mockRepresentativeIssue],
       total_count: 1,
       offset: 0,
       limit: 1,
     });
-    (mockRedmineClient.prototype.getIssue as jest.Mock).mockRejectedValueOnce(apiError);
+    (mockHandlerContext.client.issues.getIssue as Mock<any>).mockRejectedValueOnce(apiError);
 
     const result = await projectsHandlers.list_project_statuses(mockArgs);
 
-    expect(result).toEqual<ToolResponse>({
+    expect(result).toEqual({
       content: [{ type: 'text', text: `API Error: ${apiError.message}` }],
       isError: true,
     });

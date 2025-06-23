@@ -20,6 +20,12 @@ import { formatAllowedStatuses } from "../formatters/projects.js"; // Import the
 const context: HandlerContext = {
   client: redmineClient,
   config: config,
+  logger: {
+    info: console.log,
+    error: console.error,
+    warn: console.warn,
+    debug: console.debug,
+  },
 };
 
 // Create resource handlers
@@ -56,7 +62,7 @@ const TOOLS: Tool[] = [
   tools.PROJECT_ARCHIVE_TOOL,
   tools.PROJECT_UNARCHIVE_TOOL,
   tools.PROJECT_DELETE_TOOL,
-  // tools.PROJECT_LIST_STATUSES_TOOL, // This will be uncommented/added when tools/index.ts is updated
+  tools.PROJECT_LIST_STATUSES_TOOL, // New tool for listing project statuses
 
   // Time entry tools
   tools.TIME_ENTRY_LIST_TOOL,

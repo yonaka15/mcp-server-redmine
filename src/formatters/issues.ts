@@ -18,14 +18,14 @@ function escapeXml(unsafe: string | null | undefined): string {
 /**
  * Format custom fields
  */
-function formatCustomFields(fields: Array<{ id: number; name: string; value: string | string[] }>) {
+function formatCustomFields(fields: Array<{ id: number; name: string; value: string | string[] | null }>) {
   return `
   <custom_fields>
     ${fields.map(field => `
     <field>
       <id>${field.id}</id>
       <name>${escapeXml(field.name)}</name>
-      <value>${Array.isArray(field.value) ? escapeXml(field.value.join(", ")) : escapeXml(field.value)}</value>
+      <value>${field.value === null || field.value === undefined ? '' : Array.isArray(field.value) ? escapeXml(field.value.join(", ")) : escapeXml(field.value)}</value>
     </field>`).join('')}
   </custom_fields>`;
 }

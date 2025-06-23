@@ -10,6 +10,7 @@ export {
   formatProjectResult,
   formatProjectArchiveStatus,
   formatProjectDeleted,
+  formatAllowedStatuses,
 } from "./projects.js";
 
 export {

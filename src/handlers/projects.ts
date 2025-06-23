@@ -307,14 +307,17 @@ export function createProjectsHandlers(
           status_id: '*' // Get issues with any status
         });
 
-        if (!issuesResponse.issues || issuesResponse.issues.length === 0) {
+        // Type assertion to ensure issues is an array
+        const issues = Array.isArray(issuesResponse.issues) ? issuesResponse.issues : [];
+        
+        if (!issues || issues.length === 0) {
           return {
             content: [{ type: "text", text: `No issues found for project_id ${projectId} and tracker_id ${trackerId}. Cannot determine allowed statuses.` }],
             isError: false, // This is not an API error, but a "not found" scenario.
           };
         }
 
-        const representativeIssue = issuesResponse.issues[0];
+        const representativeIssue = issues[0];
 
         // 3. Get the issue details including allowed_statuses
         const issueDetailResponse = await client.issues.getIssue(representativeIssue.id, { include: "allowed_statuses" });

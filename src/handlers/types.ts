@@ -1,6 +1,15 @@
 import type { RedmineClient } from "../lib/client/index.js";
 import type { Config } from "../lib/config.js";
-import type { Logger } from "@mcp-sdk/core"; // MCP SDKのLoggerをインポート (仮のパス)
+
+/**
+ * Simple logger interface for testing
+ */
+export interface Logger {
+  info(message: string, ...args: unknown[]): void;
+  error(message: string, ...args: unknown[]): void;
+  warn(message: string, ...args: unknown[]): void;
+  debug(message: string, ...args: unknown[]): void;
+}
 
 /**
  * Response content type for each tool
