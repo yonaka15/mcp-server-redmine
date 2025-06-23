@@ -1,4 +1,5 @@
 # Redmine MCP Server
+
 [![smithery badge](https://smithery.ai/badge/@yonaka15/mcp-server-redmine)](https://smithery.ai/server/@yonaka15/mcp-server-redmine)
 
 This is a Model Context Protocol (MCP) server implementation for Redmine. It integrates with Redmine's REST API to provide ticket and project information to LLMs.
@@ -133,36 +134,221 @@ The `@modelcontextprotocol/inspector` also offers a CLI mode for more direct int
 
 **Key CLI Features:**
 
-*   **Connect to MCP Server:**
-    *   Local build: `npx @modelcontextprotocol/inspector --cli node build/index.js`
-    *   Remote URL: `npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com`
-    *   Using a config file: `npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver`
-*   **Get Server Information:**
-    *   List available tools: `--method tools/list`
-    *   List available resources: `--method resources/list`
-    *   List available prompts: `--method prompts/list`
-*   **Execute Tools:**
-    *   Call a specific tool with arguments: `--method tools/call --tool-name <tool_name> --tool-arg <key>=<value>`
-*   **Environment Variables and Arguments:**
-    *   Pass environment variables to the server: `-e <key>=<value>`
-    *   Separate Inspector flags from server arguments with `--`.
+- **Connect to MCP Server:**
+  - Local build: `npx @modelcontextprotocol/inspector --cli node build/index.js`
+  - Remote URL: `npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com`
+  - Using a config file: `npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver`
+- **Get Server Information:**
+  - List available tools: `--method tools/list`
+  - List available resources: `--method resources/list`
+  - List available prompts: `--method prompts/list`
+- **Execute Tools:**
+  - Call a specific tool with arguments: `--method tools/call --tool-name <tool_name> --tool-arg <key>=<value>`
+- **Environment Variables and Arguments:**
+  - Pass environment variables to the server: `-e <key>=<value>`
+  - Separate Inspector flags from server arguments with `--`.
 
 **Basic CLI Command Examples:**
 
-*   Connect to a local server and list available tools:
-    ```bash
-    npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/list
-    ```
-*   Connect to a remote server:
-    ```bash
-    npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com
-    ```
-*   Connect using a configuration file and execute a specific tool:
-    ```bash
-    npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver --method tools/call --tool-name mytool --tool-arg key=value
-    ```
+- Connect to a local server and list available tools:
+  ```bash
+  npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/list
+  ```
+- Connect to a remote server:
+  ```bash
+  npx @modelcontextprotocol/inspector --cli https://my-mcp-server.example.com
+  ```
+- Connect using a configuration file and execute a specific tool:
+  ```bash
+  npx @modelcontextprotocol/inspector --cli --config path/to/config.json --server myserver --method tools/call --tool-name mytool --tool-arg key=value
+  ```
 
 For more detailed information, refer to the [MCP Inspector README](https://github.com/modelcontextprotocol/inspector/blob/main/README.md).
+
+#### CLI Testing Commands
+
+Here are practical examples for testing the Redmine MCP Server using CLI mode.
+
+**Prerequisites:**
+
+```bash
+# Build the project
+npm run build
+
+# Set execute permission
+chmod +x dist/index.js
+
+# Set environment variables
+export REDMINE_API_KEY=your-api-key-here
+export REDMINE_HOST=http://localhost:3000  # or your Redmine server URL
+```
+
+**Basic Testing Commands:**
+
+1. **List available tools:**
+
+   ```bash
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/list
+   ```
+
+2. **Test Issues functionality:**
+
+   ```bash
+   # List issues (with limit)
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name list_issues \
+     --tool-arg limit=5
+
+   # Get specific issue details
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name show_issue \
+     --tool-arg id=1
+
+   # Filter issues by project
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name list_issues \
+     --tool-arg project_id=1 \
+     --tool-arg limit=3
+   ```
+
+3. **Test Projects functionality:**
+
+   ```bash
+   # List all projects
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name list_projects
+
+   # Get specific project details
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name show_project \
+     --tool-arg id=1
+   ```
+
+4. **Test Users functionality (requires admin privileges):**
+
+   ```bash
+   # List users
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name list_users
+
+   # Get specific user details
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name show_user \
+     --tool-arg id=1
+   ```
+
+5. **Test Time Entries functionality:**
+
+   ```bash
+   # List time entries
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name list_time_entries \
+     --tool-arg limit=5
+
+   # Get specific time entry details
+   npx @modelcontextprotocol/inspector --cli \
+     -e REDMINE_API_KEY=$REDMINE_API_KEY \
+     -e REDMINE_HOST=$REDMINE_HOST \
+     node dist/index.js \
+     --method tools/call \
+     --tool-name show_time_entry \
+     --tool-arg id=1
+   ```
+
+**Advanced Testing:**
+
+```bash
+# Filter issues by status
+npx @modelcontextprotocol/inspector --cli \
+  -e REDMINE_API_KEY=$REDMINE_API_KEY \
+  -e REDMINE_HOST=$REDMINE_HOST \
+  node dist/index.js \
+  --method tools/call \
+  --tool-name list_issues \
+  --tool-arg status_id=1 \
+  --tool-arg limit=5
+
+# Search issues by keyword
+npx @modelcontextprotocol/inspector --cli \
+  -e REDMINE_API_KEY=$REDMINE_API_KEY \
+  -e REDMINE_HOST=$REDMINE_HOST \
+  node dist/index.js \
+  --method tools/call \
+  --tool-name list_issues \
+  --tool-arg subject="bug" \
+  --tool-arg limit=3
+
+# Get time entries for specific project
+npx @modelcontextprotocol/inspector --cli \
+  -e REDMINE_API_KEY=$REDMINE_API_KEY \
+  -e REDMINE_HOST=$REDMINE_HOST \
+  node dist/index.js \
+  --method tools/call \
+  --tool-name list_time_entries \
+  --tool-arg project_id=1 \
+  --tool-arg limit=10
+```
+
+**Troubleshooting:**
+
+- **Connection issues**: Verify your Redmine server is running and accessible:
+
+  ```bash
+  curl -H "X-Redmine-API-Key: $REDMINE_API_KEY" \
+       "$REDMINE_HOST/projects.json"
+  ```
+
+- **Permission errors**: Some operations require administrator privileges. Check your API key permissions in Redmine.
+
+- **Environment variables**: Ensure environment variables are properly set:
+
+  ```bash
+  echo $REDMINE_API_KEY
+  echo $REDMINE_HOST
+  ```
+
+- **Build issues**: Make sure the project is built and permissions are set:
+  ```bash
+  npm run build
+  chmod +x dist/index.js
+  ls -la dist/index.js
+  ```
 
 ## Permissions
 
