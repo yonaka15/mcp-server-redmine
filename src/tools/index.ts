@@ -1,6 +1,7 @@
 // Issue-related tools
 export {
   ISSUE_LIST_TOOL,
+  ISSUE_GET_TOOL,
   ISSUE_CREATE_TOOL,
   ISSUE_UPDATE_TOOL,
   ISSUE_DELETE_TOOL,

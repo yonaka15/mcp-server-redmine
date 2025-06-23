@@ -48,6 +48,7 @@ const handlers = {
 const TOOLS: Tool[] = [
   // Issue-related tools
   tools.ISSUE_LIST_TOOL,
+  tools.ISSUE_GET_TOOL,
   tools.ISSUE_CREATE_TOOL,
   tools.ISSUE_UPDATE_TOOL,
   tools.ISSUE_DELETE_TOOL,

@@ -213,7 +213,7 @@ export REDMINE_HOST=http://localhost:3000  # or your Redmine server URL
      -e REDMINE_HOST=$REDMINE_HOST \
      node dist/index.js \
      --method tools/call \
-     --tool-name show_issue \
+     --tool-name get_issue \
      --tool-arg id=1
 
    # Filter issues by project

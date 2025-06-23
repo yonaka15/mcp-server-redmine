@@ -116,6 +116,52 @@ export function createIssuesHandlers(context: HandlerContext) {
     },
 
     /**
+     * Gets a specific issue by ID
+     */
+    get_issue: async (args: unknown): Promise<ToolResponse> => {
+      try {
+        // Validate input structure
+        if (typeof args !== 'object' || args === null) {
+          throw new ValidationError("Arguments must be an object");
+        }
+
+        const argsObj = args as Record<string, unknown>;
+
+        // Validate required fields
+        if (!('id' in argsObj)) {
+          throw new ValidationError("id is required");
+        }
+
+        const id = asNumber(argsObj.id);
+        
+        // Handle optional include parameter
+        const params = 'include' in argsObj ? { include: String(argsObj.include) } : undefined;
+
+        const response = await client.issues.getIssue(id, params);
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatters.formatIssue(response.issue),
+            }
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : String(error),
+            }
+          ],
+          isError: true,
+        };
+      }
+    },
+
+    /**
      * Creates a new issue
      */
     create_issue: async (args: unknown): Promise<ToolResponse> => {

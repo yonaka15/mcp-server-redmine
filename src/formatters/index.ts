@@ -1,4 +1,5 @@
 export {
+  formatIssue,
   formatIssues,
   formatIssueResult,
   formatIssueDeleted,
