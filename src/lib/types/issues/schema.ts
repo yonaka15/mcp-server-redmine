@@ -55,6 +55,12 @@ const RedmineRelationSchema = z.object({
   delay: z.number().nullable(), // 遅延日数
 });
 
+const AllowedStatusSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    is_closed: z.boolean().optional(),
+});
+
 export const RedmineIssueSchema = z.object({
   id: z.number(),
   project: z.object({
@@ -82,27 +88,27 @@ export const RedmineIssueSchema = z.object({
     id: z.number(),
     name: z.string(),
   }).optional(),
-  // category: z.object({ id: z.number(), name: z.string() }).optional(),
+  category: z.object({ id: z.number(), name: z.string() }).optional(), // Added for completeness, often present
   subject: z.string(),
-  description: z.string().optional(),
-  start_date: z.string().optional(), // YYYY-MM-DD
-  due_date: z.string().nullable(), // YYYY-MM-DD or null
+  description: z.string().optional().nullable(), // Can be null
+  start_date: z.string().optional().nullable(), // YYYY-MM-DD or null
+  due_date: z.string().nullable().optional(), // YYYY-MM-DD or null, made optional for consistency with reference doc
   done_ratio: z.number(),
   // is_private: z.boolean().optional(),
-  estimated_hours: z.number().nullable(),
+  estimated_hours: z.number().nullable().optional(),
   spent_hours: z.number().optional(), // Redmine 3. Spent time for issue
-  total_estimated_hours: z.number().nullable(), // Redmine 3. Total estimated hours for issue (including subtasks)
+  total_estimated_hours: z.number().nullable().optional(), // Redmine 3. Total estimated hours for issue (including subtasks)
   total_spent_hours: z.number().optional(), // Redmine 3. Total spent hours for issue (including subtasks)
   custom_fields: z.array(
     z.object({
       id: z.number(),
       name: z.string(),
-      value: z.union([z.string(), z.array(z.string())]), // Can be string or array of strings
+      value: z.union([z.string(), z.array(z.string()), z.null()]), // Value can be string, array of strings, or null
     })
   ).optional(),
   created_on: z.string(), // datetime
   updated_on: z.string(), // datetime
-  closed_on: z.string().nullable(), // datetime or null
+  closed_on: z.string().nullable().optional(), // datetime or null
   // Optional fields based on 'include' parameter
   notes: z.string().optional(), // for journals
   private_notes: z.boolean().optional(), // for journals if the user has permission
@@ -113,4 +119,7 @@ export const RedmineIssueSchema = z.object({
     id: z.number(),
   }).optional(),
   // children: z.array(RedmineIssueSchema).optional(), // Recursive, handle carefully or omit if not directly nesting
+  
+  // Added based on the reference document for list_project_statuses
+  allowed_statuses: z.array(AllowedStatusSchema).optional(),
 });

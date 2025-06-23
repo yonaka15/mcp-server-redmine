@@ -106,6 +106,13 @@ export interface RedmineIssue {
     delay: number | null, // Delay in days for "precedes" and "follows" relations
   }[];
   // children?: RedmineIssue[]; // If 'children' is included. Be careful with recursion.
+
+  // Added based on the reference document for list_project_statuses
+  allowed_statuses?: {
+    id: number;
+    name: string;
+    is_closed?: boolean;
+  }[];
 }
 
 export interface RedmineIssueCreate {
