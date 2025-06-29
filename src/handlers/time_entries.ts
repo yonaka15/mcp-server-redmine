@@ -103,7 +103,7 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         time_entry.comments = String(comments);
       }
 
-      const result = await client.timeEntries.createTimeEntry({ time_entry });
+      const result = await client.timeEntries.createTimeEntry(time_entry);
       return {
         content: [{ type: "text", text: formatters.formatTimeEntryResult(result.time_entry, "created") }],
         isError: false,
