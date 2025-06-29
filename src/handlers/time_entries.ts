@@ -81,9 +81,31 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
   const create_time_entry_generic = async (args: Record<string, unknown>): Promise<ToolResponse> => {
     try {
       validateTimeEntryPayload(args);
-      const { time_entry } = await client.timeEntries.createTimeEntry(args as RedmineTimeEntryCreate);
+
+      // HACK: Adjust the interface of the tool to match the type of client.timeEntries.createTimeEntry
+      const { issue_id, project_id, hours, activity_id, spent_on, comments } = args;
+
+      const time_entry: RedmineTimeEntryCreate = {
+        hours: asNumber(hours),
+        activity_id: asNumber(activity_id),
+      };
+
+      if (issue_id) {
+        time_entry.issue_id = asNumber(issue_id);
+      } else if (project_id) {
+        time_entry.project_id = asNumber(project_id);
+      }
+
+      if (spent_on) {
+        time_entry.spent_on = String(spent_on);
+      }
+      if (comments) {
+        time_entry.comments = String(comments);
+      }
+
+      const result = await client.timeEntries.createTimeEntry({ time_entry });
       return {
-        content: [{ type: "text", text: formatters.formatTimeEntryResult(time_entry, "created") }],
+        content: [{ type: "text", text: formatters.formatTimeEntryResult(result.time_entry, "created") }],
         isError: false,
       };
     } catch (error) {
