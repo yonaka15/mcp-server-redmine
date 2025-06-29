@@ -69,12 +69,12 @@ export const TIME_ENTRY_SHOW_TOOL: Tool = {
   }
 };
 
-// Create time entry tool
-export const TIME_ENTRY_CREATE_TOOL: Tool = {
-  name: "create_time_entry",
+// Create time entry for project tool
+export const TIME_ENTRY_CREATE_FOR_PROJECT_TOOL: Tool = {
+  name: "create_time_entry_for_project",
   description:
-    "Record spent time on projects or issues. " +
-    "Hours and project or issue ID required. " +
+    "Record spent time on a project. " +
+    "Hours and project ID required. " +
     "Activity type ID required if no default exists. " +
     "Available since Redmine 1.1",
   inputSchema: {
@@ -84,6 +84,46 @@ export const TIME_ENTRY_CREATE_TOOL: Tool = {
         type: "string",
         description: "Project ID as number or project key as text"
       },
+      spent_on: {
+        type: "string",
+        description: "Date in YYYY-MM-DD format. Defaults to today",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      hours: {
+        type: "number",
+        description: "Number of hours spent. Can use decimals",
+        minimum: 0,
+        exclusiveMinimum: 0
+      },
+      activity_id: {
+        type: "number",
+        description: "Activity type ID. Required if no default exists"
+      },
+      comments: {
+        type: "string",
+        description: "Optional comments up to 255 characters",
+        maxLength: 255
+      },
+      user_id: {
+        type: "number",
+        description: "Log time for this user ID. Requires admin rights"
+      }
+    },
+    required: ["project_id", "hours"]
+  }
+};
+
+// Create time entry for issue tool
+export const TIME_ENTRY_CREATE_FOR_ISSUE_TOOL: Tool = {
+  name: "create_time_entry_for_issue",
+  description:
+    "Record spent time on an issue. " +
+    "Hours and issue ID required. " +
+    "Activity type ID required if no default exists. " +
+    "Available since Redmine 1.1",
+  inputSchema: {
+    type: "object",
+    properties: {
       issue_id: {
         type: "number",
         description: "Issue ID to log time against"
@@ -113,11 +153,7 @@ export const TIME_ENTRY_CREATE_TOOL: Tool = {
         description: "Log time for this user ID. Requires admin rights"
       }
     },
-    required: ["hours"],
-    oneOf: [
-      { required: ["project_id"] },
-      { required: ["issue_id"] }
-    ]
+    required: ["issue_id", "hours"]
   }
 };
 

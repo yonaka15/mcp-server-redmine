@@ -6,7 +6,7 @@ import {
   extractPaginationParams,
   ValidationError,
 } from "./types.js";
-import type { RedmineTimeEntryCreate, RedmineTimeEntryUpdate } from "../lib/types/index.js"; // Added RedmineTimeEntryUpdate
+import type { RedmineTimeEntryCreate, RedmineTimeEntryUpdate } from "../lib/types/index.js";
 import * as formatters from "../formatters/index.js";
 
 /**
@@ -25,13 +25,11 @@ function isValidDate(date: string): boolean {
 function extractTimeEntryParams(args: Record<string, unknown>): Record<string, unknown> {
   const params: Record<string, unknown> = {};
 
-  // Handle project_id as string
   if ("project_id" in args) {
     const projectId = asNumberOrSpecial(args.project_id);
-    params.project_id = parseInt(projectId as string, 10); // Ensure projectId is treated as string for parseInt
+    params.project_id = projectId;
   }
 
-  // Handle date filters
   if (typeof args.spent_on === "string") {
     if (!isValidDate(args.spent_on)) {
       throw new ValidationError("Invalid date format for spent_on. Use YYYY-MM-DD");
@@ -53,57 +51,70 @@ function extractTimeEntryParams(args: Record<string, unknown>): Record<string, u
     params.to = args.to;
   }
 
-  // Handle user_id
   if (typeof args.user_id === "number") {
     params.user_id = args.user_id;
   }
 
-  // Add pagination params
   return {
     ...params,
     ...extractPaginationParams(args),
   };
 }
 
-/**
- * Type guard for RedmineTimeEntryCreate with improved validation
- */
-function isRedmineTimeEntryCreate(value: unknown): value is RedmineTimeEntryCreate {
-  if (typeof value !== "object" || !value) return false;
-  const v = value as Record<string, unknown>;
-
-  // Check required hours
-  if (typeof v.hours !== "number" || v.hours <= 0) {
+function validateTimeEntryPayload(payload: Record<string, unknown>) {
+  if (typeof payload.hours !== "number" || payload.hours <= 0) {
     throw new ValidationError("hours must be a positive number");
   }
 
-  // Check project_id or issue_id is provided
-  if (!("project_id" in v) && !("issue_id" in v)) {
-    throw new ValidationError("Either project_id or issue_id is required");
-  }
-
-  // Validate spent_on if provided
-  if ("spent_on" in v && typeof v.spent_on === "string") {
-    if (!isValidDate(v.spent_on)) {
+  if ("spent_on" in payload && typeof payload.spent_on === "string" && !isValidDate(payload.spent_on)) {
       throw new ValidationError("Invalid date format for spent_on. Use YYYY-MM-DD");
-    }
   }
 
-  // Validate activity_id
-  if (!("activity_id" in v)) {
-    throw new ValidationError("activity_id is required unless a default activity is defined in Redmine");
-  }
-
-  // Validate comments length
-  if ("comments" in v && typeof v.comments === "string" && v.comments.length > 255) {
+  if ("comments" in payload && typeof payload.comments === "string" && payload.comments.length > 255) {
     throw new ValidationError("comments must not exceed 255 characters");
   }
-
-  return true;
 }
 
 export function createTimeEntriesHandlers(context: HandlerContext) {
   const { client } = context;
+
+  const create_time_entry_generic = async (args: Record<string, unknown>): Promise<ToolResponse> => {
+    try {
+      validateTimeEntryPayload(args);
+
+      // HACK: Adjust the interface of the tool to match the type of client.timeEntries.createTimeEntry
+      const { issue_id, project_id, hours, activity_id, spent_on, comments } = args;
+
+      const time_entry: RedmineTimeEntryCreate = {
+        hours: asNumber(hours),
+        activity_id: asNumber(activity_id),
+      };
+
+      if (issue_id) {
+        time_entry.issue_id = asNumber(issue_id);
+      } else if (project_id) {
+        time_entry.project_id = asNumber(project_id);
+      }
+
+      if (spent_on) {
+        time_entry.spent_on = String(spent_on);
+      }
+      if (comments) {
+        time_entry.comments = String(comments);
+      }
+
+      const result = await client.timeEntries.createTimeEntry(time_entry);
+      return {
+        content: [{ type: "text", text: formatters.formatTimeEntryResult(result.time_entry, "created") }],
+        isError: false,
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
+        isError: true,
+      };
+    }
+  };
 
   return {
     list_time_entries: async (args: Record<string, unknown>): Promise<ToolResponse> => {
@@ -111,22 +122,12 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         const validatedArgs = extractTimeEntryParams(args);
         const entries = await client.timeEntries.getTimeEntries(validatedArgs);
         return {
-          content: [
-            {
-              type: "text",
-              text: formatters.formatTimeEntries(entries),
-            }
-          ],
+          content: [{ type: "text", text: formatters.formatTimeEntries(entries) }],
           isError: false,
         };
       } catch (error) {
         return {
-          content: [
-            {
-              type: "text",
-              text: error instanceof Error ? error.message : String(error),
-            }
-          ],
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
           isError: true,
         };
       }
@@ -137,105 +138,35 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         const id = asNumber(args.id);
         const { time_entry } = await client.timeEntries.getTimeEntry(id);
         return {
-          content: [
-            {
-              type: "text",
-              text: formatters.formatTimeEntry(time_entry),
-            }
-          ],
+          content: [{ type: "text", text: formatters.formatTimeEntry(time_entry) }],
           isError: false,
         };
       } catch (error) {
         return {
-          content: [
-            {
-              type: "text",
-              text: error instanceof Error ? error.message : String(error),
-            }
-          ],
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
           isError: true,
         };
       }
     },
 
-    create_time_entry: async (args: Record<string, unknown>): Promise<ToolResponse> => {
-      try {
-        // Convert project_id to number if present
-        let updatedArgs = { ...args };
-        if ('project_id' in args) {
-          const projectIdStr = asNumberOrSpecial(args.project_id);
-          updatedArgs = { ...updatedArgs, project_id: parseInt(projectIdStr as string, 10) };
-        }
-
-        // Validate the modified arguments
-        if (!isRedmineTimeEntryCreate(updatedArgs)) {
-          // ValidationError is thrown within isRedmineTimeEntryCreate if invalid
-          // This line is for safety, actual error comes from the type guard
-          throw new ValidationError("Invalid time entry create parameters"); 
-        }
-
-        const { time_entry } = await client.timeEntries.createTimeEntry(updatedArgs as RedmineTimeEntryCreate);
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatters.formatTimeEntryResult(time_entry, "created"),
-            }
-          ],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: error instanceof Error ? error.message : String(error),
-            }
-          ],
-          isError: true,
-        };
-      }
-    },
+    create_time_entry_for_project: create_time_entry_generic,
+    create_time_entry_for_issue: create_time_entry_generic,
 
     update_time_entry: async (args: Record<string, unknown>): Promise<ToolResponse> => {
       try {
         const id = asNumber(args.id);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id: _, ...updateData } = args; // Mark id as unused in destructuring
+        const { id: _, ...updateData } = args;
 
-        // Validate update data
-        if ("hours" in updateData && (typeof updateData.hours !== "number" || updateData.hours <= 0)) {
-          throw new ValidationError("hours must be a positive number");
-        }
-
-        if ("spent_on" in updateData && typeof updateData.spent_on === "string") {
-          if (!isValidDate(updateData.spent_on)) {
-            throw new ValidationError("Invalid date format for spent_on. Use YYYY-MM-DD");
-          }
-        }
-
-        if ("comments" in updateData && typeof updateData.comments === "string" && updateData.comments.length > 255) {
-          throw new ValidationError("comments must not exceed 255 characters");
-        }
+        validateTimeEntryPayload(updateData);
 
         const { time_entry } = await client.timeEntries.updateTimeEntry(id, updateData as RedmineTimeEntryUpdate);
         return {
-          content: [
-            {
-              type: "text",
-              text: formatters.formatTimeEntryResult(time_entry, "updated"),
-            }
-          ],
+          content: [{ type: "text", text: formatters.formatTimeEntryResult(time_entry, "updated") }],
           isError: false,
         };
       } catch (error) {
         return {
-          content: [
-            {
-              type: "text",
-              text: error instanceof Error ? error.message : String(error),
-            }
-          ],
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
           isError: true,
         };
       }
@@ -246,22 +177,12 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
         const id = asNumber(args.id);
         await client.timeEntries.deleteTimeEntry(id);
         return {
-          content: [
-            {
-              type: "text",
-              text: formatters.formatTimeEntryDeleted(id),
-            }
-          ],
+          content: [{ type: "text", text: formatters.formatTimeEntryDeleted(id) }],
           isError: false,
         };
       } catch (error) {
         return {
-          content: [
-            {
-              type: "text",
-              text: error instanceof Error ? error.message : String(error),
-            }
-          ],
+          content: [{ type: "text", text: error instanceof Error ? error.message : String(error) }],
           isError: true,
         };
       }
