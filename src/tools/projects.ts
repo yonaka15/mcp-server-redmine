@@ -22,13 +22,13 @@ export const PROJECT_LIST_TOOL: Tool = {
         pattern: "^(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields)(,(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields))*$"
       },
       status: {
-        type: "number",
+        type: "string",
         description:
           "Filter projects by status\n" +
           "- 1: active projects. Default\n" +
           "- 5: archived projects\n" +
           "- 9: closed projects",
-        enum: [1, 5, 9]
+        enum: ["1", "5", "9"]
       },
       limit: {
         type: "number",

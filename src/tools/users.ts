@@ -12,13 +12,13 @@ export const USER_LIST_TOOL: Tool = {
     type: "object",
     properties: {
       status: {
-        type: "number",
+        type: "string",
         description:
           "Filter users by status\n" +
           "- 1: Active users\n" +
           "- 2: Registered users\n" +
           "- 3: Locked users",
-        enum: [1, 2, 3],
+        enum: ["1", "2", "3"],
       },
       name: {
         type: "string",
