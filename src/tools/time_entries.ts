@@ -30,7 +30,7 @@ export const TIME_ENTRY_LIST_TOOL: Tool = {
       },
       to: {
         type: "string",
-        description: "Show entries until this date in YYYY-MM-DD format", 
+        description: "Show entries until this date in YYYY-MM-DD format",
         pattern: "^\\d{4}-\\d{2}-\\d{2}$"
       },
       offset: {
