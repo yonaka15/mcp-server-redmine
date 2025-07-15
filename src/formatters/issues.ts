@@ -31,6 +31,40 @@ function formatCustomFields(fields: Array<{ id: number; name: string; value: str
 }
 
 /**
+ * Format journal entries (comments and history)
+ */
+function formatJournals(journals: Array<{
+  id: number;
+  user: { id: number; name: string };
+  notes?: string | null;
+  private_notes?: boolean;
+  created_on: string;
+  details?: Array<{ property: string; name: string; old_value?: string | null; new_value?: string | null }>;
+}>) {
+  return `
+  <journals>
+    ${journals.map(journal => `
+    <journal>
+      <id>${journal.id}</id>
+      <user>${escapeXml(journal.user.name)}</user>
+      <created_on>${journal.created_on}</created_on>
+      ${journal.private_notes ? `<private_notes>true</private_notes>` : ''}
+      ${journal.notes !== null && journal.notes !== undefined ? `<notes>${escapeXml(journal.notes)}</notes>` : ''}
+      ${journal.details && journal.details.length > 0 ? `
+      <details>
+        ${journal.details.map(detail => `
+        <detail>
+          <property>${escapeXml(detail.property)}</property>
+          <name>${escapeXml(detail.name)}</name>
+          ${detail.old_value !== null && detail.old_value !== undefined ? `<old_value>${escapeXml(detail.old_value)}</old_value>` : ''}
+          ${detail.new_value !== null && detail.new_value !== undefined ? `<new_value>${escapeXml(detail.new_value)}</new_value>` : ''}
+        </detail>`).join('')}
+      </details>` : ''}
+    </journal>`).join('')}
+  </journals>`;
+}
+
+/**
  * Format a single issue
  */
 export function formatIssue(issue: RedmineIssue): string {
@@ -55,6 +89,7 @@ export function formatIssue(issue: RedmineIssue): string {
   ${issue.spent_hours !== undefined ? `<spent_hours>${issue.spent_hours}</spent_hours>` : ''}
   ${safeDescription ? `<description>${safeDescription}</description>` : ''}
   ${issue.custom_fields?.length ? formatCustomFields(issue.custom_fields) : ''}
+  ${issue.journals?.length ? formatJournals(issue.journals) : ''}
   ${issue.created_on ? `<created_on>${issue.created_on}</created_on>` : ''}
   ${issue.updated_on ? `<updated_on>${issue.updated_on}</updated_on>` : ''}
   ${issue.closed_on ? `<closed_on>${issue.closed_on}</closed_on>` : ''}

@@ -105,6 +105,22 @@ export interface RedmineIssue {
     relation_type: string, // e.g. "relates", "duplicates", "blocks"
     delay: number | null, // Delay in days for "precedes" and "follows" relations
   }[];
+  journals?: {
+    id: number;
+    user: {
+      id: number;
+      name: string;
+    };
+    notes?: string | null;
+    private_notes?: boolean;
+    created_on: string; // datetime
+    details?: {
+      property: string;
+      name: string;
+      old_value?: string | null;
+      new_value?: string | null;
+    }[];
+  }[];
   // children?: RedmineIssue[]; // If 'children' is included. Be careful with recursion.
 
   // Added based on the reference document for list_project_statuses
