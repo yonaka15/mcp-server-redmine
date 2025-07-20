@@ -61,6 +61,25 @@ const AllowedStatusSchema = z.object({
     is_closed: z.boolean().optional(),
 });
 
+const JournalDetailSchema = z.object({
+  property: z.string(),
+  name: z.string(),
+  old_value: z.string().nullable().optional(),
+  new_value: z.string().nullable().optional(),
+});
+
+const JournalSchema = z.object({
+  id: z.number(),
+  user: z.object({
+    id: z.number(),
+    name: z.string(),
+  }),
+  notes: z.string().nullable().optional(),
+  private_notes: z.boolean().optional(),
+  created_on: z.string(),
+  details: z.array(JournalDetailSchema).optional(),
+});
+
 export const RedmineIssueSchema = z.object({
   id: z.number(),
   project: z.object({
@@ -122,4 +141,5 @@ export const RedmineIssueSchema = z.object({
   
   // Added based on the reference document for list_project_statuses
   allowed_statuses: z.array(AllowedStatusSchema).optional(),
+  journals: z.array(JournalSchema).optional(),
 });
