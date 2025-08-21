@@ -127,3 +127,6 @@ out
 
 # Build output
 dist/
+
+# Documentations pertaining to the PR being implemented (not for automatic inclusion)
+pr_docs

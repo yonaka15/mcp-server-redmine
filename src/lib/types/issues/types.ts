@@ -29,6 +29,10 @@ export interface IssueListParams {
   parent_id?: number;
   created_on?: string;
   updated_on?: string;
+  // Text filters
+  subject_filter?: string;
+  description_filter?: string;
+  notes_filter?: string;
   [key: `cf_${number}`]: string; // Custom fields e.g. cf_1, cf_2
 }
 
@@ -156,4 +160,21 @@ export interface RedmineIssueCreate {
 export interface RedmineIssueUpdate extends Partial<RedmineIssueCreate> {
   notes?: string; // Add notes during update
   private_notes?: boolean; // Add private notes
+}
+
+// Extended parameter interfaces for formatting options
+export interface IssueListParamsExtended extends IssueListParams {
+  detail_level?: 'brief' | 'full';
+  brief_fields?: string; // JSON string of BriefFieldOptions
+  max_description_length?: number;
+  max_journal_entries?: number;
+}
+
+export interface IssueShowParamsExtended {
+  include?: string;
+  detail_level?: 'brief' | 'full';
+  brief_fields?: string; // JSON string of BriefFieldOptions
+  max_description_length?: number;
+  max_journal_entries?: number;
+  [key: string]: string | number | undefined; // Index signature for compatibility
 }

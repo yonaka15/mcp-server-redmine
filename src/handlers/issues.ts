@@ -1,4 +1,4 @@
-import {
+ import {
   HandlerContext,
   ToolResponse,
   asNumber,
@@ -6,6 +6,7 @@ import {
   ValidationError,
 } from "./types.js";
 import * as formatters from "../formatters/index.js";
+import { parseFormatOptions } from "../formatters/format-options.js";
 import type {
   RedmineIssueCreate,
   RedmineIssueUpdate,
@@ -20,6 +21,54 @@ import type {
 //   ISSUE_REMOVE_WATCHER_TOOL 
 // } from '../tools/issues.js'; // Removed unused imports
 // import { IssueQuerySchema } from '../lib/types/issues/schema.js'; // Removed unused import
+
+/**
+ * Builds Redmine API filter parameters for text filtering
+ * Generates the f[], op[], and v[] parameters required by Redmine's filter API
+ * 
+ * @param textFilters Object containing text filter values
+ * @returns Record of filter parameters to add to the API query
+ */
+function buildTextFilterParams(textFilters: {
+  subject_filter?: string;
+  description_filter?: string;
+  notes_filter?: string;
+}): Record<string, string | string[]> {
+  const filterParams: Record<string, string | string[]> = {};
+  const activeFilters: string[] = [];
+  
+  // TODO Phase 2: Add operator support (contains, equals, starts_with, regex)
+  // TODO Phase 3: Implement flexible filter array system matching Redmine UI
+  // TODO Phase 4: Add custom field filtering support (cf_123 format)
+  
+  // Subject filter: f[]=subject&op[subject]=~&v[subject][]=value
+  if (textFilters.subject_filter && textFilters.subject_filter.trim() !== '') {
+    activeFilters.push('subject');
+    filterParams['op[subject]'] = '~'; // Contains operator
+    filterParams['v[subject][]'] = textFilters.subject_filter;
+  }
+  
+  // Description filter: f[]=description&op[description]=~&v[description][]=value
+  if (textFilters.description_filter && textFilters.description_filter.trim() !== '') {
+    activeFilters.push('description');
+    filterParams['op[description]'] = '~';
+    filterParams['v[description][]'] = textFilters.description_filter;
+  }
+  
+  // Notes filter: f[]=notes&op[notes]=~&v[notes][]=value
+  if (textFilters.notes_filter && textFilters.notes_filter.trim() !== '') {
+    activeFilters.push('notes');
+    filterParams['op[notes]'] = '~';
+    filterParams['v[notes][]'] = textFilters.notes_filter;
+  }
+  
+  // Set the f[] parameter as a comma-separated string for Redmine API
+  if (activeFilters.length > 0) {
+    filterParams['f[]'] = activeFilters.join(',');
+  }
+  
+  return filterParams;
+}
 
 /**
  * Creates handlers for issue-related operations
@@ -89,13 +138,32 @@ export function createIssuesHandlers(context: HandlerContext) {
           }
         }
 
-        const issues = await client.issues.getIssues(params);
+        // Handle text filters
+        if ('subject_filter' in argsObj) params.subject_filter = String(argsObj.subject_filter);
+        if ('description_filter' in argsObj) params.description_filter = String(argsObj.description_filter);
+        if ('notes_filter' in argsObj) params.notes_filter = String(argsObj.notes_filter);
+
+        // Build text filter parameters for Redmine API
+        const textFilters = {
+          subject_filter: params.subject_filter,
+          description_filter: params.description_filter,
+          notes_filter: params.notes_filter,
+        };
+        const textFilterParams = buildTextFilterParams(textFilters);
+
+        // Merge text filter parameters with existing params
+        const finalParams = { ...params, ...textFilterParams };
+
+        const issues = await client.issues.getIssues(finalParams);
+        
+        // Parse formatting options
+        const formatOptions = parseFormatOptions(argsObj);
         
         return {
           content: [
             {
               type: "text",
-              text: formatters.formatIssues(issues),
+              text: formatters.formatIssues(issues, formatOptions),
             }
           ],
           isError: false,
@@ -139,11 +207,14 @@ export function createIssuesHandlers(context: HandlerContext) {
 
         const response = await client.issues.getIssue(id, params);
         
+        // Parse formatting options
+        const formatOptions = parseFormatOptions(argsObj);
+        
         return {
           content: [
             {
               type: "text",
-              text: formatters.formatIssue(response.issue),
+              text: formatters.formatIssue(response.issue, formatOptions),
             }
           ],
           isError: false,

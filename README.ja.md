@@ -49,6 +49,55 @@ Redmine REST API の Stable なリソースに対応しています：
   - カスタムフィールド対応
 - 作業時間の削除
 
+## Brief Mode 最適化
+
+このサーバーは、コンテキストウィンドウの効率的な利用のために Brief Mode 最適化機能を提供します。
+
+### 主な利点
+
+- **95% のサイズ削減**: 出力サイズを大幅に削減し、コンテキストウィンドウを効率的に活用
+- **拡張されたフィールド選択**: カスタムフィールドを名前で選択的にフィルタリング
+- **スマートなデフォルト**: デフォルトで切り詰められた説明を含み、空のカスタムフィールドを除外
+- **フィールド発見ワークフロー**: 利用可能なカスタムフィールドを見つけるための警告システム
+- **100% 後方互換性**: 既存の API 呼び出しは変更なしで動作
+
+### 使用方法
+
+#### 基本的な Brief モード
+
+```bash
+# Brief モードでチケット取得
+npx @modelcontextprotocol/inspector dist/index.js
+
+# get_issue ツールで以下のパラメータを使用:
+{
+  "id": 123,
+  "detail_level": "brief"
+}
+```
+
+#### カスタマイズされた Brief モード
+
+```bash
+# 特定のフィールドを含む Brief モード
+{
+  "id": 123,
+  "detail_level": "brief",
+  "brief_fields": "{\"assignee\":true,\"dates\":true,\"category\":true}",
+  "max_description_length": 300,
+  "max_journal_entries": 5
+}
+```
+
+### 設定オプション
+
+- `detail_level`: `"brief"` または `"full"` (デフォルト: `"full"`)
+- `brief_fields`: 含めるフィールドを指定する JSON 文字列
+- `max_description_length`: Brief モードでの説明文の最大長 (デフォルト: 200)
+- `max_journal_entries`: Brief モードでの履歴エントリの最大数 (デフォルト: 3)
+
+詳細な情報については、[OPTIMIZATION_GUIDE.md](./OPTIMIZATION_GUIDE.md) を参照してください。
+
 ## Claude での利用
 
 Claude でこのサーバーを利用する場合、以下のような設定を行います：
@@ -202,4 +251,3 @@ MIT
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Redmine](https://www.redmine.org/)
-

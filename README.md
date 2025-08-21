@@ -15,6 +15,65 @@ Supports stable resources from Redmine REST API:
 - Users (1.1~)
 - Time Entries (1.1~)
 
+### Brief Mode Optimization
+
+The server includes an advanced **Brief Mode** feature that reduces context window usage by up to 95% while maintaining essential information. This is particularly useful for LLMs with limited context windows or when processing large numbers of issues.
+
+#### Key Benefits
+
+- **95% size reduction**: Dramatically reduces output size for better context management
+- **Enhanced field selection**: Selective custom field filtering by field name
+- **Smart defaults**: Includes truncated descriptions by default, excludes empty custom fields
+- **Field discovery workflow**: Warning system helps users find available custom fields
+- **100% backward compatible**: Existing API calls work unchanged
+- **Maintains essential data**: Always includes core fields like ID, subject, project, status, and priority
+
+#### Usage
+
+Add `detail_level: 'brief'` to any issue query:
+
+```bash
+# Brief mode with default fields
+npx @modelcontextprotocol/inspector --cli \
+  -e REDMINE_API_KEY=$REDMINE_API_KEY \
+  -e REDMINE_HOST=$REDMINE_HOST \
+  node dist/index.js \
+  --method tools/call \
+  --tool-name get_issue \
+  --tool-arg id=1 \
+  --tool-arg detail_level=brief
+
+# Custom field configuration
+npx @modelcontextprotocol/inspector --cli \
+  -e REDMINE_API_KEY=$REDMINE_API_KEY \
+  -e REDMINE_HOST=$REDMINE_HOST \
+  node dist/index.js \
+  --method tools/call \
+  --tool-name list_issues \
+  --tool-arg detail_level=brief \
+  --tool-arg brief_fields='{"assignee":true,"dates":true,"description":true}' \
+  --tool-arg max_description_length=150
+```
+
+#### Configuration Options
+
+- `detail_level`: Set to `'brief'` to enable brief mode
+- `brief_fields`: JSON string specifying which optional fields to include:
+  - `assignee`: Include assigned user information
+  - `dates`: Include start/due dates
+  - `description`: Include description (`true` for full, `"truncated"` for default, `false` to exclude)
+  - `custom_fields`: Include custom field values (`false` to exclude, `true` for all non-empty, `["Field1", "Field2"]` for specific fields by name)
+  - `category`: Include issue category
+  - `version`: Include target version
+  - `time_tracking`: Include progress and time estimates
+  - `journals`: Include recent journal entries
+  - `relations`: Include issue relations
+  - `attachments`: Include attachment information
+- `max_description_length`: Maximum length for descriptions (default: 200)
+- `max_journal_entries`: Maximum number of journal entries (default: 3)
+
+For detailed information, see [OPTIMIZATION_GUIDE.md](OPTIMIZATION_GUIDE.md).
+
 ### Tools
 
 #### Issues
