@@ -157,3 +157,20 @@ export interface RedmineIssueUpdate extends Partial<RedmineIssueCreate> {
   notes?: string; // Add notes during update
   private_notes?: boolean; // Add private notes
 }
+
+// Extended parameter interfaces for formatting options
+export interface IssueListParamsExtended extends IssueListParams {
+  detail_level?: 'brief' | 'full';
+  brief_fields?: string; // JSON string of BriefFieldOptions
+  max_description_length?: number;
+  max_journal_entries?: number;
+}
+
+export interface IssueShowParamsExtended {
+  include?: string;
+  detail_level?: 'brief' | 'full';
+  brief_fields?: string; // JSON string of BriefFieldOptions
+  max_description_length?: number;
+  max_journal_entries?: number;
+  [key: string]: string | number | undefined; // Index signature for compatibility
+}

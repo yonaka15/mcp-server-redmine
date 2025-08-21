@@ -89,6 +89,28 @@ export const ISSUE_LIST_TOOL: Tool = {
         type: "string",
         pattern: "^cf_\\d+$",
       },
+      // Formatting options
+      detail_level: {
+        type: "string",
+        description: "Output detail level: 'brief' for concise output, 'full' for complete details (default: 'full')",
+        enum: ["brief", "full"],
+      },
+      brief_fields: {
+        type: "string",
+        description: "JSON string specifying which additional fields to include in brief mode. Example: '{\"assignee\":true,\"dates\":true,\"description\":false}'",
+      },
+      max_description_length: {
+        type: "number",
+        description: "Maximum length for description text in brief mode (default: 200, range: 50-1000)",
+        minimum: 50,
+        maximum: 1000,
+      },
+      max_journal_entries: {
+        type: "number",
+        description: "Maximum number of journal entries to include in brief mode (default: 3, range: 0-10)",
+        minimum: 0,
+        maximum: 10,
+      },
     },
   },
 };
@@ -380,6 +402,28 @@ export const ISSUE_GET_TOOL: Tool = {
         type: "string",
         description:
           "Comma-separated list of associations to include (e.g., children, attachments, relations, journals, watchers)",
+      },
+      // Formatting options
+      detail_level: {
+        type: "string",
+        description: "Output detail level: 'brief' for concise output, 'full' for complete details (default: 'full')",
+        enum: ["brief", "full"],
+      },
+      brief_fields: {
+        type: "string",
+        description: "JSON string specifying which additional fields to include in brief mode. Example: '{\"assignee\":true,\"dates\":true,\"description\":false}'",
+      },
+      max_description_length: {
+        type: "number",
+        description: "Maximum length for description text in brief mode (default: 200, range: 50-1000)",
+        minimum: 50,
+        maximum: 1000,
+      },
+      max_journal_entries: {
+        type: "number",
+        description: "Maximum number of journal entries to include in brief mode (default: 3, range: 0-10)",
+        minimum: 0,
+        maximum: 10,
       },
     },
     required: ["id"],

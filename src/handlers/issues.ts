@@ -6,6 +6,7 @@ import {
   ValidationError,
 } from "./types.js";
 import * as formatters from "../formatters/index.js";
+import { parseFormatOptions } from "../formatters/format-options.js";
 import type {
   RedmineIssueCreate,
   RedmineIssueUpdate,
@@ -91,11 +92,14 @@ export function createIssuesHandlers(context: HandlerContext) {
 
         const issues = await client.issues.getIssues(params);
         
+        // Parse formatting options
+        const formatOptions = parseFormatOptions(argsObj);
+        
         return {
           content: [
             {
               type: "text",
-              text: formatters.formatIssues(issues),
+              text: formatters.formatIssues(issues, formatOptions),
             }
           ],
           isError: false,
@@ -139,11 +143,14 @@ export function createIssuesHandlers(context: HandlerContext) {
 
         const response = await client.issues.getIssue(id, params);
         
+        // Parse formatting options
+        const formatOptions = parseFormatOptions(argsObj);
+        
         return {
           content: [
             {
               type: "text",
-              text: formatters.formatIssue(response.issue),
+              text: formatters.formatIssue(response.issue, formatOptions),
             }
           ],
           isError: false,

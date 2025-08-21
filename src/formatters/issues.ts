@@ -1,4 +1,8 @@
 import type { RedmineApiResponse, RedmineIssue } from "../lib/types/index.js";
+import type { FormatOptions, BriefFieldOptions } from "./format-options.js";
+import { OutputDetailLevel, createDefaultBriefFields } from "./format-options.js";
+import { selectFields, skipEmptyCustomFields, type FieldSelectionResult } from "./field-selector.js";
+import { truncateDescription, limitJournalEntries } from "./text-truncation.js";
 
 /**
  * Escape XML special characters
@@ -65,12 +69,95 @@ function formatJournals(journals: Array<{
 }
 
 /**
- * Format a single issue
+ * Format a single issue in brief mode
  */
-export function formatIssue(issue: RedmineIssue): string {
-  const safeDescription = escapeXml(issue.description);
+export function formatIssueBrief(issue: RedmineIssue, options: BriefFieldOptions, maxDescLength: number = 200, maxJournalEntries: number = 3): string {
+  // Select only the fields specified in options
+  const selectionResult = selectFields(issue, options);
+  const selectedIssue = selectionResult.issue;
+  
+  // Build the brief XML output with only essential and selected fields
+  let briefXml = `<issue>
+  <id>${selectedIssue.id}</id>
+  <subject>${escapeXml(selectedIssue.subject)}</subject>
+  <project>${escapeXml(selectedIssue.project?.name)}</project>
+  <tracker>${escapeXml(selectedIssue.tracker?.name)}</tracker>
+  <status>${escapeXml(selectedIssue.status?.name)}</status>
+  <priority>${escapeXml(selectedIssue.priority?.name)}</priority>`;
 
-  return `<issue>
+  // Add warnings if any
+  if (selectionResult.warnings && selectionResult.warnings.length > 0) {
+    briefXml += `\n  <warnings>`;
+    for (const warning of selectionResult.warnings) {
+      briefXml += `\n    <warning>${escapeXml(warning)}</warning>`;
+    }
+    briefXml += `\n  </warnings>`;
+  }
+
+  // Add optional fields based on selection
+  if (selectedIssue.assigned_to) {
+    briefXml += `\n  <assigned_to>${escapeXml(selectedIssue.assigned_to.name)}</assigned_to>`;
+  }
+
+  // Handle description with truncation support
+  if (selectedIssue.description && options.description) {
+    if (options.description === "truncated") {
+      const truncatedDesc = truncateDescription(selectedIssue.description, maxDescLength);
+      if (truncatedDesc) {
+        briefXml += `\n  <description>${escapeXml(truncatedDesc)}</description>`;
+      }
+    } else if (options.description === true) {
+      briefXml += `\n  <description>${escapeXml(selectedIssue.description)}</description>`;
+    }
+  }
+
+  if (selectedIssue.category && options.category) {
+    briefXml += `\n  <category>${escapeXml(selectedIssue.category.name)}</category>`;
+  }
+
+  if (selectedIssue.fixed_version && options.version) {
+    briefXml += `\n  <version>${escapeXml(selectedIssue.fixed_version.name)}</version>`;
+  }
+
+  if (options.dates) {
+    if (selectedIssue.start_date) briefXml += `\n  <start_date>${selectedIssue.start_date}</start_date>`;
+    if (selectedIssue.due_date) briefXml += `\n  <due_date>${selectedIssue.due_date}</due_date>`;
+    briefXml += `\n  <created_on>${selectedIssue.created_on}</created_on>`;
+    briefXml += `\n  <updated_on>${selectedIssue.updated_on}</updated_on>`;
+  }
+
+  if (options.time_tracking) {
+    if (selectedIssue.done_ratio !== undefined) briefXml += `\n  <progress>${selectedIssue.done_ratio}%</progress>`;
+    if (selectedIssue.estimated_hours !== undefined) briefXml += `\n  <estimated_hours>${selectedIssue.estimated_hours}</estimated_hours>`;
+    if (selectedIssue.spent_hours !== undefined) briefXml += `\n  <spent_hours>${selectedIssue.spent_hours}</spent_hours>`;
+  }
+
+  if (selectedIssue.custom_fields && options.custom_fields) {
+    if (selectedIssue.custom_fields.length > 0) {
+      briefXml += formatCustomFields(selectedIssue.custom_fields);
+    }
+  }
+
+  if (selectedIssue.journals && options.journals) {
+    const limitedJournals = limitJournalEntries(selectedIssue.journals, maxJournalEntries);
+    if (limitedJournals.length > 0) {
+      briefXml += formatJournals(limitedJournals);
+    }
+  }
+
+  briefXml += '\n</issue>';
+  return briefXml;
+}
+
+/**
+ * Format a single issue with optional formatting options
+ */
+export function formatIssue(issue: RedmineIssue, options?: FormatOptions): string {
+  // If no options provided or full mode, use original formatting
+  if (!options || options.detail_level === OutputDetailLevel.FULL) {
+    const safeDescription = escapeXml(issue.description);
+
+    return `<issue>
   <id>${issue.id}</id>
   <subject>${escapeXml(issue.subject)}</subject>
   <project>${escapeXml(issue.project?.name)}</project>
@@ -94,18 +181,26 @@ export function formatIssue(issue: RedmineIssue): string {
   ${issue.updated_on ? `<updated_on>${issue.updated_on}</updated_on>` : ''}
   ${issue.closed_on ? `<closed_on>${issue.closed_on}</closed_on>` : ''}
 </issue>`;
+  }
+
+  // Brief mode
+  const briefFields = options.brief_fields || createDefaultBriefFields();
+  const maxDescLength = options.max_description_length || 200;
+  const maxJournalEntries = options.max_journal_entries || 3;
+  
+  return formatIssueBrief(issue, briefFields, maxDescLength, maxJournalEntries);
 }
 
 /**
- * Format list of issues
+ * Format list of issues with optional formatting options
  */
-export function formatIssues(response: RedmineApiResponse<RedmineIssue>): string {
+export function formatIssues(response: RedmineApiResponse<RedmineIssue>, options?: FormatOptions): string {
   // response や response.issues が null/undefined の場合のチェックを追加
   if (!response || !response.issues || !Array.isArray(response.issues) || response.issues.length === 0) {
     return '<?xml version="1.0" encoding="UTF-8"?>\n<issues type="array" total_count="0" limit="0" offset="0" />';
   }
 
-  const issues = response.issues.map(formatIssue).join('\n');
+  const issues = response.issues.map(issue => formatIssue(issue, options)).join('\n');
   
   return `<?xml version="1.0" encoding="UTF-8"?>
 <issues type="array" total_count="${response.total_count || 0}" offset="${response.offset || 0}" limit="${response.limit || 0}">
