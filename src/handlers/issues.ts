@@ -268,6 +268,12 @@ export function createIssuesHandlers(context: HandlerContext) {
         if ('start_date' in argsObj) updateParams.start_date = String(argsObj.start_date);
         if ('due_date' in argsObj) updateParams.due_date = String(argsObj.due_date);
 
+        // Validate that at least one field is being updated (besides id)
+        const hasUpdateFields = Object.keys(updateParams).length > 0;
+        if (!hasUpdateFields) {
+          throw new ValidationError("At least one field must be provided to update (e.g., notes, subject, status_id, etc.)");
+        }
+
         await client.issues.updateIssue(id, updateParams);
         
         return {
@@ -280,6 +286,35 @@ export function createIssuesHandlers(context: HandlerContext) {
           isError: false,
         };
       } catch (error) {
+        // Handle Zod validation errors
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'invalid_type') {
+          const zodError = error as { code: string; expected: string; received: string; path: unknown[]; message: string };
+          const pathStr = zodError.path.length > 0 ? ` at path: ${zodError.path.join('.')}` : '';
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Validation Error: ${zodError.message}${pathStr}. Expected ${zodError.expected}, received ${zodError.received}.`,
+              }
+            ],
+            isError: true,
+          };
+        }
+        
+        // Handle ValidationError
+        if (error instanceof ValidationError) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Input Error: ${error.message}`,
+              }
+            ],
+            isError: true,
+          };
+        }
+        
+        // Handle other errors
         return {
           content: [
             {

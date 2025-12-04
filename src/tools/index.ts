@@ -18,7 +18,7 @@ export {
   PROJECT_ARCHIVE_TOOL,
   PROJECT_UNARCHIVE_TOOL,
   PROJECT_DELETE_TOOL,
-  PROJECT_LIST_STATUSES_TOOL, // Added new tool
+  PROJECT_LIST_STATUSES_TOOL,
 } from "./projects.js";
 
 // Time entry tools
@@ -39,3 +39,59 @@ export {
   USER_UPDATE_TOOL,
   USER_DELETE_TOOL,
 } from "./users.js";
+
+// Issue status tools
+export { ISSUE_STATUS_LIST_TOOL } from "./issue_statuses.js";
+
+// Tracker tools
+export { TRACKER_LIST_TOOL } from "./trackers.js";
+
+// Enumeration tools
+export {
+  ENUMERATION_ISSUE_PRIORITIES_TOOL,
+  ENUMERATION_TIME_ENTRY_ACTIVITIES_TOOL,
+  ENUMERATION_DOCUMENT_CATEGORIES_TOOL,
+} from "./enumerations.js";
+
+// Version tools
+export {
+  VERSION_LIST_TOOL,
+  VERSION_SHOW_TOOL,
+  VERSION_CREATE_TOOL,
+  VERSION_UPDATE_TOOL,
+  VERSION_DELETE_TOOL,
+} from "./versions.js";
+
+// Membership tools
+export {
+  MEMBERSHIP_LIST_TOOL,
+  MEMBERSHIP_SHOW_TOOL,
+  MEMBERSHIP_CREATE_TOOL,
+  MEMBERSHIP_UPDATE_TOOL,
+  MEMBERSHIP_DELETE_TOOL,
+} from "./memberships.js";
+
+// Role tools
+export {
+  ROLE_LIST_TOOL,
+  ROLE_SHOW_TOOL,
+} from "./roles.js";
+
+// Issue category tools
+export {
+  ISSUE_CATEGORY_LIST_TOOL,
+  ISSUE_CATEGORY_SHOW_TOOL,
+  ISSUE_CATEGORY_CREATE_TOOL,
+  ISSUE_CATEGORY_UPDATE_TOOL,
+  ISSUE_CATEGORY_DELETE_TOOL,
+} from "./issue_categories.js";
+
+// Attachment tools
+export {
+  ATTACHMENT_UPLOAD_TOOL,
+  ATTACHMENT_GET_TOOL,
+  ATTACHMENT_UPDATE_TOOL,
+  ATTACHMENT_DELETE_TOOL,
+  ATTACHMENT_DOWNLOAD_TOOL,
+  ATTACHMENT_UPLOAD_FROM_PATH_TOOL,
+} from "./attachments.js";

@@ -9,12 +9,20 @@ import {
 import { redmineClient } from "../lib/client/index.js";
 import config from "../lib/config.js";
 import * as tools from "../tools/index.js";
-import { HandlerContext } from "./types.js"; 
+import { HandlerContext } from "./types.js";
 import { createIssuesHandlers } from "./issues.js";
 import { createProjectsHandlers } from "./projects.js";
 import { createTimeEntriesHandlers } from "./time_entries.js";
 import { createUserHandlers } from "./users.js";
-import { formatAllowedStatuses } from "../formatters/projects.js"; // Import the new formatter
+import { createIssueStatusesHandlers } from "./issue_statuses.js";
+import { createTrackersHandlers } from "./trackers.js";
+import { createEnumerationsHandlers } from "./enumerations.js";
+import { createVersionsHandlers } from "./versions.js";
+import { createMembershipsHandlers } from "./memberships.js";
+import { createRolesHandlers } from "./roles.js";
+import { createIssueCategoriesHandlers } from "./issue_categories.js";
+import { createAttachmentsHandlers } from "./attachments.js";
+import { formatAllowedStatuses } from "../formatters/projects.js";
 
 // Create handler context
 const context: HandlerContext = {
@@ -30,10 +38,17 @@ const context: HandlerContext = {
 
 // Create resource handlers
 const issuesHandlers = createIssuesHandlers(context);
-// Pass the formatter function to createProjectsHandlers
 const projectsHandlers = createProjectsHandlers(context, formatAllowedStatuses);
 const timeEntriesHandlers = createTimeEntriesHandlers(context);
 const usersHandlers = createUserHandlers(context);
+const issueStatusesHandlers = createIssueStatusesHandlers(context);
+const trackersHandlers = createTrackersHandlers(context);
+const enumerationsHandlers = createEnumerationsHandlers(context);
+const versionsHandlers = createVersionsHandlers(context);
+const membershipsHandlers = createMembershipsHandlers(context);
+const rolesHandlers = createRolesHandlers(context);
+const issueCategoriesHandlers = createIssueCategoriesHandlers(context);
+const attachmentsHandlers = createAttachmentsHandlers(context);
 
 // Create handler map
 const handlers = {
@@ -41,45 +56,15 @@ const handlers = {
   ...projectsHandlers,
   ...timeEntriesHandlers,
   ...usersHandlers,
+  ...issueStatusesHandlers,
+  ...trackersHandlers,
+  ...enumerationsHandlers,
+  ...versionsHandlers,
+  ...membershipsHandlers,
+  ...rolesHandlers,
+  ...issueCategoriesHandlers,
+  ...attachmentsHandlers,
 };
-
-// Available tools list
-// The PROJECT_LIST_STATUSES_TOOL will be added in the tools/index.ts modification step
-const TOOLS: Tool[] = [
-  // Issue-related tools
-  tools.ISSUE_LIST_TOOL,
-  tools.ISSUE_GET_TOOL,
-  tools.ISSUE_CREATE_TOOL,
-  tools.ISSUE_UPDATE_TOOL,
-  tools.ISSUE_DELETE_TOOL,
-  tools.ISSUE_ADD_WATCHER_TOOL,
-  tools.ISSUE_REMOVE_WATCHER_TOOL,
-
-  // Project-related tools
-  tools.PROJECT_LIST_TOOL,
-  tools.PROJECT_SHOW_TOOL,
-  tools.PROJECT_CREATE_TOOL,
-  tools.PROJECT_UPDATE_TOOL,
-  tools.PROJECT_ARCHIVE_TOOL,
-  tools.PROJECT_UNARCHIVE_TOOL,
-  tools.PROJECT_DELETE_TOOL,
-  tools.PROJECT_LIST_STATUSES_TOOL, // New tool for listing project statuses
-
-  // Time entry tools
-  tools.TIME_ENTRY_LIST_TOOL,
-  tools.TIME_ENTRY_SHOW_TOOL,
-  tools.TIME_ENTRY_CREATE_FOR_ISSUE_TOOL,
-  tools.TIME_ENTRY_CREATE_FOR_PROJECT_TOOL,
-  tools.TIME_ENTRY_UPDATE_TOOL,
-  tools.TIME_ENTRY_DELETE_TOOL,
-
-  // User-related tools
-  tools.USER_LIST_TOOL,
-  tools.USER_SHOW_TOOL,
-  tools.USER_CREATE_TOOL,
-  tools.USER_UPDATE_TOOL,
-  tools.USER_DELETE_TOOL,
-];
 
 // Initialize server
 const server = new Server(

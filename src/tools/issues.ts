@@ -36,10 +36,8 @@ export const ISSUE_LIST_TOOL: Tool = {
       include: {
         type: "string",
         description:
-          "Additional data to include as comma separated values\n" +
-          "- attachments: file attachments\n" +
-          "- relations: issue relations",
-        pattern: "^(attachments|relations)(,(attachments|relations))*$",
+          "Additional data to include as comma-separated values: " +
+          "attachments, relations",
       },
       // Basic filters
       issue_id: {
@@ -61,8 +59,7 @@ export const ISSUE_LIST_TOOL: Tool = {
       },
       status_id: {
         type: "string",
-        description: "Filter by open, closed, * for any, or specific status ID",
-        enum: ["open", "closed", "*"],
+        description: "Filter by 'open', 'closed', '*' for any, or specific numeric status ID",
       },
       assigned_to_id: {
         type: "string",
@@ -379,7 +376,8 @@ export const ISSUE_GET_TOOL: Tool = {
       include: {
         type: "string",
         description:
-          "Comma-separated list of associations to include (e.g., children, attachments, relations, journals, watchers)",
+          "Comma-separated list of associations to include: " +
+          "children, attachments, relations, changesets, journals, watchers, allowed_statuses",
       },
     },
     required: ["id"],

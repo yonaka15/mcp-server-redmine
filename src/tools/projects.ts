@@ -14,12 +14,8 @@ export const PROJECT_LIST_TOOL: Tool = {
       include: {
         type: "string",
         description:
-          "Additional data to include as comma separated values\n" +
-          "- trackers: list project trackers\n" +
-          "- categories: list project categories\n" +
-          "- modules: list project modules. Since 2.6.0\n" +
-          "- time tracking: list time activities. Since 3.4.0",
-        pattern: "^(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields)(,(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields))*$"
+          "Comma-separated values: trackers, issue_categories, enabled_modules (2.6.0+), " +
+          "time_entry_activities (3.4.0+), issue_custom_fields (4.2.0+)",
       },
       status: {
         type: "string",
@@ -65,12 +61,8 @@ export const PROJECT_SHOW_TOOL: Tool = {
       include: {
         type: "string",
         description:
-          "Additional data to include as comma separated values\n" +
-          "- trackers: list project trackers\n" +
-          "- categories: list project categories\n" +
-          "- modules: list project modules. Since 2.6.0\n" +
-          "- time tracking: list time activities. Since 3.4.0",
-        pattern: "^(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields)(,(trackers|issue_categories|enabled_modules|time_entry_activities|issue_custom_fields))*$"
+          "Comma-separated values: trackers, issue_categories, enabled_modules (2.6.0+), " +
+          "time_entry_activities (3.4.0+), issue_custom_fields (4.2.0+)",
       }
     },
     required: ["id"]
@@ -128,22 +120,29 @@ export const PROJECT_CREATE_TOOL: Tool = {
       },
       enabled_module_names: {
         type: "array",
-        description: "List of enabled modules",
+        description: "List of enabled modules: boards, calendar, documents, files, gantt, issue_tracking, news, repository, time_tracking, wiki",
         items: {
           type: "string",
-          enum: [
-            "boards",
-            "calendar",
-            "documents",
-            "files",
-            "gantt",
-            "issue_tracking",
-            "news",
-            "repository",
-            "time_tracking",
-            "wiki"
-          ]
         }
+      },
+      default_assigned_to_id: {
+        type: "number",
+        description: "Default assignee ID for new issues"
+      },
+      default_version_id: {
+        type: "number",
+        description: "Default version ID for new issues"
+      },
+      issue_custom_field_ids: {
+        type: "array",
+        description: "List of issue custom field IDs to enable",
+        items: {
+          type: "number"
+        }
+      },
+      custom_field_values: {
+        type: "object",
+        description: "Custom field values as key-value pairs (field_id => value)"
       }
     },
     required: ["name", "identifier"]
@@ -203,22 +202,29 @@ export const PROJECT_UPDATE_TOOL: Tool = {
       },
       enabled_module_names: {
         type: "array",
-        description: "New list of enabled modules",
+        description: "New list of enabled modules: boards, calendar, documents, files, gantt, issue_tracking, news, repository, time_tracking, wiki",
         items: {
           type: "string",
-          enum: [
-            "boards",
-            "calendar",
-            "documents",
-            "files",
-            "gantt",
-            "issue_tracking",
-            "news",
-            "repository",
-            "time_tracking",
-            "wiki"
-          ]
         }
+      },
+      default_assigned_to_id: {
+        type: "number",
+        description: "Default assignee ID for new issues"
+      },
+      default_version_id: {
+        type: "number",
+        description: "Default version ID for new issues"
+      },
+      issue_custom_field_ids: {
+        type: "array",
+        description: "List of issue custom field IDs to enable",
+        items: {
+          type: "number"
+        }
+      },
+      custom_field_values: {
+        type: "object",
+        description: "Custom field values as key-value pairs (field_id => value)"
       }
     },
     required: ["id"]
@@ -283,15 +289,23 @@ export const PROJECT_DELETE_TOOL: Tool = {
   }
 };
 
-// Add the new tool definition here
+// List allowed issue statuses for project/tracker combination
 export const PROJECT_LIST_STATUSES_TOOL: Tool = {
   name: "list_project_statuses",
-  description: "指定されたRedmineプロジェクトの特定のトラッカーで利用可能なIssueステータスの一覧を取得",
+  description:
+    "Get allowed issue statuses for a project and tracker combination. " +
+    "Returns the list of statuses that can be used for issues with the specified tracker in the project.",
   inputSchema: {
     type: "object",
     properties: {
-      project_id: { type: "number" },
-      tracker_id: { type: "number" }
+      project_id: {
+        type: "number",
+        description: "Project ID"
+      },
+      tracker_id: {
+        type: "number",
+        description: "Tracker ID"
+      }
     },
     required: ["project_id", "tracker_id"]
   }

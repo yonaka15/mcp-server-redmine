@@ -107,22 +107,19 @@ export class IssuesClient extends BaseClient {
    *
    * @param id Issue ID to update
    * @param issue Update parameters
-   * @returns Promise with updated issue
+   * @returns Promise that resolves when the issue is updated
    */
   async updateIssue(
     id: number,
     issue: RedmineIssueUpdate
-  ): Promise<{ issue: RedmineIssue }> {
-    const response = await this.performRequest<{ issue: RedmineIssue }>(
+  ): Promise<void> {
+    await this.performRequest<void>(
       `issues/${id}.json`,
       {
         method: "PUT",
         body: JSON.stringify({ issue }),
       }
     );
-    return {
-      issue: RedmineIssueSchema.parse(response.issue),
-    };
   }
 
   /**

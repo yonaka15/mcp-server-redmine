@@ -65,10 +65,7 @@ export const USER_SHOW_TOOL: Tool = {
       include: {
         type: "string",
         description:
-          "Additional data to include as comma separated values\n" +
-          "- memberships: list project memberships and roles\n" +
-          "- groups: list group memberships. Since 2.1",
-        pattern: "^(memberships|groups)(,(memberships|groups))*$",
+          "Comma-separated values: memberships (project memberships and roles), groups (2.1+)",
       },
     },
     required: ["id"],

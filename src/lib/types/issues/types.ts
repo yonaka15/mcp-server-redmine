@@ -122,6 +122,20 @@ export interface RedmineIssue {
     }[];
   }[];
   // children?: RedmineIssue[]; // If 'children' is included. Be careful with recursion.
+  attachments?: {
+    id: number;
+    filename: string;
+    filesize: number;
+    content_type: string;
+    description?: string;
+    content_url: string;
+    thumbnail_url?: string;
+    author: {
+      id: number;
+      name: string;
+    };
+    created_on: string;
+  }[];
 
   // Added based on the reference document for list_project_statuses
   allowed_statuses?: {
@@ -129,6 +143,16 @@ export interface RedmineIssue {
     name: string;
     is_closed?: boolean;
   }[];
+}
+
+/**
+ * Upload attachment for issue creation/update
+ */
+export interface RedmineIssueUpload {
+  token: string;
+  filename: string;
+  content_type?: string;
+  description?: string;
 }
 
 export interface RedmineIssueCreate {
@@ -151,6 +175,7 @@ export interface RedmineIssueCreate {
   estimated_hours?: number;
   start_date?: string; // YYYY-MM-DD
   due_date?: string; // YYYY-MM-DD
+  uploads?: RedmineIssueUpload[]; // Attachments to add
 }
 
 export interface RedmineIssueUpdate extends Partial<RedmineIssueCreate> {
