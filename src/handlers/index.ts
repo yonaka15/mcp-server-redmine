@@ -9,11 +9,18 @@ import {
 import { redmineClient } from "../lib/client/index.js";
 import config from "../lib/config.js";
 import * as tools from "../tools/index.js";
-import { HandlerContext } from "./types.js"; 
+import { HandlerContext } from "./types.js";
 import { createIssuesHandlers } from "./issues.js";
 import { createProjectsHandlers } from "./projects.js";
 import { createTimeEntriesHandlers } from "./time_entries.js";
 import { createUserHandlers } from "./users.js";
+import {
+  handleCreateOrUpdateWikiPage,
+  handleGetWikiPage,
+  handleListWikiAttachments,
+  handleListWikiHistory,
+  handleListWikiPages,
+} from "./wiki.js";
 import { formatAllowedStatuses } from "../formatters/projects.js"; // Import the new formatter
 
 // Create handler context
@@ -79,6 +86,13 @@ const TOOLS: Tool[] = [
   tools.USER_CREATE_TOOL,
   tools.USER_UPDATE_TOOL,
   tools.USER_DELETE_TOOL,
+
+  // Wiki-related tools
+  tools.WIKI_LIST_PAGES_TOOL,
+  tools.WIKI_GET_PAGE_TOOL,
+  tools.WIKI_LIST_HISTORY_TOOL,
+  tools.WIKI_LIST_ATTACHMENTS_TOOL,
+  tools.WIKI_CREATE_OR_UPDATE_PAGE_TOOL,
 ];
 
 // Initialize server
@@ -96,9 +110,10 @@ const server = new Server(
 
 // Tools list handler
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  // Dynamically build the list of tools from the tools module at runtime
-  // This ensures that any tool added to tools/index.ts is automatically included.
-  tools: Object.values(tools).filter(t => typeof t === 'object' && t !== null && 'name' in t && 'description' in t && 'inputSchema' in t) as Tool[],
+  // Use the statically defined TOOLS array so that tools/list always returns
+  // a consistent set of Tool definitions, independent of how the tools
+  // module is compiled or imported.
+  tools: TOOLS,
 }));
 
 // Tool execution handler
@@ -116,6 +131,109 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const handlerArgs = args || {};
     if (name in handlers) {
       return await handlers[name as keyof typeof handlers](handlerArgs);
+    }
+
+    // Wiki-related tools are handled separately because their handlers have
+    // strongly typed parameter objects rather than generic Records.
+    if (
+      name === "wiki_list_pages" ||
+      name === "wiki_get_page" ||
+      name === "wiki_list_history" ||
+      name === "wiki_list_attachments" ||
+      name === "wiki_create_or_update_page"
+    ) {
+      const wikiArgs = (args || {}) as Record<string, unknown>;
+      const project_id = wikiArgs.project_id as string | number;
+
+      if (!project_id) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "project_id is required for wiki tools",
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      switch (name) {
+        case "wiki_list_pages":
+          return await handleListWikiPages({ project_id });
+        case "wiki_get_page": {
+          const title = wikiArgs.title as string;
+          const version = wikiArgs.version as number | undefined;
+          if (!title) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "title is required for wiki_get_page",
+                },
+              ],
+              isError: true,
+            };
+          }
+          return await handleGetWikiPage({ project_id, title, version });
+        }
+        case "wiki_list_history": {
+          const title = wikiArgs.title as string;
+          if (!title) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "title is required for wiki_list_history",
+                },
+              ],
+              isError: true,
+            };
+          }
+          return await handleListWikiHistory({ project_id, title });
+        }
+        case "wiki_list_attachments": {
+          const title = wikiArgs.title as string;
+          const version = wikiArgs.version as number | undefined;
+          if (!title) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "title is required for wiki_list_attachments",
+                },
+              ],
+              isError: true,
+            };
+          }
+          return await handleListWikiAttachments({ project_id, title, version });
+        }
+        case "wiki_create_or_update_page": {
+          const title = wikiArgs.title as string;
+          const text = wikiArgs.text as string;
+          const comments = wikiArgs.comments as string | undefined;
+          const parent_title = wikiArgs.parent_title as string | undefined;
+
+          if (!title || !text) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "title and text are required for wiki_create_or_update_page",
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          return await handleCreateOrUpdateWikiPage({
+            project_id,
+            title,
+            text,
+            comments,
+            parent_title,
+          });
+        }
+      }
     }
 
     // Unknown tool

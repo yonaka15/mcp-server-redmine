@@ -39,3 +39,12 @@ export {
   USER_UPDATE_TOOL,
   USER_DELETE_TOOL,
 } from "./users.js";
+
+// Wiki-related tools
+export {
+  WIKI_LIST_PAGES_TOOL,
+  WIKI_GET_PAGE_TOOL,
+  WIKI_LIST_HISTORY_TOOL,
+  WIKI_LIST_ATTACHMENTS_TOOL,
+  WIKI_CREATE_OR_UPDATE_PAGE_TOOL,
+} from "./wiki.js";

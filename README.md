@@ -14,6 +14,7 @@ Supports stable resources from Redmine REST API:
 - Projects (1.0~)
 - Users (1.1~)
 - Time Entries (1.1~)
+- Wiki (1.0~)
 
 ### Tools
 
@@ -51,7 +52,21 @@ Supports stable resources from Redmine REST API:
   - Record against project or issue
   - Specify activity
   - Custom field support
-- Delete Time Entries
+-- Delete Time Entries
+
+#### Wiki
+
+- List Wiki Pages
+  - List all wiki pages for a project
+- Get Wiki Page
+  - Fetch the latest or a specific version of a wiki page
+- List Wiki History
+  - List all versions (history) of a wiki page
+- List Wiki Attachments
+  - List attachments for the latest or a specific version of a wiki page
+- Create/Update Wiki Page
+  - Create a new wiki page or update an existing one (upsert)
+  - Set parent page and edit comments
 
 ## Usage with Claude
 
