@@ -45,20 +45,20 @@ export class TimeEntriesClient extends BaseClient {
     };
   }
 
+  /**
+   * Redmine's PUT /time_entries/:id.json returns 204 No Content on success
+   * and does not echo back the updated time entry, so there is nothing to
+   * parse or return here. Fetch the entry again via getTimeEntry() if the
+   * caller needs the post-update state.
+   */
   async updateTimeEntry(
     id: number,
     timeEntry: RedmineTimeEntryUpdate
-  ): Promise<{ time_entry: RedmineTimeEntry }> {
-    const response = await this.performRequest<{ time_entry: RedmineTimeEntry }>(
-      `time_entries/${id}.json`,
-      {
-        method: "PUT",
-        body: JSON.stringify({ time_entry: timeEntry }),
-      }
-    );
-    return {
-      time_entry: RedmineTimeEntrySchema.parse(response.time_entry),
-    };
+  ): Promise<void> {
+    await this.performRequest<void>(`time_entries/${id}.json`, {
+      method: "PUT",
+      body: JSON.stringify({ time_entry: timeEntry }),
+    });
   }
 
   async deleteTimeEntry(id: number): Promise<void> {

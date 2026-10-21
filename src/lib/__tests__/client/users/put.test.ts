@@ -1,49 +1,56 @@
-import { jest, /*expect,*/ describe, it, beforeEach } from '@jest/globals';
+import { jest, expect, describe, it, beforeEach } from '@jest/globals';
 import type { Mock } from 'jest-mock';
 import { UsersClient } from "../../../client/users.js";
-// import { mockResponse, mockErrorResponse } from "../../helpers/mocks.js"; // Unused
-// import * as fixtures from "../../helpers/fixtures.js"; // Unused due to userId being unused
-// import config from "../../../config.js"; // Unused
-// import { RedmineApiError } from "../../../client/base.js"; // Unused
-// import { parseUrl } from "../../helpers/url.js"; // Unused
+import { mockErrorResponse } from "../../helpers/mocks.js";
+import config from "../../../config.js";
+import { RedmineApiError } from "../../../client/base.js";
+import { RedmineUserUpdate } from "../../../types/index.js";
 
 describe("Users API (PUT)", () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let client: UsersClient; // Assigned but not used in active tests
+  let client: UsersClient;
   let mockFetch: Mock;
-  // const userId = fixtures.singleUserResponse.user.id; // Unused
 
   beforeEach(() => {
-     
-    client = new UsersClient(); // Commented out as tests are skipped and client is unused
+    client = new UsersClient();
     mockFetch = jest.spyOn(global, "fetch") as Mock;
     mockFetch.mockReset();
   });
 
   describe("PUT /users/:id.json (updateUser)", () => {
-    // PUT操作のテストは安全のためスキップ
-    it.skip("all PUT operation tests are skipped for safety", () => {
-      // PUT操作のテストは、実際のAPIに対して実行するとデータが更新されてしまうため、
-      // 通常はモック環境でのみ実施するか、特別なテスト用APIエンドポイントを使用します。
-      // Redmine APIの仕様として、PUTリクエストは成功するとステータスコード 204 No Content を返します。
-      //
-      // 更新可能なパラメータ:
-      // - login: ログインID（変更不可の場合あり）
-      // - firstname: 名
-      // - lastname: 姓
-      // - mail: メールアドレス
-      // - password: パスワード（変更する場合）
-      // - must_change_passwd: パスワード変更要否
-      // - auth_source_id: 認証元ID
-      // - mail_notification: メール通知設定
-      // - admin: 管理者権限
-      // - status: ステータス
-      // - custom_fields: カスタムフィールド値
-      // - group_ids: 所属グループID配列
-      //
-      // これらのテストケースを網羅的にテストするためには、各ケースに応じたモック設定とリクエストボディの作成が必要です。
-      // 現状ではclient変数やuserId変数も未使用警告が出る可能性があります。
-      // ユーザー更新時の関連データの扱いも確認ポイントです。
+    it("resolves without error on Redmine's real 204 No Content response", async () => {
+      // Arrange — Redmine does not echo back the updated user on a
+      // successful PUT, it returns an empty 204 body.
+      const userIdToUpdate = 7;
+      const updateData: RedmineUserUpdate = {
+        firstname: "Updated",
+        lastname: "Name",
+      };
+      mockFetch.mockImplementationOnce(() =>
+        Promise.resolve(new Response(null, { status: 204 }))
+      );
+
+      // Act & Assert — must not throw trying to parse a body that isn't there
+      await expect(client.updateUser(userIdToUpdate, updateData)).resolves.toBeUndefined();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/users/${userIdToUpdate}.json`),
+        expect.objectContaining({
+          method: "PUT",
+          headers: expect.objectContaining({
+            "X-Redmine-API-Key": config.redmine.apiKey,
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({ user: updateData }),
+        })
+      );
+    });
+
+    it("handles error when updating a non-existent user", async () => {
+      const userIdToUpdate = 99999;
+      const updateData: RedmineUserUpdate = { firstname: "Nobody" };
+      mockFetch.mockImplementationOnce(() => mockErrorResponse(404, ["User not found"]));
+
+      await expect(client.updateUser(userIdToUpdate, updateData)).rejects.toThrow(RedmineApiError);
     });
   });
 });

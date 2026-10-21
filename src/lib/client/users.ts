@@ -169,47 +169,17 @@ export class UsersClient extends BaseClient {
   /**
    * Update user information
    * Requires admin privileges
-   * Returns:
-   * - 200 OK: Update successful
-   * - 422 Unprocessable Entity: Validation error
+   *
+   * Redmine's PUT /users/:id.json returns 204 No Content on success and
+   * does not echo back the updated user, so there is nothing to parse or
+   * return here. Fetch the user again via getUser() if the caller needs
+   * the post-update state.
    */
-  async updateUser(id: number, data: RedmineUserUpdate): Promise<RedmineUserResponse> {
-    const response = await this.performRequest<RedmineUserResponse>(
-      `users/${id}.json`,
-      {
-        method: "PUT",
-        body: JSON.stringify({ user: data }),
-      }
-    );
-
-    // Validate and ensure user data has ID
-    const parsed = RedmineUserSchema.parse(response.user);
-    if (!parsed.id) {
-      throw new Error(`Invalid user data: missing id for user ${parsed.login || 'unknown'}`);
-    }
-
-    const validUser: RedmineUser = {
-      id: parsed.id,
-      firstname: parsed.firstname,
-      lastname: parsed.lastname,
-      created_on: parsed.created_on,
-      status: parsed.status,
-      avatar_url: parsed.avatar_url || '',
-      ...(parsed.login && { login: parsed.login }),
-      ...(parsed.mail && { mail: parsed.mail }),
-      ...(parsed.last_login_on && { last_login_on: parsed.last_login_on }),
-      ...(parsed.api_key && { api_key: parsed.api_key }),
-      ...(parsed.updated_on && { updated_on: parsed.updated_on }),
-      ...(parsed.admin && { admin: parsed.admin }),
-      ...(parsed.passwd_changed_on && { passwd_changed_on: parsed.passwd_changed_on }),
-      ...(parsed.custom_fields && { custom_fields: parsed.custom_fields }),
-      ...(parsed.memberships && { memberships: parsed.memberships }),
-      ...(parsed.groups && { groups: parsed.groups })
-    };
-
-    return {
-      user: validUser
-    };
+  async updateUser(id: number, data: RedmineUserUpdate): Promise<void> {
+    await this.performRequest<void>(`users/${id}.json`, {
+      method: "PUT",
+      body: JSON.stringify({ user: data }),
+    });
   }
 
   /**

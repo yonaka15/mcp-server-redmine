@@ -105,24 +105,19 @@ export class IssuesClient extends BaseClient {
   /**
    * Update an existing issue
    *
+   * Redmine's PUT /issues/:id.json returns 204 No Content on success and
+   * does not echo back the updated issue, so there is nothing to parse or
+   * return here. Fetch the issue again via getIssue() if the caller needs
+   * the post-update state.
+   *
    * @param id Issue ID to update
    * @param issue Update parameters
-   * @returns Promise with updated issue
    */
-  async updateIssue(
-    id: number,
-    issue: RedmineIssueUpdate
-  ): Promise<{ issue: RedmineIssue }> {
-    const response = await this.performRequest<{ issue: RedmineIssue }>(
-      `issues/${id}.json`,
-      {
-        method: "PUT",
-        body: JSON.stringify({ issue }),
-      }
-    );
-    return {
-      issue: RedmineIssueSchema.parse(response.issue),
-    };
+  async updateIssue(id: number, issue: RedmineIssueUpdate): Promise<void> {
+    await this.performRequest<void>(`issues/${id}.json`, {
+      method: "PUT",
+      body: JSON.stringify({ issue }),
+    });
   }
 
   /**

@@ -74,20 +74,20 @@ export class ProjectsClient extends BaseClient {
     };
   }
 
+  /**
+   * Redmine's PUT /projects/:id.json returns 204 No Content on success and
+   * does not echo back the updated project, so there is nothing to parse or
+   * return here. Fetch the project again via getProject() if the caller
+   * needs the post-update state.
+   */
   async updateProject(
     idOrIdentifier: number | string,
     project: Partial<RedmineProjectCreate>
-  ): Promise<{ project: RedmineProject }> {
-    const response = await this.performRequest<{ project: RedmineProject }>(
-      `projects/${idOrIdentifier}.json`,
-      {
-        method: "PUT",
-        body: JSON.stringify({ project }),
-      }
-    );
-    return {
-      project: RedmineProjectSchema.parse(response.project),
-    };
+  ): Promise<void> {
+    await this.performRequest<void>(`projects/${idOrIdentifier}.json`, {
+      method: "PUT",
+      body: JSON.stringify({ project }),
+    });
   }
 
   async archiveProject(idOrIdentifier: number | string): Promise<void> {

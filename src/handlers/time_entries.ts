@@ -159,9 +159,9 @@ export function createTimeEntriesHandlers(context: HandlerContext) {
 
         validateTimeEntryPayload(updateData);
 
-        const { time_entry } = await client.timeEntries.updateTimeEntry(id, updateData as RedmineTimeEntryUpdate);
+        await client.timeEntries.updateTimeEntry(id, updateData as RedmineTimeEntryUpdate);
         return {
-          content: [{ type: "text", text: formatters.formatTimeEntryResult(time_entry, "updated") }],
+          content: [{ type: "text", text: `Time entry ${id} updated successfully.` }],
           isError: false,
         };
       } catch (error) {

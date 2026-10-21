@@ -185,12 +185,12 @@ export function createProjectsHandlers(
         if (Object.keys(updateData).length === 0) {
             throw new ValidationError("No update data provided for the project.");
         }
-        const { project } = await client.projects.updateProject(id, updateData as Partial<RedmineProjectCreate>);
+        await client.projects.updateProject(id, updateData as Partial<RedmineProjectCreate>);
         return {
           content: [
             {
               type: "text",
-              text: formatters.formatProjectResult(project, "updated"),
+              text: `Project ${id} updated successfully.`,
             }
           ],
           isError: false,
